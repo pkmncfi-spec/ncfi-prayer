@@ -1,29 +1,37 @@
-# Create T3 App
+# NCFI Website Project 🌍
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Welcome to the official repository for the **Nurses Christian Fellowship International (NCFI) website**. This platform aims to promote transparency, foster community engagement, and provide easy access to information about NCFI’s activities, mission, and impact.
 
-## What's next? How do I make an app with this?
+## 🌟 Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- **Homepage**: Highlights NCFI's mission, vision, and key activities.
+- **About Us**: Detailed information about NCFI, its history, and team members.
+- **Projects and Impact**: Showcases the organization's ongoing and completed projects with measurable results.
+- **Donation Page**: Secure and user-friendly platform for online donations.
+- **Volunteer Portal**: Allows users to sign up as volunteers and stay updated on opportunities.
+- **Contact Us**: Form and contact details for inquiries and feedback.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## 🔧 Tech Stack
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+This project is built using the **T3 App**, which integrates modern web development technologies to ensure scalability and performance.
 
-## Learn More
+- **Frontend**: TypeScript, Next.js, Tailwind CSS
+- **Backend**: tRPC, Prisma
+- **Database**: PostgreSQL
+- **Authentication**: NextAuth.js
+- **Deployment**: Railway (backend), Vercel (frontend)
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## 🚀 Deployment
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+The site is live at: -
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## 🤝 Contributing
 
-## How do I deploy this?
+We welcome contributions from the community! To contribute:
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-name`).
+3. Make changes and commit (`git commit -m "Add feature description"`).
+4. Push to the branch (`git push origin feature-name`).
+5. Open a pull request.
+

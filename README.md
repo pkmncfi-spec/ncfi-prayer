@@ -1,1 +1,0 @@
-# ncfi-prayer

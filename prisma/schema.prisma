@@ -6,15 +6,12 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
+    provider = "mongodb"
     url      = env("DATABASE_URL")
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@index([name])
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    title  String
+    userId String @db.ObjectId
 }

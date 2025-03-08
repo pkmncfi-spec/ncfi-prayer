@@ -3,13 +3,18 @@ import { type AppType } from "next/app";
 
 import { api } from "~/utils/api";
 
+import { AuthProvider } from "~/context/authContext";
+
+
 import "~/styles/globals.css";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <div className={GeistSans.className}>
-      <Component {...pageProps} />
-    </div>
+    <AuthProvider>
+      <div className={GeistSans.className}>
+        <Component {...pageProps} />
+      </div>
+    </AuthProvider>
   );
 };
 

@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 import { auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
@@ -23,7 +23,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (user) {
-      router.push("/");
+      void router.push("/");
     }
   }, [user, router]);
 
@@ -51,7 +51,7 @@ export default function AuthPage() {
             <Button className="w-full place-items-center mt-4 mb-10" variant={"outline"} onClick={handleLogin}><FcGoogle/> Login with Google</Button>
           </CardContent>
           <CardFooter className="items-center">
-            <p>Don't Have Account ?<Link href="/registerPage" className="font-bold text-purple-700">Register</Link></p>
+            <p>Dont Have Account ?<Link href="/registerPage" className="font-bold text-purple-700">Register</Link></p>
           </CardFooter>
         </Card>
       </main>

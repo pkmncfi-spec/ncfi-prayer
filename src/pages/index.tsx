@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Link from "next/link";
 
 import { signOut } from "firebase/auth";
 import { auth } from "~/lib/firebase";
@@ -16,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     if (loading) return; // Jangan redirect saat masih loading
-    if (!user) router.push("/auth");
+    if (!user) void router.push("/auth");
   }, [user, loading, router]);
 
   // Tampilkan "Loading..." jika masih menunggu Firebase memuat user

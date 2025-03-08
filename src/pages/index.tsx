@@ -10,9 +10,8 @@ import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
-
   const { user, loading } = useAuth();
-
+  
   useEffect(() => {
     if (loading) return; // Jangan redirect saat masih loading
     if (!user) void router.push("/auth");

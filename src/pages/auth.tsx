@@ -40,7 +40,7 @@ export default function AuthPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-[calc(100vh-144px)] w-full flex-col justify-center">
-        <Card className="w-full max-w-[400px] self-center">
+        <Card className="w-full max-w-[350px] self-center">
           <CardHeader className="items-center">
             <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 
             <CardDescription className="">NCFI Prayer</CardDescription>

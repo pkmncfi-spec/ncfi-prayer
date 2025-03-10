@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button"
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox"
-
+import { GoogleAuthProvider, signInWithPopup} from "firebase/auth";
 
 import {
   Card,
@@ -13,6 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card"
+
+import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -30,6 +32,9 @@ import {
 import { Input } from "~/components/ui/input"
 import { useState } from "react";
 
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
+import { auth } from "~/lib/firebase";
+
 const formSchema = z.object({
     email: z.string().email( {
         message: "Invalid email address",
@@ -41,21 +46,42 @@ const formSchema = z.object({
         .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." })
 });
 
-
 export default function RegisterPage() {
+    const router = useRouter();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-          email: "",
-          password: ""
+            email: "",
+            password: ""
         },
-      })
+    })
 
-    function onSubmit() {
-        alert("testing")
+    async function onSubmit(values: z.infer<typeof formSchema>){
+        try{
+            const res = await createUserWithEmailAndPassword(values.email, values.password);
+            console.log({res});
+
+            form.reset({
+                email: "",
+                password: ""
+            });
+
+            router.push("/login");
+        } catch(e){
+            console.error(e);
+        }
     }
 
+    
+    const handleGoogleRegist = async () => {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+        router.push("/login");
+    };
+
     const [showPass, setShowPass] = useState<boolean>(false);
+    const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
 
     return (
         <>
@@ -73,7 +99,7 @@ export default function RegisterPage() {
             <CardContent>
                 <div>
                     <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-3">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-2">
                         <FormField
                         control={form.control}
                         name="email"
@@ -87,8 +113,7 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                         />
-                    </form>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-1">
+
                         <FormField
                         control={form.control}
                         name="password"
@@ -96,24 +121,24 @@ export default function RegisterPage() {
                             <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
-                                <Input type={showPass ? "text" : "password"} placeholder="" {...field} />
+                                <Input type={showPass ? "text" : "password"} placeholder="•••••••••••••••" {...field} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
                         />
+                        <div className="flex items-center mb-5">
+                            <Checkbox id="showpass" 
+                                checked={showPass}
+                                onCheckedChange={(checked) => setShowPass(!!checked)}/>
+                            <label
+                                htmlFor="showpass"
+                                className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2">
+                                Show Password
+                            </label>
+                        </div>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
                     </form>
-                    <div className="flex items-center mb-5">
-                        <Checkbox id="showpass" 
-                            checked={showPass}
-                            onCheckedChange={(checked) => setShowPass(!!checked)}/>
-                        <label
-                            htmlFor="showpass"
-                            className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2">
-                            Show Password
-                        </label>
-                    </div>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit" onClick={onSubmit}>Submit</Button>
                     </Form>
                 </div>
             </CardContent>
@@ -121,16 +146,16 @@ export default function RegisterPage() {
                 <div className="flex w-full items-center justify-between gap-x-4">
                     <div className="h-[2px] w-full border-t-2" />
                     <p className="flex-1 text-nowrap text-sm text-muted-foreground">
-                    Atau lanjut dengan
+                    Or Continue With
                     </p>
                     <div className="h-[2px] w-full border-t-2" />
                 </div>
 
-                <Button className="w-full mt-6 mb-10 hover:bg-primary/10" variant={"outline"}>
-                    <FcGoogle/> Login with Google
+                <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"} onClick={handleGoogleRegist}>
+                    <FcGoogle/> Register with Google
                 </Button>
 
-                <p>Already Have Account?<Link href="/auth" className="font-bold text-purple-700 ml-2">Login</Link></p>
+                <p>Already Have an Account?<Link href="/login" className="font-bold text-blue-700 ml-1">Login</Link></p>
             </CardFooter>
             </Card>
         </main>

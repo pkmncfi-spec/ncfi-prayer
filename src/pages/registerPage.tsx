@@ -51,7 +51,7 @@ export default function RegisterPage() {
         },
       })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    function onSubmit() {
         alert("testing")
     }
 

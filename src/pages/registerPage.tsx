@@ -113,7 +113,7 @@ export default function RegisterPage() {
                             Show Password
                         </label>
                     </div>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit" onClick={onSubmit}>Submit</Button>
                     </Form>
                 </div>
             </CardContent>

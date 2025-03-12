@@ -32,7 +32,7 @@ import {
 import { Input } from "~/components/ui/input"
 import { useState } from "react";
 
-import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
+import { useCreateUserWithEmailAndPassword, sendEmailVerification } from "react-firebase-hooks/auth"
 import { auth } from "~/lib/firebase";
 
 const formSchema = z.object({
@@ -59,8 +59,7 @@ export default function RegisterPage() {
 
     async function onSubmit(values: z.infer<typeof formSchema>){
         try{
-            const res = await createUserWithEmailAndPassword(values.email, values.password);
-            console.log({res});
+            await createUserWithEmailAndPassword(values.email, values.password);
 
             form.reset({
                 email: "",

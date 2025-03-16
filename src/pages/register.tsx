@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button"
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox"
-import { GoogleAuthProvider, signInWithPopup} from "firebase/auth";
+import { GoogleAuthProvider, sendEmailVerification, signInWithPopup} from "firebase/auth";
 
 import {
   Card,
@@ -32,8 +32,10 @@ import {
 import { Input } from "~/components/ui/input"
 import { useState } from "react";
 
-import { useCreateUserWithEmailAndPassword, sendEmailVerification } from "react-firebase-hooks/auth"
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { auth } from "~/lib/firebase";
+import { useAuth } from "~/context/authContext";
+import { useEffect } from "react";
 
 const formSchema = z.object({
     email: z.string().email( {
@@ -48,6 +50,14 @@ const formSchema = z.object({
 
 export default function RegisterPage() {
     const router = useRouter();
+    const [showPass, setShowPass] = useState<boolean>(false);
+    const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
+
+    const { user, loading } = useAuth();
+    useEffect(() => {
+        if (loading) return; // Jangan redirect saat masih loading
+        if (user) void router.push("/");
+    }, [user, loading, router]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -59,28 +69,32 @@ export default function RegisterPage() {
 
     async function onSubmit(values: z.infer<typeof formSchema>){
         try{
-            await createUserWithEmailAndPassword(values.email, values.password);
+            const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
+            if(userCredential){
+                const users = userCredential.user;
+                await sendEmailVerification(users);
 
-            form.reset({
-                email: "",
-                password: ""
-            });
+                localStorage.setItem("user", JSON.stringify(users));
 
-            router.push("/login");
+                form.reset({
+                    email: "",
+                    password: ""
+                });
+
+                router.push("/login");
+            } else {
+                console.error('Failed to create user credential');
+            }
         } catch(e){
             console.error(e);
         }
     }
 
-    
     const handleGoogleRegist = async () => {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
         router.push("/login");
     };
-
-    const [showPass, setShowPass] = useState<boolean>(false);
-    const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
 
     return (
         <>

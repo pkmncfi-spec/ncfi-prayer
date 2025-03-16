@@ -45,6 +45,14 @@ export default function AuthPage() {
   const [showPass, setShowPass] = useState<boolean>(false);
   const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
 
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  useEffect(() => {
+    if (loading) return; // Jangan redirect saat masih loading
+    if (user) void router.push("/");
+  }, [user, loading, router]);
+
+
   const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -55,21 +63,22 @@ export default function AuthPage() {
   
   async function onSubmit(values: z.infer<typeof formSchema>){
     try{
-        const res = await signInWithEmailAndPassword(values.email, values.password);
-        console.log({res});
+        const userCredential = await signInWithEmailAndPassword(values.email, values.password);
+        if(userCredential){
+            const users = userCredential.user;
+            await users.reload();
+            
+            if(!users.emailVerified){
+                alert("Please verify your email before logging in.");
+                return;
+            }
+
+            await router.push("/");
+        }
     } catch(e){
         console.error(e);
     }
   }
-
-  const { user } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (user) {
-      void router.push("/");
-    }
-  }, [user, router]);
 
   const handleLoginGoogle = async () => {
       const provider = new GoogleAuthProvider();

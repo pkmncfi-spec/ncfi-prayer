@@ -31,7 +31,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        <h1 className="text-5xl">Ini nanti homepage, Welcome, {user.displayName}</h1>
+        <h1 className="text-5xl">Ini nanti homepage, Welcome, {user.email}</h1>
         <h2><button onClick={handleLogout}>Logout</button></h2>
       </main>
     </>

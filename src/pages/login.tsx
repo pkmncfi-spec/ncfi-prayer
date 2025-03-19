@@ -45,12 +45,17 @@ export default function AuthPage() {
     const [showPass, setShowPass] = useState<boolean>(false);
     const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const router = useRouter();
     const { user, loading } = useAuth();
+
+    const redirect = false;
+
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/");
-    }, [user, loading, router]);
+        if (user && redirect) void router.push("/");
+    }, [user, loading, router, redirect]);
 
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -62,6 +67,11 @@ export default function AuthPage() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>){
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
+        console.log("berapa kali");
+
         try{
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
             if(userCredential){
@@ -72,8 +82,8 @@ export default function AuthPage() {
                     alert("Please verify your email before logging in.");
                     return;
                 }
-
-                await router.push("/");
+                
+                void router.push("/");
             }
         } catch(e){
             console.error(e);

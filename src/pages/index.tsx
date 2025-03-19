@@ -12,7 +12,10 @@ export default function Home() {
   
   useEffect(() => {
     if (loading) return; // Jangan redirect saat masih loading
-    if (!user) void router.push("/register");
+    if (!user){
+      void router.push("/register");
+      return;
+    }
   }, [user, loading, router]);
 
   // Tampilkan "Loading..." jika masih menunggu Firebase memuat user

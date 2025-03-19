@@ -36,6 +36,9 @@ import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useEffect } from "react";
+import { db } from "~/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+
 
 const formSchema = z.object({
     email: z.string().email( {
@@ -74,7 +77,11 @@ export default function RegisterPage() {
                 const users = userCredential.user;
                 await sendEmailVerification(users);
 
-                localStorage.setItem("user", JSON.stringify(users));
+                await setDoc(doc(db, "user", users.uid), {
+                    uid: users.uid,
+                    email: users.email,
+                    createdAt: new Date().toISOString(),
+                });
 
                 form.reset({
                     email: "",

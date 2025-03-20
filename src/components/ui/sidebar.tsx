@@ -146,6 +146,7 @@ const SidebarProvider = React.forwardRef<
             }
             className={cn(
               "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+              "justify-center items-center", 
               className
             )}
             ref={ref}
@@ -155,7 +156,8 @@ const SidebarProvider = React.forwardRef<
           </div>
         </TooltipProvider>
       </SidebarContext.Provider>
-    )
+    );
+    
   }
 )
 SidebarProvider.displayName = "SidebarProvider"

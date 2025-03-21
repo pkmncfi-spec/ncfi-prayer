@@ -15,7 +15,7 @@ const HelpPage = () => {
       </Head>
 
       <main className="flex min-h-screen flex-col items-center bg-gray-100 p-4">
-        <Card className="w-full max-w-xs bg-white shadow-lg overflow-hidden relative h-auto min-h-screen rounded-none">
+        <Card className="w-full max-w-xs bg-white rounded-lg shadow-lg overflow-hidden relative h-auto min-h-screen">
           {/* Header */}
           <div className="relative w-full h-16 bg-gray-000 flex items-center px-4 border-b border-gray-300">
             <button>

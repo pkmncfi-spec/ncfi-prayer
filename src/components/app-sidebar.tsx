@@ -1,3 +1,4 @@
+import { GeistSans } from "geist/font/sans"
 import { Home, Search } from "lucide-react"
 
 import {
@@ -28,16 +29,16 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className={GeistSans.className}>
         <SidebarGroup>
           <SidebarGroupLabel>NCFI Prayer</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-12 text-xl">
                     <a href={item.url}>
-                      <item.icon />
+                      <item.icon className="mr-3"/>
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>

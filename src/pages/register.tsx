@@ -29,6 +29,16 @@ import {
   FormMessage,
 } from "~/components/ui/form"
 
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+  } from "~/components/ui/select"
+
 import { Input } from "~/components/ui/input"
 import { useState } from "react";
 
@@ -37,19 +47,23 @@ import { auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useEffect } from "react";
 import { db } from "~/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { addDoc, collection} from "firebase/firestore";
 
 
 const formSchema = z.object({
-    email: z.string().email( {
-        message: "Invalid email address",
-    }),
+    name: z.string().min(1, { message: "Name is required" }),
+    email: z.string().email({ message: "Invalid email address" }),
     password: z.string()
-        .min(8, { message: "Password must be at least 8 characters long." })
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
-        .regex(/[0-9]/, { message: "Password must contain at least one number." })
-        .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character." })
-});
+      .min(8, { message: "Password must be at least 8 characters long" })
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
+    country: z.string().min(2, { message: "Country is required" }),
+    dateOfBirth: z.string().regex(/^\d{2}-\d{2}-\d{4}$/, { message: "Date format must be MM-DD-YYYY" }),
+    gender: z.string().min(1, { message: "..." }),
+    role: z.string().min(1, { message: "..." }),
+    isverified: z.boolean().default(false),
+  });
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -65,28 +79,35 @@ export default function RegisterPage() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            name: "",
+            country: "",
+            dateOfBirth: "",
             email: "",
-            password: ""
+            password: "",
+            gender: "male",
+            role: "guest"
         },
     })
-
     async function onSubmit(values: z.infer<typeof formSchema>){
         try{
             const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
             if(userCredential){
                 const users = userCredential.user;
-                await sendEmailVerification(users);
+                // await sendEmailVerification(users);
 
-                await setDoc(doc(db, "user", users.uid), {
+                await addDoc(collection(db, "users"), {
+                    name: values.name,
                     uid: users.uid,
                     email: users.email,
-                    createdAt: new Date().toISOString(),
+                    country: values.country,
+                    dateOfBirth: values.dateOfBirth,
+                    isVerified: false,
+                    gender: values.gender,
+                    role: "guest"
                 });
-
-                form.reset({
-                    email: "",
-                    password: ""
-                });
+                
+                alert("Post successful!");
+                form.reset();
 
                 router.push("/login");
             } else {
@@ -111,7 +132,7 @@ export default function RegisterPage() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center">
-            <Card className="w-full max-w-[350px] self-center">
+            <Card className="w-full max-w-[350px] self-center mt-4">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -119,7 +140,73 @@ export default function RegisterPage() {
             <CardContent>
                 <div>
                     <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-2">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1 mb-2">
+                        <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                                <Input type="text" placeholder="Joko Armando Setiabudi" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+
+                        <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ }) => (
+                            <FormItem>
+                            <FormLabel>Gender</FormLabel>
+                            <FormControl>
+                                <Select>
+                                    <SelectTrigger className="">
+                                        <SelectValue placeholder="Select Gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                        <SelectItem value="male">Male</SelectItem>
+                                        <SelectItem value="female">Female</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+
+                        <FormField
+                        control={form.control}
+                        name="dateOfBirth"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                                <Input type="text" placeholder="MM-DD-YYYY" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+
+                        <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Country</FormLabel>
+                            <FormControl>
+                                <Input type="text" placeholder="Indonesia" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+
                         <FormField
                         control={form.control}
                         name="email"

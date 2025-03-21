@@ -83,7 +83,7 @@ export default function AuthPage() {
                     return;
                 }
                 
-                void router.push("/");
+                void router.push("/home");
             }
         } catch(e){
             console.error(e);

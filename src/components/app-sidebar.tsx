@@ -1,5 +1,5 @@
 import { GeistSans } from "geist/font/sans"
-import { Home, Search } from "lucide-react"
+import { Home, Search, Bookmark, Bell, Info } from "lucide-react"
 
 import {
   Sidebar,
@@ -23,6 +23,21 @@ const items = [
     title: "Search",
     url: "/search",
     icon: Search,
+  },
+  {
+    title: "Bookmarks",
+    url: "/bookmarks",
+    icon: Bookmark,
+  },
+  {
+    title: "Notification",
+    url: "/notification",
+    icon: Bell,
+  },
+  {
+    title: "Help",
+    url: "/help",
+    icon: Info,
   }
 ]
 
@@ -38,7 +53,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-12 text-xl">
                     <a href={item.url}>
-                      <item.icon className="mr-3"/>
+                      <item.icon size={64} className="mr-5 w-10 h-10"/>
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>

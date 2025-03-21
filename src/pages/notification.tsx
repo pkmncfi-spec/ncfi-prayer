@@ -1,11 +1,11 @@
 import Layout from "~/components/layout/sidebar"
 import { SidebarTrigger } from "~/components/ui/sidebar"
 
-export default function Page() {
+export default function Notification() {
   return (
     <Layout>
-      <SidebarTrigger />
-      <div>This is search page</div>
+            <SidebarTrigger />
+      <h1>This is notification page</h1>
     </Layout>
   )
 }

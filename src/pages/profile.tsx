@@ -57,7 +57,7 @@ export default function ProfilePage() {
 
           {/* Profile Section */}
           <div className="bg-gray-400 h-24 flex justify-center"></div>
-          <CardContent className="relative flex flex-col items-center -mt-12">
+          <CardContent className="relative flex flex-col items-right -mt-12">
             <div className="w-20 h-20 bg-gray-300 rounded-full"></div>
             <h3 className="text-lg font-bold mt-2">{fullName}</h3>
             <Button

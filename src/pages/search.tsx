@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <Layout>
       <SidebarTrigger />
-      <main className="flex flex-col w-full max-w-[500px] mx-auto min-h-screen overflow-auto">
+      <main className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
         <Card className="flex flex-col w-full items-center justify-start flex-1">
           {/* Header */}
           <div className="relative w-full h-16 bg-gray-100 flex items-center px-4 border-b border-gray-300">

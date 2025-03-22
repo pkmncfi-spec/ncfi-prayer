@@ -134,10 +134,10 @@ export default function HomePage() {
                   {posts.map((post) => (
                     <div key={post.id} className="border-b-[1px] py-2">
                       <div className="grid grid-cols-[40px_1fr] items-start">
-                        <img src="image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-4 mt-1" />
+                        <img src="image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                         <div className="pl-4">
                           <p className="font-semibold">{post.name}</p>
-                          <p className="whitespace-normal break-all overflow-hidden">{post.text}</p>
+                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                         </div>
                       </div>
                     </div>

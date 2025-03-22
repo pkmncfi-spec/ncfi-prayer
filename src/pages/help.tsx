@@ -26,7 +26,7 @@ export default function HelpPage() {
           <div className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
             <Card className="w-full rounded-none">
               <CardContent className="p-0">
-                <Accordion type="multiple" collapsible className="w-full">
+                <Accordion type="multiple" className="w-full">
                   <AccordionItem value="item-1" className="border-b border-gray-300 rounded-none">
                     <AccordionTrigger className="text-base font-semibold p-4 bg-white text-left w-full rounded-none">
                       How to use?

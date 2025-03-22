@@ -93,7 +93,7 @@ export default function RegisterPage() {
             const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
             if(userCredential){
                 const users = userCredential.user;
-                // await sendEmailVerification(users);
+                await sendEmailVerification(users);
 
                 await addDoc(collection(db, "users"), {
                     name: values.name,

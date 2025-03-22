@@ -21,7 +21,7 @@ export default function HelpPage() {
         </div>
 
           {/* Konten FAQ */}
-          div className="flex flex-col w-full max-w-[500px] mx-auto min-h-screen">
+          <div className="flex flex-col w-full max-w-[500px] mx-auto min-h-screen">
           <Accordion type="multiple" collapsible className="w-full">
             <AccordionItem value="item-1" className="border-b border-gray-300 rounded-none">
               <AccordionTrigger className="text-lg font-semibold p-4 bg-white text-left w-full rounded-none">

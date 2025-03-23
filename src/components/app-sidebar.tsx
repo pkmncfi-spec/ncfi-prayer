@@ -7,7 +7,8 @@ import {
   Bell,
   Info,
   User,
-  Send
+  Send,
+  LogOut
 } from "lucide-react";
 
 import {
@@ -20,6 +21,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/router";
 
 // Menu items.
 const items = [
@@ -30,9 +33,18 @@ const items = [
   { title: "Help", url: "/help", icon: Info },
   { title: "Profile", url: "/profile", icon: User },
   { title: "Request", url: "/request", icon: Send },
+  { title: "Log Out", url: "/home", icon: LogOut },
 ];
 
 export function AppSidebar() {
+  const auth = getAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    void router.push("/login");
+  };
+
   return (
     <Sidebar>
       <SidebarContent className={GeistSans.className}>
@@ -42,7 +54,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map(({ title, url, icon: Icon }) => (
                 <SidebarMenuItem key={title}>
-                  <SidebarMenuButton className="h-12 text-xl flex items-center">
+                  <SidebarMenuButton onClick={title === "Log Out" ? handleLogout : undefined} className="h-12 text-xl flex items-center">
                     <Icon size={24} className="mr-4 w-6 h-6" />
                     <Link href={url} aria-label={title} className="w-full">
                       {title}

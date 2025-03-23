@@ -47,7 +47,8 @@ import { auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useEffect } from "react";
 import { db } from "~/lib/firebase";
-import { addDoc, collection} from "firebase/firestore";
+import { doc, setDoc} from "firebase/firestore";
+import { GeistSans } from "geist/font/sans";
 
 
 const formSchema = z.object({
@@ -69,11 +70,11 @@ export default function RegisterPage() {
     const router = useRouter();
     const [showPass, setShowPass] = useState<boolean>(false);
     const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
-
     const { user, loading } = useAuth();
+
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/");
+        if (user) return;
     }, [user, loading, router]);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -95,7 +96,7 @@ export default function RegisterPage() {
                 const users = userCredential.user;
                 await sendEmailVerification(users);
 
-                await addDoc(collection(db, "users"), {
+                await setDoc(doc(db, "users", users.uid), {
                     name: values.name,
                     uid: users.uid,
                     email: users.email,
@@ -106,7 +107,7 @@ export default function RegisterPage() {
                     role: "guest"
                 });
                 
-                alert("Post successful!");
+                alert("Register successful!");
                 form.reset();
 
                 router.push("/login");
@@ -132,7 +133,7 @@ export default function RegisterPage() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center">
-            <Card className="w-full max-w-[350px] self-center mt-4">
+            <Card className="w-full max-w-[500px] self-center mt-4 mb-4">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -166,7 +167,7 @@ export default function RegisterPage() {
                                     <SelectTrigger className="">
                                         <SelectValue placeholder="Select Gender" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className={GeistSans.className}>
                                         <SelectGroup>
                                         <SelectItem value="male">Male</SelectItem>
                                         <SelectItem value="female">Female</SelectItem>
@@ -234,7 +235,7 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                         />
-                        <div className="flex items-center mb-5">
+                        <div className="flex items-center mb-4 pt-2">
                             <Checkbox id="showpass" 
                                 checked={showPass}
                                 onCheckedChange={(checked) => setShowPass(!!checked)}/>
@@ -244,7 +245,9 @@ export default function RegisterPage() {
                                 Show Password
                             </label>
                         </div>
-                        <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                        <div className="pt-7">
+                            <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                        </div>
                     </form>
                     </Form>
                 </div>
@@ -258,8 +261,8 @@ export default function RegisterPage() {
                     <div className="h-[2px] w-full border-t-2" />
                 </div>
 
-                <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"} onClick={handleGoogleRegist}>
-                    <FcGoogle/> Register with Google
+                <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"}>
+                    <FcGoogle/> Register with Google (sementara blom)
                 </Button>
 
                 <p>Already Have an Account?<Link href="/login" className="font-bold text-blue-700 ml-1">Login</Link></p>

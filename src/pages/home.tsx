@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFirestore, collection, addDoc, getDocs, query } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc } from "firebase/firestore";
 import { app } from "~/lib/firebase"; // Pastikan ini adalah konfigurasi Firebase Anda
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
@@ -16,6 +16,7 @@ import {
 import { GeistSans } from "geist/font/sans";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";
+import { useRouter } from "next/router";
 
 const db = getFirestore(app);
 
@@ -24,43 +25,41 @@ export default function HomePage() {
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const queryPosts = await getDocs(collection(db, "posts"));
-        const postsData = queryPosts.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as { text: string; uid: string }),
-        }));
+    if(!user) return void router.push("/register");;
+    const unsubscribe = onSnapshot(query(collection(db, "posts")), (querySnapshot) => {
+      const postsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as { text: string; uid: string }),
+      }));
   
-        console.log("Posts Data:", postsData); // Debugging
-  
-        const usersQuery = await getDocs(collection(db, "users"));
-        const usersMap = usersQuery.docs.reduce((acc, doc) => {
-          const userData = doc.data() as { name: string };
-          acc[doc.id] = userData.name;
-          return acc;
-        }, {} as Record<string, string>);
-  
-        console.log("Users Map:", usersMap); // Debugging
-  
+      // Ambil nama user hanya jika diperlukan
+      const usersMap: Record<string, string> = {};
+      Promise.all(
+        postsData.map(async (post) => {
+          if (!usersMap[post.uid]) {
+            const userDoc = await getDoc(doc(db, "users", post.uid));
+            usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
+          }
+        })
+      ).then(() => {
         const enrichedPosts = postsData.map((post) => ({
           ...post,
           name: usersMap[post.uid] ?? "Unknown",
         }));
-  
-        console.log("Enriched Posts:", enrichedPosts); // Debugging
-  
+      
         setPosts(enrichedPosts);
-      } catch (error) {
-        console.error("Error fetching posts or users:", error);
-      }
-    };
+      }).catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+    });
   
-    void fetchPosts();
+    return () => unsubscribe();
   }, []);
-  
+
+
   const handlePost = async () => {
     console.log("User:", user); // Debugging
     if (!text.trim() || !user?.uid) return; // Pastikan tidak post kosong dan user login
@@ -144,7 +143,19 @@ export default function HomePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-4">Konten International...</p>
+                <div>
+                  {posts.map((post) => (
+                    <div key={post.id} className="border-b-[1px] py-2">
+                      <div className="grid grid-cols-[40px_1fr] items-start">
+                        <img src="image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                        <div className="pl-4">
+                          <p className="font-semibold">{post.name}</p>
+                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

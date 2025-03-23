@@ -35,6 +35,7 @@ import { Input } from "~/components/ui/input"
 import { useState } from "react";
 
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth"
+import { FirebaseError } from "firebase/app";
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -54,7 +55,7 @@ export default function AuthPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user && redirect) void router.push("/");
+        if (user) void router.push("/home");
     }, [user, loading, router, redirect]);
 
 
@@ -66,29 +67,60 @@ export default function AuthPage() {
         },
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>){
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         if (isSubmitting) return;
         setIsSubmitting(true);
-
-        console.log("berapa kali");
-
-        try{
+    
+        if (!values.email || !values.password) {
+            alert("Email dan password tidak boleh kosong!");
+            setIsSubmitting(false);
+            return;
+        }
+    
+        try {
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
-            if(userCredential){
-                const users = userCredential.user;
-                await users.reload();
-                
-                if(!users.emailVerified){
-                    alert("Please verify your email before logging in.");
-                    return;
+            const user = userCredential?.user;
+            await user?.reload();
+            
+            // if (!user.emailVerified) {
+            //     alert("Please verify your email before logging in.");
+            //     void auth.signOut();
+            //     setIsSubmitting(false);
+            //     return;
+            // }
+    
+            void router.push("/home");
+        } catch (e) {
+            if (e instanceof FirebaseError) {
+                switch (e.code) {
+                    case "auth/user-not-found":
+                        alert("Email belum terdaftar. Silakan daftar terlebih dahulu.");
+                        break;
+                    case "auth/wrong-password":
+                        alert("Password salah. Silakan coba lagi.");
+                        break;
+                    case "auth/invalid-email":
+                        alert("Format email tidak valid.");
+                        break;
+                    case "auth/user-disabled":
+                        alert("Akun ini telah dinonaktifkan.");
+                        break;
+                    case "auth/too-many-requests":
+                        alert("Terlalu banyak percobaan login. Silakan coba lagi nanti.");
+                        break;
+                    default:
+                        alert("Terjadi kesalahan. Silakan coba lagi.");
                 }
-                
-                void router.push("/home");
+            } else {
+                console.error(e);
+                alert("Terjadi kesalahan yang tidak diketahui.");
             }
-        } catch(e){
-            console.error(e);
+        } finally {
+            setIsSubmitting(false);
         }
     }
+    
+    
 
     const handleLoginGoogle = async () => {
         const provider = new GoogleAuthProvider();
@@ -103,7 +135,7 @@ export default function AuthPage() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center">
-            <Card className="w-full max-w-[350px] self-center">
+            <Card className="w-full max-w-[500px] self-center mb-4">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Sign In</CardTitle>
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -111,7 +143,7 @@ export default function AuthPage() {
             <CardContent>
                 <div>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-2">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-2">
                             <FormField
                             name="email"
                             render={({ field }) => (
@@ -137,7 +169,7 @@ export default function AuthPage() {
                                 </FormItem>
                             )}
                             />
-                            <div className="flex items-center mb-5">
+                            <div className="flex items-center">
                                 <Checkbox id="showpass" 
                                     checked={showPass}
                                     onCheckedChange={(checked) => setShowPass(!!checked)}/>
@@ -147,7 +179,9 @@ export default function AuthPage() {
                                     Show Password
                                 </label>
                             </div>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                            <div className="pt-4">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                            </div>
                         </form>
                         </Form>
                 </div>
@@ -161,8 +195,8 @@ export default function AuthPage() {
                     <div className="h-[2px] w-full border-t-2" />
                 </div>
 
-                <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"} onClick={handleLoginGoogle}>
-                    <FcGoogle/> Login with Google
+                <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"}>
+                    <FcGoogle/> Login with Google (sementara blom)
                 </Button>
 
                 <p>Dont Have Account?<Link href="/register" className="font-bold text-blue-700 ml-1">Register</Link></p>

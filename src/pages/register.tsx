@@ -132,7 +132,7 @@ export default function RegisterPage() {
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <main className="flex min-h-screen flex-col justify-center items-center">
+        <main className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
             <Card className="w-full max-w-[500px] self-center mt-4 mb-4">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 

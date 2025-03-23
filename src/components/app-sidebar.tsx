@@ -98,16 +98,16 @@ export function AppSidebar() {
                   Today's Devotion
                 </button>
               </DialogTrigger>
-              <DialogContent className="fixed inset-0 flex items-center justify-center">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Today's Devotion</DialogTitle>
-                    <DialogDescription>
-                      "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." (Proverbs 3:5-6)
-                    </DialogDescription>
-                  </DialogHeader>
-                </div>
-              </DialogContent>
+                <DialogContent className="flex flex-col w-full max-w-lg ml-10 border min-h-screen">
+                  <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Today's Devotion</DialogTitle>
+                      <DialogDescription>
+                        "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." (Proverbs 3:5-6)
+                      </DialogDescription>
+                    </DialogHeader>
+                  </div>
+                </DialogContent>
             </Dialog>
 
             {/* Button Region menggunakan Sheet */}

@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button"
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox"
-import { GoogleAuthProvider, sendEmailVerification, signInWithPopup} from "firebase/auth";
+import { GoogleAuthProvider, sendEmailVerification, signInWithPopup, signOut} from "firebase/auth";
 
 import {
   Card,
@@ -34,7 +34,6 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
   } from "~/components/ui/select"
@@ -74,7 +73,7 @@ export default function RegisterPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) return;
+        if (user) void router.push("/home");
     }, [user, loading, router]);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -106,6 +105,7 @@ export default function RegisterPage() {
                     gender: values.gender,
                     role: "guest"
                 });
+                await signOut(auth);
                 
                 alert("Register successful!");
                 form.reset();

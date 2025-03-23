@@ -17,6 +17,9 @@ import { GeistSans } from "geist/font/sans";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
+import Image from 'next/image';
+import Head from "next/head";
+
 
 const db = getFirestore(app);
 
@@ -84,6 +87,11 @@ export default function HomePage() {
 
   return (
         <Layout>
+          <Head>
+            <title>NCFI Prayer</title>
+            <meta name="description" content="Prayer app for NCFI" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
             <div className="fixed w-full bg-white max-w-[598px]">
               <div>
@@ -92,7 +100,7 @@ export default function HomePage() {
                   <SidebarTrigger />
                   </div>
                   <div className="w-full items-center justify-center pr-7">
-                    <img src="favicon.ico" alt="NFCI Prayer" width="25" height="25" className="mx-auto" />
+                    <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
                     <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
                   </div>
                 </div>
@@ -138,7 +146,7 @@ export default function HomePage() {
                   {posts.map((post) => (
                     <div key={post.id} className="border-b-[1px] py-2">
                       <div className="grid grid-cols-[40px_1fr] items-start">
-                        <img src="image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                        <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                         <div className="pl-4">
                           <p className="font-semibold">{post.name}</p>
                           <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
@@ -152,7 +160,7 @@ export default function HomePage() {
                   {posts.map((post) => (
                     <div key={post.id} className="border-b-[1px] py-2">
                       <div className="grid grid-cols-[40px_1fr] items-start">
-                        <img src="image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                        <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                         <div className="pl-4">
                           <p className="font-semibold">{post.name}</p>
                           <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>

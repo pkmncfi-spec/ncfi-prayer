@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy } from "firebase/firestore";
 import { app } from "~/lib/firebase"; // Pastikan ini adalah konfigurasi Firebase Anda
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
@@ -24,12 +24,17 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string }>>([]);
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if(!user) return void router.push("/register");;
-    const unsubscribe = onSnapshot(query(collection(db, "posts")), (querySnapshot) => {
+    if (loading) return;
+    if(!user){
+      void router.push("/login");
+      return;
+    }
+
+    const unsubscribe = onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (querySnapshot) => {
       const postsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as { text: string; uid: string }),
@@ -57,7 +62,7 @@ export default function HomePage() {
     });
   
     return () => unsubscribe();
-  }, []);
+  }, [user, loading, router]);
 
 
   const handlePost = async () => {
@@ -112,14 +117,14 @@ export default function HomePage() {
                   <SheetTrigger className="w-full text-gray-500">Post Message Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
-                      <SheetTitle>asdasdasdjhsdfsdf</SheetTitle>
+                      <SheetTitle>Post Prayer</SheetTitle>
                       <SheetDescription>
                         <Textarea
                           value={text}
                           placeholder="Type your message here."
                           onChange={(e) => setText(e.target.value)}
-                          className="mb-2 resize-none h-[100px]"/>
-                        <Button onClick={handlePost}>Send message</Button>
+                          className="mb-2 resize-none h-[300px]"/>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send message</Button>
                       </SheetDescription>
                     </SheetHeader>
                   </SheetContent>

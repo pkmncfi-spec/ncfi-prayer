@@ -19,6 +19,7 @@ import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import Image from 'next/image';
 import Head from "next/head";
+import { useQuery } from "@tanstack/react-query";
 
 
 const db = getFirestore(app);

@@ -10,11 +10,11 @@ import "~/styles/globals.css";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <AuthProvider>
-        <div className={GeistSans.className}>
-            <Component {...pageProps} />
-        </div>
-    </AuthProvider>
+      <AuthProvider>
+          <div className={GeistSans.className}>
+              <Component {...pageProps} />
+          </div>
+      </AuthProvider>
   );
 };
 

@@ -47,7 +47,7 @@ export default function LandingPage() {
       
       <section id="about" className="bg-gray-300 py-16 px-6">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6">
-        <div className="ml-auto w-full md:w-3/4 bg-white shadow-xl p-6 rounded-3xl">
+        <div className="ml-auto w-full md:w-3/4 p-6 rounded-3xl">
           <h2 className="text-3xl font-bold text-gray-900">Pray together in groups</h2>
           <p className="text-black mt-4">
             Create a prayer group and start sharing prayer requests and praying for each other within your own country or region.

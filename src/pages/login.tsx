@@ -80,7 +80,6 @@ export default function AuthPage() {
         try {
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
             const user = userCredential?.user;
-            await user?.reload();
             
             // if (!user.emailVerified) {
             //     alert("Please verify your email before logging in.");

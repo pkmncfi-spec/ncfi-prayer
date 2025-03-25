@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy } from "firebase/firestore";
-import { app } from "~/lib/firebase"; // Pastikan ini adalah konfigurasi Firebase Anda
+import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import Layout from "~/components/layout/sidebar";
@@ -19,7 +19,6 @@ import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import Image from 'next/image';
 import Head from "next/head";
-import { useQuery } from "@tanstack/react-query";
 
 
 const db = getFirestore(app);
@@ -70,7 +69,7 @@ export default function HomePage() {
 
 
   const handlePost = async () => {
-    console.log("User:", user); // Debugging
+    console.log("User:", user)
     if (!text.trim() || !user?.uid) return; // Pastikan tidak post kosong dan user login
 
     await addDoc(collection(db, "posts"), {
@@ -128,11 +127,18 @@ export default function HomePage() {
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
                       <SheetDescription>
-                        <Textarea
-                          value={text}
-                          placeholder="Type your message here."
-                          onChange={(e) => setText(e.target.value)}
-                          className="mb-2 resize-none h-[300px]"/>
+                        <div className="grid grid-cols-[40px_1fr] items-start">
+                          <div>
+                          <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full mt-1" />
+                          </div>
+                          <div>
+                            <Textarea
+                              value={text}
+                              placeholder="Type your message here."
+                              onChange={(e) => setText(e.target.value)}
+                              className="resize-none border-none mb-10 active:border-none active:outline-none"/>
+                          </div>
+                        </div>
                         <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send message</Button>
                       </SheetDescription>
                     </SheetHeader>

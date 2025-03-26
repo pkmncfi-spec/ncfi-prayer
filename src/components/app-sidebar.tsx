@@ -91,26 +91,24 @@ export function AppSidebar() {
           </SidebarMenu>
 
           {/* Tombol tambahan dengan popup dialog */}
-          <div className="mt-6 flex flex-col space-y-3">
-            <div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="px-4 py-3 border-2 border-gray-400 rounded-2xl text-center font-bold text-xl w-full transition-all duration-300 hover:bg-gray-300 active:scale-95">
-                    Today&apos;s Devotion
-                  </button>
-                </DialogTrigger>
-                  <DialogContent className={`flex flex-col w-full ml-4 mr-4 mb-4 ${GeistSans.className}`}>
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Today&apos;s Devotion</DialogTitle>
-                        <DialogDescription>
-                          &quot;Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.&quot; (Proverbs 3:5-6)
-                        </DialogDescription>
-                      </DialogHeader>
-                    </div>
-                  </DialogContent>
-              </Dialog>
-            </div>
+         <div className="mt-6 flex flex-col space-y-3">
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="px-4 py-3 border-2 border-gray-400 rounded-2xl text-center font-bold text-xl w-full transition-all duration-300 hover:bg-gray-300 active:scale-95">
+                  Today's Devotion
+                </button>
+              </DialogTrigger>
+                <DialogContent className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
+                  <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Today's Devotion</DialogTitle>
+                      <DialogDescription>
+                        "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." (Proverbs 3:5-6)
+                      </DialogDescription>
+                    </DialogHeader>
+                  </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Button Region menggunakan Sheet */}
             <Sheet>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Separator } from "~/components/ui/separator";
 import Layout from "~/components/layout/sidebar";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { LogOut } from "lucide-react";
@@ -11,43 +12,50 @@ import { signOut } from "firebase/auth";
 import { auth } from "~/lib/firebase";
 import { Button } from "~/components/ui/button";
 
+
 export default function ProfilePage() {
   const { user } = useAuth();
-  const router = useRouter();
-  const [fullName, setFullName] = useState("Indonesia");
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
-  useEffect(() => {
-    if (user?.displayName) {
-      setFullName(user.displayName);
-    }
-  }, [user]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      await router.push("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  const posts = [
-    { id: 1, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    { id: 2, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    { id: 3, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-  ];
+    const router = useRouter();
+    const [fullName, setFullName] = useState("Indonesia");
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
+    useEffect(() => {
+      if (user?.displayName) {
+        setFullName(user.displayName);
+      }
+    }, [user]);
+  
+    const handleLogout = async () => {
+      try {
+        await signOut(auth);
+        await router.push("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    };
+  
+    const posts = [
+      { id: 1, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+      { id: 2, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+      { id: 3, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+    ];
+  
 
   return (
     <Layout>
-      <SidebarTrigger />
       <Head>
         <title>{fullName} - Profile</title>
         <meta name="description" content="User Profile Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
+      
+      <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
+        <div className="fixed w-full bg-white max-w-[598px]">
+        {/* Header */}
+        <div className="sticky top-0 bg-white w-full z-10"></div>
+        
+        <SidebarTrigger />
+        <Separator className="my" />
         <div className="bg-gray-400 h-24 flex justify-center"></div>
         <div className="relative flex flex-col items-right -mt-12 p-4">
           <div className="w-20 h-20 bg-gray-300 rounded-full"></div>
@@ -88,7 +96,8 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
-      </main>
+      </div>
+      </div>
     </Layout>
   );
 }

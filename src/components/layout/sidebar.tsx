@@ -1,5 +1,5 @@
 // components/Layout.tsx
-import { AppSidebar } from "~/components/app-sidebar";
+import { AppSidebar } from "~/components/layout/sidebar/member/app-sidebar";
 import { SidebarProvider, useSidebar } from "../ui/sidebar";
 import { type ReactNode } from "react";
 import React, { useEffect, useState } from "react";

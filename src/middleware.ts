@@ -23,7 +23,11 @@ export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // Redirect guests trying to access restricted areas
-    if (pathname.startsWith("/member/home") && userData.role !== "guest") {
+    if (pathname.startsWith("/member") && userData.role !== "guest") {
+      console.warn("Unauthorized access attempt by non-guest user");
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    else if (pathname.startsWith("/admin") && userData.role !== "admin") {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -37,7 +41,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/member/:path*", "/dashboard/:path*"],
+  matcher: ["/member/:path*", "/admin/:path*"],
 };
 
 // Lightweight token verification function for Edge Runtime

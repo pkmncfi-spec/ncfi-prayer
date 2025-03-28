@@ -31,11 +31,11 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return;
-    if(!user){
-      void router.push("/login");
-      return;
-    }
+    // if (loading) return;
+    // if(!user){
+    //   void router.push("/login");
+    //   return;
+    // }
 
     const unsubscribe = onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (querySnapshot) => {
       const postsData = querySnapshot.docs.map((doc) => ({
@@ -47,11 +47,12 @@ export default function HomePage() {
       const usersMap: Record<string, string> = {};
       Promise.all(
         postsData.map(async (post) => {
+          if (!post.uid) return; // Pastikan `uid` ada sebelum digunakan
           if (!usersMap[post.uid]) {
             const userDoc = await getDoc(doc(db, "users", post.uid));
             usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
           }
-        })
+        })        
       ).then(() => {
         const enrichedPosts = postsData.map((post) => ({
           ...post,
@@ -111,7 +112,6 @@ export default function HomePage() {
                     ? "w-full border-b-[4px] border-blue-500 font-semibold"
                     : ""
                     }`}>Regional</button>
-                  <Separator orientation="vertical" className="h-5 w-[1px] bg-gray-300" />
                   <button onClick={internationalTab} className={`mr-4 flex-1 py-2 transition-all ${
                     tab === "international"
                     ? "w-full border-b-[4px] border-blue-500 font-semibold"

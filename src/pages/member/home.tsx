@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
@@ -31,41 +31,49 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // if (loading) return;
-    // if(!user){
-    //   void router.push("/login");
-    //   return;
-    // }
-
-    const unsubscribe = onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (querySnapshot) => {
-      const postsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as { text: string; uid: string }),
-      }));
-  
-      // Ambil nama user hanya jika diperlukan
-      const usersMap: Record<string, string> = {};
-      Promise.all(
-        postsData.map(async (post) => {
-          if (!post.uid) return; // Pastikan `uid` ada sebelum digunakan
-          if (!usersMap[post.uid]) {
-            const userDoc = await getDoc(doc(db, "users", post.uid));
-            usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
-          }
-        })        
-      ).then(() => {
-        const enrichedPosts = postsData.map((post) => ({
-          ...post,
-          name: usersMap[post.uid] ?? "Unknown",
+    const fetchUserAndSubscribe = async () => {
+    try{
+      if (!user?.uid) return; // Ensure user ID is defined
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const regional = (userDoc.data() as { regional?: string })?.regional;
+      console.log("User Regional:", regional);
+    
+      const unsubscribe = onSnapshot(query(collection(db, "posts"), where("status", "==", "posted"), where("regional", "==", regional)), (querySnapshot) => {
+        const postsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as { text: string; uid: string; status: string;}),
         }));
-      
-        setPosts(enrichedPosts);
-      }).catch((error) => {
-        console.error("Error fetching user data:", error);
+    
+        // Ambil nama user hanya jika diperlukan
+        const usersMap: Record<string, string> = {};
+        Promise.all(
+          postsData.map(async (post) => {
+            if (!post.uid) return; // Pastikan `uid` ada sebelum digunakan
+            if (!usersMap[post.uid]) {
+              const userDoc = await getDoc(doc(db, "users", post.uid));
+              usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
+            }
+          })        
+        ).then(() => {
+          const enrichedPosts = postsData.map((post) => ({
+            ...post,
+            name: usersMap[post.uid] ?? "Unknown",
+          }));
+
+          setPosts(enrichedPosts);
+        }).catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
       });
-    });
-  
-    return () => unsubscribe();
+    
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  }
+
+  void fetchUserAndSubscribe();
+
   }, [user, loading, router]);
 
 
@@ -73,10 +81,14 @@ export default function HomePage() {
     console.log("User:", user)
     if (!text.trim() || !user?.uid) return; // Pastikan tidak post kosong dan user login
 
+    const currentUser = await getDoc(doc(db, "users", user.uid));
+
     await addDoc(collection(db, "posts"), {
       text: text.trim(),
       uid: user.uid,
       createdAt: new Date(),
+      status: "requested",
+      regional: (currentUser.data() as { regional?: string })?.regional,
     });
 
     setText(""); // Reset input setelah post

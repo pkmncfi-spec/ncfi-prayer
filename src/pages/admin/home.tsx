@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { getFirestore, collection, query, onSnapshot, getDoc, doc, orderBy } from "firebase/firestore";
 import { app } from "~/lib/firebase";
-import Layout from "~/components/layout/sidebar";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import Layout from "~/components/layout/sidebar-member";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";

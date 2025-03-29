@@ -1,6 +1,6 @@
 "use client";
 
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import {
   Dialog,

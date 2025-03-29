@@ -3,7 +3,7 @@ import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, order
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,

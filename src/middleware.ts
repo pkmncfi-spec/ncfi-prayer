@@ -18,18 +18,22 @@ export async function middleware(request: NextRequest) {
     // Verify the token using the Edge-compatible function
     const userData: VerifyTokenOutput = await verifyTokenOnEdge(token);
 
+    if(userData.isVerified === false) {
+      return NextResponse.redirect(new URL("/unverified", request.url));
+    }
     console.log("User data:", userData);
+    console.log("User data:", userData.isVerified);
 
     const pathname = request.nextUrl.pathname;
 
     // Redirect guests trying to access restricted areas
     if (pathname.startsWith("/member") && userData.role !== "guest") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
-    else if (pathname.startsWith("/admin") && userData.role !== "admin") {
+    else if (pathname.startsWith("/regional") && userData.role !== "regional") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
 
     // Allow the request to proceed
@@ -41,7 +45,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/member/:path*", "/admin/:path*"],
+  matcher: ["/member/:path*", "/regional/:path*"],
 };
 
 // Lightweight token verification function for Edge Runtime
@@ -67,7 +71,7 @@ async function verifyTokenOnEdge(token: string): Promise<VerifyTokenOutput> {
       throw new Error("Token verification failed");
     }
 
-    return await response.json(); // Ensure the response is parsed as JSON
+    return await response.json() as VerifyTokenOutput; // Ensure the response is parsed as JSON
   } catch (error) {
     console.error("Error during token verification:", error);
     throw new Error("Failed to verify token");

@@ -80,7 +80,7 @@ export default function HomePage() {
     };
 
     void fetchPosts();
-  }, [user, loading, router, tab]);
+  }, [user, loading, tab]);
 
 
   const handlePost = async () => {

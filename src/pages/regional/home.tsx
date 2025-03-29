@@ -3,7 +3,7 @@ import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, order
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
-import Layout from "~/components/layout/sidebar-member";
+import Layout from "~/components/layout/sidebar-regional";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -42,7 +42,7 @@ export default function HomePage() {
 
         const queryCondition =
           tab === "regional"
-            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"),where("regional", "==", regional),where("postFor", "==", "regional"))
+            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "requested"),where("regional", "==", regional),where("postFor", "==", "regional"))
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
         const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
@@ -187,8 +187,6 @@ export default function HomePage() {
                 </div>
             </div>
         </Layout>
-
-      // </div>
   );
 }
 

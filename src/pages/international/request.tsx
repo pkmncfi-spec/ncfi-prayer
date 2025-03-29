@@ -1,23 +1,27 @@
 import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import * as React from "react";
+import Image from 'next/image';
 
 export default function RequestPage() {
   return (
-    <Layout>
-      <SidebarTrigger />
-      <main className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
+    <Layout> 
+      <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
+        <div className="fixed w-full bg-white max-w-[598px]">
         {/* Header */}
-        <div className="flex flex-col w-full items-center justify-center">
-          <div className="flex flex-col items-center mt-2 w-full">
-            <img src="favicon.ico" alt="NFCI Prayer" width="25" height="25" className="mx-auto" />
-            <p className="text-sm text-muted-foreground">NCFI Prayer</p>
-            <div className="relative w-full h-4 bg-gray-000 flex items-center border-b border-gray-300"></div>
+        <div className="sticky top-3 bg-white w-full z-10 py-3">
+          <div className="flex items-center justify-between px-4">
+              <SidebarTrigger />
+                <div className="w-full h-02 items-center justify-center pr-7">
+                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+                  <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
+                </div>
           </div>
-          {/* Konten Post Request yang dilakukan */}
+        </div>
+
+          <Separator className="my-4" />
           <div className="flex flex-col w-full min-h-screen"></div>
         </div>
-      </main>
+      </div>
     </Layout>
   );
 }

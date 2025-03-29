@@ -1,16 +1,12 @@
-import Layout from "~/components/layout/sidebar-regional";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Image from "next/image";
-import { Separator } from "~/components/ui/separator";
-
 import { app } from "~/lib/firebase";
 import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import Head from "next/head";
 import { GeistSans } from "geist/font/sans";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 
 const db = getFirestore(app);

@@ -1,31 +1,72 @@
+import { Separator } from "~/components/ui/separator";
 import Layout from "~/components/layout/sidebar";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import * as React from "react";
+import Image from 'next/image';
 import SearchBar from "~/components/ui/searchbar";
+import { useState } from "react";
 
-export default function Page() {
+export default function SearchPage() {
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = (query: string) => {
+    if (!query) return;
+    
+    setHasSearched(true);
+    
+    if (!recentSearches.includes(query)) {
+      setRecentSearches([query, ...recentSearches]);
+    }
+    
+    // Simulasi pencarian (gantilah dengan pencarian sebenarnya)
+    const results = mockSearchFunction(query);
+    setSearchResults(results);
+  };
+
+  // Fungsi pencarian simulasi
+  const mockSearchFunction = (query: string) => {
+    const mockData = ["Prayer", "Faith", "Hope", "Love"];
+    return mockData.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+  };
+
   return (
     <Layout>
-      <SidebarTrigger />
-      <main className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
-        {/* Header */}
-        <div className="flex flex-col w-full items-center justify-center">
-          <div className="flex flex-col items-center mt-2 w-full">
-            <img src="favicon.ico" alt="NFCI Prayer" width="25" height="25" className="mx-auto" />
-            <p className="text-sm text-muted-foreground">NCFI Prayer</p>
-            <div className="relative w-full h-4 bg-gray-000 flex items-center border-b border-gray-300"></div>
+      <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
+        <div className="fixed w-full bg-white max-w-[598px]">
+          {/* Header */}
+          <div className="flex flex-col w-full items-center justify-center">
+            <div className="sticky top-3 bg-white w-full z-10 py-3">
+              <div className="flex items-center justify-between px-4">
+                <SidebarTrigger />
+                <div className="flex flex-col items-center justify-center pr-7 w-full">
+                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+                  <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
+                </div>
+              </div>
+              <div className="w-full h-4 border-b border-gray-300"></div>
+            </div>
+          </div>
+          
+          {/* Search */}
+          <SearchBar onSearch={handleSearch} />
+          <Separator className="my-2" />
+          
+          {/* Search Results */}
+          <div className="p-4">
+            {hasSearched && searchResults.length === 0 && (
+              <p className="text-center text-gray-500">Not Found</p>
+            )}
+            {searchResults.length > 0 && (
+              <ul>
+                {searchResults.map((result, index) => (
+                  <li key={index} className="py-1">{result}</li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
-
-        {/* Search */}
-        <SearchBar />
-        <div className="relative w-full h-2 bg-white flex items-center px-4 border-b border-gray-300"></div>
-
-        {/* Konten yang pernah dicari */}
-        <div className="w-full p-4 space-y-4">
-          <p className="text-gray-700">Recent searches will appear here.</p>
-        </div>
-      </main>
+      </div>
     </Layout>
   );
 }

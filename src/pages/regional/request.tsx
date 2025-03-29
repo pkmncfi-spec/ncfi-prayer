@@ -8,6 +8,7 @@ import { useAuth } from "~/context/authContext";
 import Head from "next/head";
 import { GeistSans } from "geist/font/sans";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import Layout from "~/components/layout/sidebar-regional";
 
 const db = getFirestore(app);
 
@@ -118,7 +119,7 @@ export default function RequestPage() {
                 {posts.map((post) => (
                   <div key={post.id} className="border-b-[1px] py-2 w-full">
                     <SheetTrigger>
-                    <button onClick={() => handleRequest(post.id)} className="w-full align-left">
+                    <button onClick={() => handleRequest(post.id)} className="w-[600px] align-left">
                     <div className="grid grid-cols-[40px_1fr] items-start">
                       <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                       <div className="pl-4 text-left text-s">

@@ -25,11 +25,11 @@ export default function Home() {
 
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const userData = userDoc.data() as { role?: string };
-        void router.push(userData?.role + "/home");
+        void router.push("/"+ userData?.role + "/home");
 
         if (loading) return; // Jangan redirect saat masih loading
         if (user){
-          void router.push("/home");
+          void router.push("/"+ userData?.role + "/home");
           return;
         }
       } catch (error) {

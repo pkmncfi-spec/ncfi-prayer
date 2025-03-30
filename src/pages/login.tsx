@@ -55,7 +55,7 @@ export default function AuthPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/");
+        if (user) void router.push("/member/home");
     }, [user, loading, router, redirect]);
 
 

@@ -73,7 +73,7 @@ export default function RegisterPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/home");
+        if (user) void router.push("/member/home");
     }, [user, loading, router]);
 
     const form = useForm<z.infer<typeof formSchema>>({

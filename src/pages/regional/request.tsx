@@ -2,13 +2,15 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Image from "next/image";
 import { app } from "~/lib/firebase";
-import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import Head from "next/head";
 import { GeistSans } from "geist/font/sans";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import Layout from "~/components/layout/sidebar-regional";
+import { Separator } from "~/components/ui/separator";
+import { Button } from "~/components/ui/button";
 
 const db = getFirestore(app);
 
@@ -17,6 +19,8 @@ export default function RequestPage() {
   const {user, loading} = useAuth();
   const [content, setContent] = useState("");
   const [contentAuthor, setContentAuthor] = useState("");
+  const [postId, setPostId] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -90,6 +94,18 @@ export default function RequestPage() {
     if (selectedPost) {
       setContent(selectedPost.text);
       setContentAuthor(selectedPost.name);
+      setPostId(selectedPost.id);
+      setSheetOpen(true); // Open the sheet
+    }
+  };
+
+  const acceptPrayer = async (postId: string) => {
+    try {
+      await updateDoc(doc(db, "posts", postId), { status: "posted" });
+      setSheetOpen(false); // Close the sheet after accepting
+      console.log("Prayer request accepted!");
+    } catch (error) {
+      console.error("Error accepting prayer request:", error);
     }
   };
 
@@ -115,7 +131,7 @@ export default function RequestPage() {
               </div>
             </div>
                 <div className="pt-16 w-full flex flex-col transition-all">
-                <Sheet>             
+                <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>             
                 {posts.map((post) => (
                   <div key={post.id} className="border-b-[1px] py-2 w-full">
                     <SheetTrigger>
@@ -135,13 +151,35 @@ export default function RequestPage() {
                   </div>
                     
                 ))}
-                         <SheetContent className={`flex flex-col w-full max-w-[500px] mx-autoborder ${GeistSans.className}`}>
-                    <SheetHeader>
-                      <SheetTitle>{contentAuthor}</SheetTitle>
-                      <SheetDescription>
-                        <p className="whitespace-normal break-all overflow-hidden text-ellipsis">{content}</p>
+                <SheetContent className={`flex flex-col w-full mx-autoborder ${GeistSans.className} overflow-y-auto`}>
+                    <SheetHeader className="">
+                      <div className="flex items-center fixed min-w-screen bg-white top-0 pt-4 pb-4 pl-2 mr-4">
+                        <SheetClose className="pr-5 text-xl ">&#10006;</SheetClose>
+                        <SheetTitle className="text-2xl w-full font-bold text-left pr-20">Prayer Request</SheetTitle>
+                      </div>
+                      </SheetHeader>
+                      <Separator className="w-full"/>
+                      <SheetDescription className="pt-6">
+                        <div className="grid grid-cols-[40px_1fr] items-start">
+                          <div>
+                          <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full mt-1" />
+                          </div>
+                          <div>
+                            <div className="flex gap-1 items-center">
+                              <p className="flex font-semibold">{contentAuthor}</p>
+                              <p className="text-muted-foreground">&#x2022; {formatDate(new Date())}</p>
+                            </div>
+                            <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5 mb-5">{content}</p>
+                          </div>
+                        </div>
                       </SheetDescription>
-                    </SheetHeader>
+                      <SheetFooter className="">
+                      <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 mr-4 pr-6">
+                        <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Accept Prayer</Button>
+                        <Button  className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
+                        <Button  className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
+                      </div>
+                      </SheetFooter>
                 </SheetContent>
             </Sheet>      
                 </div>

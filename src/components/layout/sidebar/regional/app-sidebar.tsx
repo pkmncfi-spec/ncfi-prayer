@@ -50,7 +50,7 @@ const items = [
   { title: "Help", url: "/regional/help", icon: Info },
   { title: "Profile", url: "/regional/profile", icon: User },
   { title: "Request", url: "/regional/request", icon: Send },
-  { title: "Log Out", url: "", icon: LogOut },
+  { title: "Log Out", url: "/login", icon: LogOut },
 ];
 
 const regions = [
@@ -77,18 +77,25 @@ export function AppSidebar() {
       <SidebarGroup>
         <SidebarGroupLabel>NCFI Prayer</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu>
-            {items.map(({ title, url, icon: Icon }) => (
-            <SidebarMenuItem key={title}>
-              <SidebarMenuButton onClick={title === "Log Out" ? handleLogout : undefined} className="h-12 text-xl flex items-center">
-                <Icon size={24} className="mr-4 w-6 h-6" />
-                <Link href={url} aria-label={title} className="w-full">
-                  {title}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          <SidebarMenu >
+          {items.map(({ title, url, icon: Icon }) => {
+                const isActive = router.pathname.startsWith(url);
+                return (
+                  <SidebarMenuItem key={title}>
+                    <SidebarMenuButton
+                      onClick={title === "Log Out" ? handleLogout : undefined}
+                      className={`h-12 text-xl flex items-center ${isActive ? "font-bold bg-gray-200" : ""}`}
+                    >
+                      <Icon className={`mr-3 !w-6 !h-6 ${isActive ? "stroke-2" : "stroke-[1]"}`} />
+                      <Link href={url} aria-label={title} className="w-full">
+                        {title}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
           </SidebarMenu>
+          
 
           {/* Tombol tambahan dengan popup dialog */}
          <div className="mt-6 flex flex-col space-y-3">

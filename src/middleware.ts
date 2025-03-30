@@ -35,6 +35,10 @@ export async function middleware(request: NextRequest) {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
+    else if (pathname.startsWith("/admin") && userData.role !== "admin") {
+      console.warn("Unauthorized access attempt by non-guest user");
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
 
     // Allow the request to proceed
     return NextResponse.next();
@@ -45,7 +49,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/member/:path*", "/regional/:path*"],
+  matcher: ["/member/:path*", "/regional/:path*", "/admin/:path*"],
 };
 
 // Lightweight token verification function for Edge Runtime

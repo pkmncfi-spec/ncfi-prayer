@@ -26,7 +26,7 @@ import Head from "next/head";
 const db = getFirestore(app);
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt?: string }>>([]);
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
@@ -45,33 +45,40 @@ export default function HomePage() {
             ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"),where("regional", "==", regional),where("postFor", "==", "regional"))
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
-        const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
-          const postsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...(doc.data() as { text: string; uid: string;}),
-          }));
-
-          const usersMap: Record<string, string> = {};
-          Promise.all(
-            postsData.map(async (post) => {
-              if (!post.uid) return;
-              if (!usersMap[post.uid]) {
-                const userDoc = await getDoc(doc(db, "users", post.uid));
-                usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
-              }
-            })
-          )
-            .then(() => {
-              const enrichedPosts = postsData.map((post) => ({
-                ...post,
-                name: usersMap[post.uid] ?? "Unknown",
-              }));
-              setPosts(enrichedPosts);
-            })
-            .catch((error) => {
-              console.error("Error fetching user data:", error);
+            const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
+              const postsData = querySnapshot.docs.map((doc) => {
+                const data = doc.data() as { text: string; uid: string; createdAt?: any };
+                return {
+                  id: doc.id,
+                  text: data.text,
+                  uid: data.uid,
+                  createdAt: data.createdAt?.toDate() || null, // Convert Firestore Timestamp to Date or set to null
+                };
+              });
+            
+              const usersMap: Record<string, string> = {};
+              Promise.all(
+                postsData.map(async (post) => {
+                  if (!post.uid) return;
+                  if (!usersMap[post.uid]) {
+                    const userDoc = await getDoc(doc(db, "users", post.uid));
+                    usersMap[post.uid] = userDoc.exists()
+                      ? (userDoc.data() as { name: string }).name
+                      : "Unknown";
+                  }
+                })
+              )
+                .then(() => {
+                  const enrichedPosts = postsData.map((post) => ({
+                    ...post,
+                    name: usersMap[post.uid] ?? "Unknown",
+                  }));
+                  setPosts(enrichedPosts);
+                })
+                .catch((error) => {
+                  console.error("Error fetching user data:", error);
+                });
             });
-        });
 
         return unsubscribe;
       } catch (error) {
@@ -120,7 +127,7 @@ export default function HomePage() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-            <div className="fixed w-full bg-white max-w-[598px]">
+            <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
                 <div className="flex flex-cols mt-2 mb-2">
                   <div className="">
@@ -185,7 +192,7 @@ export default function HomePage() {
                       <div className="pl-4">
                         <div className="flex gap-1 items-center">
                           <p className="font-semibold">{post.name}</p>
-                          <p className="flex pr-10 text-muted-foreground">&#x2022; {formatDate(new Date())}</p>
+                          <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(post.createdAt) : "Unknown Date"}</p>
                         </div>
                         <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>

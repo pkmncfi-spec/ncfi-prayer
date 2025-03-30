@@ -1,7 +1,8 @@
-import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import Image from 'next/image';
+import * as React from "react";
+import Image from "next/image";
+import { Separator } from "~/components/ui/separator";
 
 export default function RequestPage() {
   return (
@@ -9,7 +10,7 @@ export default function RequestPage() {
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
         <div className="fixed w-full bg-white max-w-[598px]">
         {/* Header */}
-        <div className="sticky top-3 bg-white w-full z-10 py-3">
+        <div className="sticky top-3 bg-white w-full z-10 ">
           <div className="flex items-center justify-between px-4">
               <SidebarTrigger />
                 <div className="w-full h-02 items-center justify-center pr-7">

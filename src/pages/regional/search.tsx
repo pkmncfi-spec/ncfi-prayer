@@ -1,9 +1,9 @@
-import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-regional";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import Image from 'next/image';
 import SearchBar from "~/components/ui/searchbar";
 import { useState } from "react";
+import { Separator } from "~/components/ui/separator";
 
 export default function SearchPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);

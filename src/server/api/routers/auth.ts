@@ -6,6 +6,7 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 // Define the expected structure of user data in Firestore
 const userDataSchema = z.object({
   role: z.string(), // Ensure the role is always a string
+  isVerified: z.boolean(), // Ensure isVerified is always a boolean
 });
 
 export const authRouter = createTRPCRouter({
@@ -30,7 +31,7 @@ export const authRouter = createTRPCRouter({
         const userData = userDataSchema.parse(userDoc.data());
 
         // Return the user's UID and role
-        return { uid: decodedToken.uid, role: userData.role };
+        return { uid: decodedToken.uid, role: userData.role, isVerified: userData.isVerified };
       } catch (error) {
         console.error("Token verification failed:", error);
 

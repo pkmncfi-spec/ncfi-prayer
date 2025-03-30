@@ -101,6 +101,13 @@ export default function HomePage() {
     setText(""); // Reset input setelah post
     alert("Post successful!");
   };
+  function formatDate(date: Date): string {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }
 
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
@@ -176,7 +183,10 @@ export default function HomePage() {
                     <div className="grid grid-cols-[40px_1fr] items-start">
                       <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                       <div className="pl-4">
-                        <p className="font-semibold">{post.name}</p>
+                        <div className="flex gap-1 items-center">
+                          <p className="font-semibold">{post.name}</p>
+                          <p className="flex pr-10 text-muted-foreground">&#x2022; {formatDate(new Date())}</p>
+                        </div>
                         <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>
                     </div>

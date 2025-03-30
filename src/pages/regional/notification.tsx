@@ -1,4 +1,4 @@
-import Layout from "~/components/layout/sidebar-member"
+import Layout from "~/components/layout/sidebar-regional"
 import { SidebarTrigger } from "~/components/ui/sidebar"
 
 export default function Notification() {

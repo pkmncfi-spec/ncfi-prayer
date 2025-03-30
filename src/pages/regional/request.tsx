@@ -20,6 +20,7 @@ export default function RequestPage() {
   const [content, setContent] = useState("");
   const [contentAuthor, setContentAuthor] = useState("");
   const [postId, setPostId] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -94,12 +95,14 @@ export default function RequestPage() {
       setContent(selectedPost.text);
       setContentAuthor(selectedPost.name);
       setPostId(selectedPost.id);
+      setSheetOpen(true); // Open the sheet
     }
   };
 
   const acceptPrayer = async (postId: string) => {
     try {
       await updateDoc(doc(db, "posts", postId), { status: "posted" });
+      setSheetOpen(false); // Close the sheet after accepting
       console.log("Prayer request accepted!");
     } catch (error) {
       console.error("Error accepting prayer request:", error);
@@ -128,7 +131,7 @@ export default function RequestPage() {
               </div>
             </div>
                 <div className="pt-16 w-full flex flex-col transition-all">
-                <Sheet>             
+                <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>             
                 {posts.map((post) => (
                   <div key={post.id} className="border-b-[1px] py-2 w-full">
                     <SheetTrigger>
@@ -150,9 +153,9 @@ export default function RequestPage() {
                 ))}
                 <SheetContent className={`flex flex-col w-full mx-autoborder ${GeistSans.className} overflow-y-auto`}>
                     <SheetHeader className="">
-                      <div className="flex items-center justify-between fixed bg-white w-[345px] top-0 pt-4 pb-4">
-                        <SheetClose className="pr-5 ">&#10006;</SheetClose>
-                        <SheetTitle className="text-2xl w-full font-bold text-left">Prayer Request</SheetTitle>
+                      <div className="flex items-center fixed min-w-screen bg-white top-0 pt-4 pb-4 pl-2 mr-4">
+                        <SheetClose className="pr-5 text-xl ">&#10006;</SheetClose>
+                        <SheetTitle className="text-2xl w-full font-bold text-left pr-20">Prayer Request</SheetTitle>
                       </div>
                       </SheetHeader>
                       <Separator className="w-full"/>
@@ -166,14 +169,16 @@ export default function RequestPage() {
                               <p className="flex font-semibold">{contentAuthor}</p>
                               <p className="text-muted-foreground">&#x2022; {formatDate(new Date())}</p>
                             </div>
-                            <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5">{content}</p>
+                            <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5 mb-5">{content}</p>
                           </div>
                         </div>
                       </SheetDescription>
-                      <SheetFooter className="bg-white fixed bottom-0 w-[340px] pl-0 ml-0 pt-4 pb-4">
-                        <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs">Accept Prayer</Button>
-                        <Button  className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs">Edit</Button>
-                        <Button  className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs">Reject</Button>
+                      <SheetFooter className="">
+                      <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 mr-4 pr-6">
+                        <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Accept Prayer</Button>
+                        <Button  className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
+                        <Button  className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
+                      </div>
                       </SheetFooter>
                 </SheetContent>
             </Sheet>      

@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // Redirect guests trying to access restricted areas
-    if (pathname.startsWith("/member") && userData.role !== "guest") {
+    if (pathname.startsWith("/member") && userData.role !== "member") {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }

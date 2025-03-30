@@ -4,6 +4,7 @@ import Image from "next/image";
 import SearchBar from "~/components/ui/searchbar";
 import { useState, useEffect } from "react";
 import { Bookmark } from "lucide-react";
+import { Separator } from "~/components/ui/separator";
 
 export default function SearchPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);

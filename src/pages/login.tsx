@@ -1,5 +1,5 @@
-import { GoogleAuthProvider, signInWithPopup} from "firebase/auth";
-import { auth } from "~/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup, sendEmailVerification, type User} from "firebase/auth";
+import { app, auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -36,6 +36,9 @@ import { useState } from "react";
 
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { FirebaseError } from "firebase/app";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+
+const db = getFirestore(app);
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -80,15 +83,22 @@ export default function AuthPage() {
         try {
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
             const user = userCredential?.user;
-            
-            // if (!user.emailVerified) {
-            //     alert("Please verify your email before logging in.");
-            //     void auth.signOut();
-            //     setIsSubmitting(false);
-            //     return;
-            // }
+
+            if (!user?.uid) {
+                throw new Error("User UID is undefined.");
+            }
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const userData = userDoc.data() as { role?: string };
+
+            if (!user?.emailVerified) {
+                alert("Please verify your email before logging in.");
+                void auth.signOut();
+                sendEmailVerification(user);
+                setIsSubmitting(false);
+                return;
+            }
     
-            void router.push("/home");
+            void router.push("/" + userData?.role + "/home");
         } catch (e) {
             if (e instanceof FirebaseError) {
                 switch (e.code) {

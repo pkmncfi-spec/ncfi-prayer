@@ -27,11 +27,15 @@ export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
     // Redirect guests trying to access restricted areas
-    if (pathname.startsWith("/member") && userData.role !== "guest") {
+    if (pathname.startsWith("/member") && userData.role !== "member") {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
     else if (pathname.startsWith("/regional") && userData.role !== "regional") {
+      console.warn("Unauthorized access attempt by non-guest user");
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+    else if (pathname.startsWith("/admin") && userData.role !== "admin") {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
@@ -45,7 +49,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/member/:path*", "/regional/:path*"],
+  matcher: ["/member/:path*", "/regional/:path*", "/admin/:path*"],
 };
 
 // Lightweight token verification function for Edge Runtime

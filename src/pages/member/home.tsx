@@ -26,7 +26,7 @@ import Head from "next/head";
 const db = getFirestore(app);
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt?: string }>>([]);
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
@@ -45,33 +45,40 @@ export default function HomePage() {
             ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"),where("regional", "==", regional),where("postFor", "==", "regional"))
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
-        const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
-          const postsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...(doc.data() as { text: string; uid: string;}),
-          }));
-
-          const usersMap: Record<string, string> = {};
-          Promise.all(
-            postsData.map(async (post) => {
-              if (!post.uid) return;
-              if (!usersMap[post.uid]) {
-                const userDoc = await getDoc(doc(db, "users", post.uid));
-                usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
-              }
-            })
-          )
-            .then(() => {
-              const enrichedPosts = postsData.map((post) => ({
-                ...post,
-                name: usersMap[post.uid] ?? "Unknown",
-              }));
-              setPosts(enrichedPosts);
-            })
-            .catch((error) => {
-              console.error("Error fetching user data:", error);
+            const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
+              const postsData = querySnapshot.docs.map((doc) => {
+                const data = doc.data() as { text: string; uid: string; createdAt?: any };
+                return {
+                  id: doc.id,
+                  text: data.text,
+                  uid: data.uid,
+                  createdAt: data.createdAt?.toDate() || null, // Convert Firestore Timestamp to Date or set to null
+                };
+              });
+            
+              const usersMap: Record<string, string> = {};
+              Promise.all(
+                postsData.map(async (post) => {
+                  if (!post.uid) return;
+                  if (!usersMap[post.uid]) {
+                    const userDoc = await getDoc(doc(db, "users", post.uid));
+                    usersMap[post.uid] = userDoc.exists()
+                      ? (userDoc.data() as { name: string }).name
+                      : "Unknown";
+                  }
+                })
+              )
+                .then(() => {
+                  const enrichedPosts = postsData.map((post) => ({
+                    ...post,
+                    name: usersMap[post.uid] ?? "Unknown",
+                  }));
+                  setPosts(enrichedPosts);
+                })
+                .catch((error) => {
+                  console.error("Error fetching user data:", error);
+                });
             });
-        });
 
         return unsubscribe;
       } catch (error) {
@@ -101,6 +108,13 @@ export default function HomePage() {
     setText(""); // Reset input setelah post
     alert("Post successful!");
   };
+  function formatDate(date: Date): string {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }
 
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
@@ -113,7 +127,7 @@ export default function HomePage() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-            <div className="fixed w-full bg-white max-w-[598px]">
+            <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
                 <div className="flex flex-cols mt-2 mb-2">
                   <div className="">
@@ -141,7 +155,7 @@ export default function HomePage() {
               <Separator className="my-4 w-full" />
               <div>
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
+                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
@@ -155,16 +169,14 @@ export default function HomePage() {
                               value={text}
                               placeholder="Type your message here."
                               onChange={(e) => setText(e.target.value)}
-                              className="resize-none min-h-[500px] border-none mb-10 active:border-none active:outline-none"/>
+                              className="resize-none min-h-[600px] border-none"/>
                           </div>
+                          <SheetClose>
+                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send Prayer</Button>
+                          </SheetClose>
                         </div>
                       </SheetDescription>
                     </SheetHeader>
-                    <SheetFooter>
-                      <SheetClose>
-                        <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send message</Button>
-                      </SheetClose>
-                    </SheetFooter>
                   </SheetContent>
                 </Sheet>            
               </div>
@@ -172,20 +184,26 @@ export default function HomePage() {
             </div>
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
                 <div>
-                  {posts.map((post) => (
-                    <div key={post.id} className="border-b-[1px] py-2">
-                      <div className="grid grid-cols-[40px_1fr] items-start">
-                        <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
-                        <div className="pl-4">
+                {posts.map((post) => (
+                  <div key={post.id} className="border-b-[1px] py-2">
+                    <button className="w-[600px] text-left">
+                    <div className="grid grid-cols-[40px_1fr] items-start">
+                      <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                      <div className="pl-4">
+                        <div className="flex gap-1 items-center">
                           <p className="font-semibold">{post.name}</p>
-                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
+                          <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(post.createdAt) : "Unknown Date"}</p>
                         </div>
+                        <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>
                     </div>
+                    </button>
+                  </div>
                   ))}
                 </div>
                 </div>
             </div>
+
         </Layout>
 
       // </div>

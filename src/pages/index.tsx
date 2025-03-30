@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     async function userRole() {
       try{
-        if(!user) return;
+        if(!user) return; // Pastikan user tidak null
 
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const userData = userDoc.data() as { role?: string };

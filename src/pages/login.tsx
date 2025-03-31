@@ -58,7 +58,7 @@ export default function AuthPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/member/home");
+        if (user) void router.push("/");
     }, [user, loading, router, redirect]);
 
 
@@ -95,6 +95,7 @@ export default function AuthPage() {
                 void auth.signOut();
                 sendEmailVerification(user);
                 setIsSubmitting(false);
+                void router.push("/login");
                 return;
             }
     

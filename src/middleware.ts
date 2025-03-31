@@ -18,9 +18,14 @@ export async function middleware(request: NextRequest) {
     // Verify the token using the Edge-compatible function
     const userData: VerifyTokenOutput = await verifyTokenOnEdge(token);
 
-    if(userData.isVerified === false) {
-      return NextResponse.redirect(new URL("/unverified", request.url));
+    if (userData && request.url === "/") {
+      console.warn("Invalid or expired token");
+      return NextResponse.redirect(new URL("/member/home", request.url));
     }
+
+    // if(userData.isVerified === false) {
+    //   return NextResponse.redirect(new URL("/unverified", request.url));
+    // }
     console.log("User data:", userData);
     console.log("User data:", userData.isVerified);
 
@@ -32,6 +37,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
     else if (pathname.startsWith("/regional") && userData.role !== "regional") {
+      console.warn("Unauthorized access attempt by non-guest user");
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+    else if (pathname.startsWith("/international") && userData.role !== "international") {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }

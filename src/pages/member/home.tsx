@@ -40,6 +40,12 @@ export default function HomePage() {
         const regional = (userDoc.data() as { regional?: string })?.regional;
         console.log("User Regional:", regional);
 
+        if (!regional && tab === "regional") {
+          console.warn("Regional value is undefined for the user.");
+          setPosts([]); // Clear posts if regional is undefined
+          return;
+        }
+
         const queryCondition =
           tab === "regional"
             ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"),where("regional", "==", regional),where("postFor", "==", "regional"))
@@ -155,7 +161,7 @@ export default function HomePage() {
               <Separator className="my-4 w-full" />
               <div>
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
+                  <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
@@ -172,7 +178,7 @@ export default function HomePage() {
                               className="resize-none min-h-[600px] border-none"/>
                           </div>
                           <SheetClose>
-                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send Prayer</Button>
+                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Request Prayer</Button>
                           </SheetClose>
                         </div>
                       </SheetDescription>
@@ -192,7 +198,7 @@ export default function HomePage() {
                       <div className="pl-4">
                         <div className="flex gap-1 items-center">
                           <p className="font-semibold">{post.name}</p>
-                          <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(post.createdAt) : "Unknown Date"}</p>
+                          <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
                         </div>
                         <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>

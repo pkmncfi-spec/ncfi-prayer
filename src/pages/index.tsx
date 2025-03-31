@@ -21,17 +21,14 @@ export default function Home() {
   useEffect(() => {
     async function userRole() {
       try{
-        if(!user) return; // Pastikan user tidak null
-
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data() as { role?: string };
-        void router.push("/"+ userData?.role + "/home");
-
-        if (loading) return; // Jangan redirect saat masih loading
-        if (user){
+        if(user){
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          const userData = userDoc.data() as { role?: string };
           void router.push("/"+ userData?.role + "/home");
           return;
-        }
+        } // Pastikan user tidak null
+
+        if (loading) return <>loading...</>; // Jangan redirect saat masih loading
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
@@ -41,8 +38,7 @@ export default function Home() {
 
   // Tampilkan "Loading..." jika masih menunggu Firebase memuat user
   if (loading) return <p>Loading...</p>;
-  if (!user) return null;
-
+  
   const handleLogout = async () => {
     await signOut(auth);
   };

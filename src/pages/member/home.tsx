@@ -200,6 +200,7 @@ export default function HomePage() {
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
                 <div>
                 {posts.map((post) => (
+
                 <Dialog key={post.id}>
                   <DialogTrigger asChild>
                     <button className="w-[600px] text-left border-b-[1px] py-2 transition-all duration-300 hover:bg-gray-100 active:scale-95">
@@ -212,6 +213,7 @@ export default function HomePage() {
                           </div>
                           <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                         </div>
+                        <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>
                     </button>
                   </DialogTrigger>
@@ -241,6 +243,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
         </Layout>
       // </div>
   );

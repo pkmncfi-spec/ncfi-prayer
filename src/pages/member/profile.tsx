@@ -1,7 +1,6 @@
 "use client";
 
-import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { LogOut } from "lucide-react";
 import { useAuth } from "~/context/authContext";
@@ -11,6 +10,7 @@ import Head from "next/head";
 import { signOut } from "firebase/auth";
 import { auth } from "~/lib/firebase";
 import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 
 
 export default function ProfilePage() {

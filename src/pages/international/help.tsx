@@ -1,5 +1,4 @@
-import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Head from "next/head";

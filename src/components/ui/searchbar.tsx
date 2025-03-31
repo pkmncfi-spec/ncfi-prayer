@@ -1,19 +1,26 @@
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Input } from "~/components/ui/input";
 import { Search } from "lucide-react";
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, pageType: string) => void;
 }
 
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const pathname = usePathname();
+
+  // Menentukan jenis halaman berdasarkan URL
+  const pageType = pathname.includes("bookmarks") ? "bookmarks" : "search";
 
   const handleSearch = (searchQuery: string) => {
     if (searchQuery.trim()) {
-      onSearch(searchQuery.trim());
-      setRecentSearches((prev) => [searchQuery, ...prev.filter(q => q !== searchQuery)].slice(0, 5));
+      onSearch(searchQuery.trim(), pageType);
+      if (pageType === "search") {
+        setRecentSearches((prev) => [searchQuery, ...prev.filter(q => q !== searchQuery)].slice(0, 5));
+      }
       setQuery(""); // Membersihkan search bar setelah pencarian
     }
   };
@@ -31,14 +38,14 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={20} />
         <Input
           type="text"
-          placeholder="Search..."
+          placeholder={pageType === "search" ? "Search by region..." : "Search bookmarks..."}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           className="pl-10 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
         />
       </div>
-      {recentSearches.length > 0 && (
+      {pageType === "search" && recentSearches.length > 0 && (
         <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-md p-2">
           <p className="text-gray-600 text-sm mb-1">Recent Searches:</p>
           <ul>

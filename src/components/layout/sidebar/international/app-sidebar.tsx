@@ -43,13 +43,13 @@ import {
 
 // Menu items.
 const items = [
-  { title: "Home", url: "/member/home", icon: Home },
-  { title: "Search", url: "/member/search", icon: Search },
-  { title: "Bookmarks", url: "/member/bookmarks", icon: Bookmark },
-  { title: "Notification", url: "/member/notification", icon: Bell },
-  { title: "Help", url: "/member/help", icon: Info },
-  { title: "Profile", url: "/member/profile", icon: User },
-  { title: "Request", url: "/member/request", icon: Send },
+  { title: "Home", url: "/international/home", icon: Home },
+  { title: "Search", url: "/international/search", icon: Search },
+  { title: "Bookmarks", url: "/international/bookmarks", icon: Bookmark },
+  { title: "Notification", url: "/international/notification", icon: Bell },
+  { title: "Help", url: "/international/help", icon: Info },
+  { title: "Profile", url: "/international/profile", icon: User },
+  { title: "Request", url: "/international/request", icon: Send },
   { title: "Log Out", url: "/login", icon: LogOut },
 ];
 

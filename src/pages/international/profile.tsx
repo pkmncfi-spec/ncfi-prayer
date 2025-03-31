@@ -1,7 +1,6 @@
 "use client";
 
-import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { LogOut } from "lucide-react";
 import { useAuth } from "~/context/authContext";

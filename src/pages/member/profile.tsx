@@ -10,6 +10,7 @@ import Head from "next/head";
 import { signOut } from "firebase/auth";
 import { auth } from "~/lib/firebase";
 import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 
 
 export default function ProfilePage() {

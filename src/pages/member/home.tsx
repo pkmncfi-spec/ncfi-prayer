@@ -21,6 +21,8 @@ import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import Image from 'next/image';
 import Head from "next/head";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "~/components/ui/dialog";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 
 const db = getFirestore(app);
@@ -31,6 +33,7 @@ export default function HomePage() {
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -125,6 +128,12 @@ export default function HomePage() {
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
 
+  const toggleBookmark = (postId: string) => {
+    setBookmarkedPosts((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    );
+  };
+
   return (
         <Layout>
           <Head>
@@ -191,27 +200,51 @@ export default function HomePage() {
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
                 <div>
                 {posts.map((post) => (
-                  <div key={post.id} className="border-b-[1px] py-2">
-                    <button className="w-[600px] text-left">
-                    <div className="grid grid-cols-[40px_1fr] items-start">
-                      <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
-                      <div className="pl-4">
-                        <div className="flex gap-1 items-center">
-                          <p className="font-semibold">{post.name}</p>
-                          <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
+
+                <Dialog key={post.id}>
+                  <DialogTrigger asChild>
+                    <button className="w-[600px] text-left border-b-[1px] py-2 transition-all duration-300 hover:bg-gray-100 active:scale-95">
+                      <div className="grid grid-cols-[40px_1fr] items-start">
+                        <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                        <div className="pl-4">
+                          <div className="flex gap-1 items-center">
+                            <p className="font-semibold">{post.name}</p>
+                            <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
+                          </div>
+                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                         </div>
                         <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>
-                    </div>
                     </button>
-                  </div>
-                  ))}
+                  </DialogTrigger>
+                  <DialogContent className="flex flex-col w-full max-w-[600px] ml-24 border min-h-screen">
+                    <div className="bg-white p-8 rounded-lg max-w-[598px] h-[750px] overflow-y-auto flex flex-col">
+                      <DialogHeader className="flex justify-between items-center w-full">
+                        <div className="flex items-center space-x-2 w-full justify-between">
+                          <DialogTitle className="font-serif text-lg">{post.name}'s Prayer</DialogTitle>
+                          <button onClick={() => toggleBookmark(post.id)}>
+                            {bookmarkedPosts.includes(post.id) ? (
+                              <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />
+                            ) : (
+                              <Bookmark className="w-6 h-6 text-gray-500" />
+                            )}
+                          </button>
+                        </div>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-y-auto">
+                        <DialogDescription className="break-words font-serif">
+                          {post.text}
+                        </DialogDescription>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ))}
                 </div>
-                </div>
+              </div>
             </div>
 
         </Layout>
-
       // </div>
   );
 }

@@ -93,7 +93,13 @@ export default function RegisterPage() {
             const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
             if(userCredential){
                 const users = userCredential.user;
-                await sendEmailVerification(users);
+                try{
+                    await sendEmailVerification(users);
+                }
+                catch(e){
+                    alert("Error sending email verification:", e);
+                    return null;
+                }
 
                 await setDoc(doc(db, "users", users.uid), {
                     name: values.name,
@@ -105,6 +111,7 @@ export default function RegisterPage() {
                     gender: values.gender,
                     role: "guest"
                 });
+
                 await signOut(auth);
                 
                 alert("Register successful!");

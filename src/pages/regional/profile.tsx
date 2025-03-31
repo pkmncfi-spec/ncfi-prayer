@@ -34,12 +34,6 @@ export default function ProfilePage() {
       }
     };
   
-    const posts = [
-      { id: 1, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-      { id: 2, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-      { id: 3, author: fullName, date: "1 Jan 30", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    ];
-  
 
   return (
     <Layout>

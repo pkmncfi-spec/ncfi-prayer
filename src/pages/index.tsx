@@ -38,7 +38,7 @@ export default function Home() {
 
   // Tampilkan "Loading..." jika masih menunggu Firebase memuat user
   if (loading) return <p>Loading...</p>;
-  
+
   const handleLogout = async () => {
     await signOut(auth);
   };

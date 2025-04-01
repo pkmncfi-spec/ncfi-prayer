@@ -12,36 +12,32 @@ import { Separator } from "~/components/ui/separator";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 
-const db = getFirestore(app);
+// const db = getFirestore(app);
 
 export default function Home() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
   
-  useEffect(() => {
-    async function userRole() {
-      try{
-        if(user){
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          const userData = userDoc.data() as { role?: string };
-          void router.push("/"+ userData?.role + "/home");
-          return;
-        } // Pastikan user tidak null
+  // useEffect(() => {
+  //   async function userRole() {
+  //     try{
+  //       if(user){
+  //         const userDoc = await getDoc(doc(db, "users", user.uid));
+  //         const userData = userDoc.data() as { role?: string };
+  //         void router.push("/"+ userData?.role + "/home");
+  //         return;
+  //       } // Pastikan user tidak null
 
-        if (loading) return <>loading...</>; // Jangan redirect saat masih loading
-      } catch (error) {
-        console.error("Error fetching user role:", error);
-      }
-    }
-    void userRole();
-  }, [user, loading, router]);
+  //       if (loading) return <>loading...</>; // Jangan redirect saat masih loading
+  //     } catch (error) {
+  //       console.error("Error fetching user role:", error);
+  //     }
+  //   }
+  //   void userRole();
+  // }, [user, loading, router]);
 
   // Tampilkan "Loading..." jika masih menunggu Firebase memuat user
-  if (loading) return <p>Loading...</p>;
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  };
+  // if (loading) return <p>Loading...</p>;
 
   return (
     <div className="min-h-screen bg-gray-100">

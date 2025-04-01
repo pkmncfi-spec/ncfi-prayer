@@ -19,7 +19,6 @@ export default function SearchPage() {
       setRecentSearches([query, ...recentSearches]);
     }
     
-    // Simulasi pencarian (gantilah dengan pencarian sebenarnya)
     const results = mockSearchFunction(query);
     setSearchResults(results);
   };

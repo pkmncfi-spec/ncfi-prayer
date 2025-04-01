@@ -9,6 +9,7 @@ import { getAuth, type User } from "firebase/auth";
 import Cookies from "js-cookie";
 
 import "~/styles/globals.css";
+import LoadingBar from "~/components/loadingBar";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
     useEffect(() => {
@@ -35,6 +36,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
   return (
       <AuthProvider>
+          <LoadingBar/>
           <div className={GeistSans.className}>
               <Component {...pageProps} />
           </div>

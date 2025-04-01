@@ -23,15 +23,15 @@ function MainLayout({ children }: { children: ReactNode }) {
   console.log("Sidebar open:", isMobile);
 
   return (
-    <div className="flex w-full min-h-screen transition-all duration-300">
+    <div className="flex w-full min-h-screen ">
   {/* Wrapper Sidebar */}
-  <aside className={`border-r min-h-screen fixed left-0 top-0 transition-all duration-300 ${isOpen ? "w-64" : "w-0"}`}>
+  <aside className={`border-r min-h-screen fixed left-0 top-0  ${isOpen ? "w-64" : "w-0"}`}>
     <AppSidebar />
   </aside>
 
   {/* Wrapper Konten */}
   <div
-    className={`flex flex-1 transition-all duration-300 ${
+    className={`flex flex-1  ${
       isOpen ? "ml-64" : "ml-0"
     } justify-center`}
   >

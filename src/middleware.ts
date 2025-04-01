@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
+import path from "path";
 
 type VerifyTokenOutput = inferRouterOutputs<AppRouter>["auth"]["verifyToken"];
 
@@ -12,24 +13,19 @@ export async function middleware(request: NextRequest) {
   if (!token) {
     console.warn("No auth token found in cookies");
     return NextResponse.redirect(new URL("/login", request.url));
-  }
+  }  
 
   try {
+    const pathname = request.nextUrl.pathname;
+
+    if (token && pathname.startsWith("/login")) {
+      console.warn("Auth token is undefined");
+      return NextResponse.redirect(new URL("/regional/home", request.url));
+    }
     // Verify the token using the Edge-compatible function
     const userData: VerifyTokenOutput = await verifyTokenOnEdge(token);
 
-    if (userData && request.url === "/") {
-      console.warn("Invalid or expired token");
-      return NextResponse.redirect(new URL("/member/home", request.url));
-    }
-
-    // if(userData.isVerified === false) {
-    //   return NextResponse.redirect(new URL("/unverified", request.url));
-    // }
-    console.log("User data:", userData);
-    console.log("User data:", userData.isVerified);
-
-    const pathname = request.nextUrl.pathname;
+    console.log( "asdasda", request.nextUrl.pathname);
 
     // Redirect guests trying to access restricted areas
     if (pathname.startsWith("/member") && userData.role !== "member") {
@@ -48,12 +44,16 @@ export async function middleware(request: NextRequest) {
       console.warn("Unauthorized access attempt by non-guest user");
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
+    else if (pathname.startsWith("/login") && userData) {
+      console.warn("Unauthorized access attempt by non-guest user");
+      return NextResponse.redirect(new URL("/regional/home", request.url));
+    }
 
     // Allow the request to proceed
     return NextResponse.next();
   } catch (error) {
     console.error("Auth verification failed:", error);
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 }
 

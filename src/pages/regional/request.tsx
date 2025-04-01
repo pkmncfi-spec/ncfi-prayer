@@ -21,6 +21,7 @@ export default function RequestPage() {
   const [contentAuthor, setContentAuthor] = useState("");
   const [postId, setPostId] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [postDate, setPostDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -96,13 +97,24 @@ export default function RequestPage() {
       setContentAuthor(selectedPost.name);
       setPostId(selectedPost.id);
       setSheetOpen(true); // Open the sheet
+      setPostDate(selectedPost.createdAt); // Set the post date
     }
   };
 
   const acceptPrayer = async (postId: string) => {
     try {
-      await updateDoc(doc(db, "posts", postId), { status: "posted" });
+      await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "regional" });
       setSheetOpen(false); // Close the sheet after accepting
+      console.log("Prayer request accepted!");
+    } catch (error) {
+      console.error("Error accepting prayer request:", error);
+    }
+  };
+
+  const rejectPrayer = async (postId: string) => {
+    try {
+      await updateDoc(doc(db, "posts", postId), { status: "rejected" });
+      setSheetOpen(false); // Close the sheet after rejecting
       console.log("Prayer request accepted!");
     } catch (error) {
       console.error("Error accepting prayer request:", error);
@@ -167,7 +179,7 @@ export default function RequestPage() {
                           <div>
                             <div className="flex gap-1 items-center">
                               <p className="flex font-semibold">{contentAuthor}</p>
-                              <p className="text-muted-foreground">&#x2022; {formatDate(new Date())}</p>
+                              <p className="text-muted-foreground">&#x2022; {formatDate(postDate)}</p>
                             </div>
                             <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5 mb-5">{content}</p>
                           </div>
@@ -176,7 +188,7 @@ export default function RequestPage() {
                       <SheetFooter className="">
                       <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 mr-4 pr-6">
                         <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Accept Prayer</Button>
-                        <Button  className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
+                        <Button onClick={() => rejectPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
                         <Button  className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
                       </div>
                       </SheetFooter>

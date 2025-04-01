@@ -10,6 +10,7 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -20,16 +21,19 @@ import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import Image from 'next/image';
 import Head from "next/head";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "~/components/ui/dialog";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 
 const db = getFirestore(app);
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt?: string }>>([]);
   const [text, setText] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -39,38 +43,51 @@ export default function HomePage() {
         const regional = (userDoc.data() as { regional?: string })?.regional;
         console.log("User Regional:", regional);
 
+        if (!regional && tab === "regional") {
+          console.warn("Regional value is undefined for the user.");
+          setPosts([]); // Clear posts if regional is undefined
+          return;
+        }
+
         const queryCondition =
           tab === "regional"
             ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"),where("regional", "==", regional),where("postFor", "==", "regional"))
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
-        const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
-          const postsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...(doc.data() as { text: string; uid: string;}),
-          }));
-
-          const usersMap: Record<string, string> = {};
-          Promise.all(
-            postsData.map(async (post) => {
-              if (!post.uid) return;
-              if (!usersMap[post.uid]) {
-                const userDoc = await getDoc(doc(db, "users", post.uid));
-                usersMap[post.uid] = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
-              }
-            })
-          )
-            .then(() => {
-              const enrichedPosts = postsData.map((post) => ({
-                ...post,
-                name: usersMap[post.uid] ?? "Unknown",
-              }));
-              setPosts(enrichedPosts);
-            })
-            .catch((error) => {
-              console.error("Error fetching user data:", error);
+            const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
+              const postsData = querySnapshot.docs.map((doc) => {
+                const data = doc.data() as { text: string; uid: string; createdAt?: any };
+                return {
+                  id: doc.id,
+                  text: data.text,
+                  uid: data.uid,
+                  createdAt: data.createdAt?.toDate() || null, // Convert Firestore Timestamp to Date or set to null
+                };
+              });
+            
+              const usersMap: Record<string, string> = {};
+              Promise.all(
+                postsData.map(async (post) => {
+                  if (!post.uid) return;
+                  if (!usersMap[post.uid]) {
+                    const userDoc = await getDoc(doc(db, "users", post.uid));
+                    usersMap[post.uid] = userDoc.exists()
+                      ? (userDoc.data() as { name: string }).name
+                      : "Unknown";
+                  }
+                })
+              )
+                .then(() => {
+                  const enrichedPosts = postsData.map((post) => ({
+                    ...post,
+                    name: usersMap[post.uid] ?? "Unknown",
+                  }));
+                  setPosts(enrichedPosts);
+                })
+                .catch((error) => {
+                  console.error("Error fetching user data:", error);
+                });
             });
-        });
 
         return unsubscribe;
       } catch (error) {
@@ -79,7 +96,7 @@ export default function HomePage() {
     };
 
     void fetchPosts();
-  }, [user, loading, router, tab]);
+  }, [user, loading, tab]);
 
 
   const handlePost = async () => {
@@ -94,15 +111,29 @@ export default function HomePage() {
       createdAt: new Date(),
       status: "posted",
       regional: (currentUser.data() as { regional?: string })?.regional,
-      postFor: "regional"
+      postFor: "regional",
+      country: (currentUser.data() as { country?: string })?.country,
     });
 
     setText(""); // Reset input setelah post
     alert("Post successful!");
   };
+  function formatDate(date: Date): string {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }
 
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
+
+  const toggleBookmark = (postId: string) => {
+    setBookmarkedPosts((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    );
+  };
 
   return (
         <Layout>
@@ -112,7 +143,7 @@ export default function HomePage() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-            <div className="fixed w-full bg-white max-w-[598px]">
+            <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
                 <div className="flex flex-cols mt-2 mb-2">
                   <div className="">
@@ -140,7 +171,7 @@ export default function HomePage() {
               <Separator className="my-4 w-full" />
               <div>
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
+                  <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
@@ -157,7 +188,7 @@ export default function HomePage() {
                               className="resize-none min-h-[600px] border-none"/>
                           </div>
                           <SheetClose>
-                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Send Prayer</Button>
+                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Request Prayer</Button>
                           </SheetClose>
                         </div>
                       </SheetDescription>
@@ -169,24 +200,53 @@ export default function HomePage() {
             </div>
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
                 <div>
-                  {posts.map((post) => (
-                    <div key={post.id} className="border-b-[1px] py-2">
-                      <button className="w-[600px] text-left">
+                {posts.map((post) => (
+
+                <Dialog key={post.id}>
+                  <DialogTrigger asChild>
+                    <button className="w-[600px] text-left border-b-[1px] py-2 transition-all duration-300 hover:bg-gray-100 active:scale-95">
                       <div className="grid grid-cols-[40px_1fr] items-start">
                         <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                         <div className="pl-4">
-                          <p className="font-semibold">{post.name}</p>
-                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
+                          <div className="flex gap-1 items-center">
+                            <p className="font-semibold">{post.name}</p>
+                            <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
+                          </div>
+                          <p className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-6">{post.text}</p>
+                          <p className="text-blue-500">...see more</p>
                         </div>
                       </div>
-                      </button>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="flex flex-col w-full max-w-[600px] ml-24 border min-h-screen">
+                    <div className="bg-white p-8 rounded-lg max-w-[598px] h-[750px] overflow-y-auto flex flex-col">
+                      <DialogHeader className="flex justify-between items-center w-full">
+                        <div className="flex items-center space-x-2 w-full justify-between">
+                          <DialogTitle className="font-serif text-lg">{post.name}'s Prayer</DialogTitle>
+                          <button onClick={() => toggleBookmark(post.id)}>
+                            {bookmarkedPosts.includes(post.id) ? (
+                              <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />
+                            ) : (
+                              <Bookmark className="w-6 h-6 text-gray-500" />
+                            )}
+                          </button>
+                        </div>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-y-auto">
+                        <DialogDescription className="break-words font-serif">
+                          {post.text}
+                        </DialogDescription>
+                      </div>
                     </div>
-                    
-                  ))}
+                  </DialogContent>
+                </Dialog>
+              ))}
                 </div>
-                </div>
+              </div>
             </div>
+
         </Layout>
+      // </div>
   );
 }
 

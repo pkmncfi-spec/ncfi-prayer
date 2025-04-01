@@ -111,7 +111,8 @@ export default function HomePage() {
       createdAt: new Date(),
       status: "requested",
       regional: (currentUser.data() as { regional?: string })?.regional,
-      postFor: "regional"
+      postFor: "regional",
+      country: (currentUser.data() as { country?: string })?.country,
     });
 
     setText(""); // Reset input setelah post
@@ -173,7 +174,7 @@ export default function HomePage() {
                   <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
-                      <SheetTitle>Post Prayer</SheetTitle>
+                      <SheetTitle>Request Prayer</SheetTitle>
                       <SheetDescription>
                         <div className="grid grid-cols-[40px_1fr] items-start">
                           <div>
@@ -211,9 +212,9 @@ export default function HomePage() {
                             <p className="font-semibold">{post.name}</p>
                             <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
                           </div>
-                          <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
+                          <p className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-6">{post.text}</p>
+                          <p className="text-blue-500">...see more</p>
                         </div>
-                        <p className="whitespace-normal break-all overflow-hidden pr-10">{post.text}</p>
                       </div>
                     </button>
                   </DialogTrigger>

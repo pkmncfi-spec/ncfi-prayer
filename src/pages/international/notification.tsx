@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getFirestore, collection, query, onSnapshot, orderBy, getDoc, doc } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import { Separator } from "~/components/ui/separator";
-import Layout from "~/components/layout/sidebar";
+import Layout from "~/components/layout/sidebar-international";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "~/components/ui/dialog";
 import Image from "next/image";

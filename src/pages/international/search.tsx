@@ -1,8 +1,9 @@
-import Layout from "~/components/layout/sidebar-member";
+import Layout from "~/components/layout/sidebar-international";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import Image from 'next/image';
 import SearchBar from "~/components/ui/searchbar";
 import { useState } from "react";
+import { Separator } from "~/components/ui/separator";
 
 export default function SearchPage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -18,7 +19,6 @@ export default function SearchPage() {
       setRecentSearches([query, ...recentSearches]);
     }
     
-    // Simulasi pencarian (gantilah dengan pencarian sebenarnya)
     const results = mockSearchFunction(query);
     setSearchResults(results);
   };

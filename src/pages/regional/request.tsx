@@ -29,6 +29,7 @@ export default function RequestPage() {
         if (!user) return; // Ensure user is not null
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const regional = (userDoc.data() as { regional?: string })?.regional;
+        const country = (userDoc.data() as { country?: string })?.country;
         console.log("User Regional:", regional);
   
         const queryCondition = query(
@@ -36,7 +37,8 @@ export default function RequestPage() {
           orderBy("createdAt", "desc"),
           where("status", "==", "requested"),
           where("regional", "==", regional),
-          where("postFor", "==", "regional")
+          where("postFor", "==", "regional"),
+          where("country", "==", country)
         );
   
         const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
@@ -103,7 +105,7 @@ export default function RequestPage() {
 
   const acceptPrayer = async (postId: string) => {
     try {
-      await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "regional" });
+      await updateDoc(doc(db, "posts", postId), { status: "posted", uid: user?.uid });
       setSheetOpen(false); // Close the sheet after accepting
       console.log("Prayer request accepted!");
     } catch (error) {
@@ -188,8 +190,8 @@ export default function RequestPage() {
                       <SheetFooter className="">
                       <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 mr-4 pr-6">
                         <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Accept Prayer</Button>
-                        <Button onClick={() => rejectPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
-                        <Button  className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
+                        <Button onClick={() => editPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
+                        <Button onClick={() => rejectPrayer(postId)} className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
                       </div>
                       </SheetFooter>
                 </SheetContent>

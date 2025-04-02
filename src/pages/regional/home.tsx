@@ -171,7 +171,7 @@ export default function HomePage() {
               <Separator className="my-4 w-full" />
               <div>
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
+                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className}`}>
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
@@ -188,7 +188,7 @@ export default function HomePage() {
                               className="resize-none min-h-[600px] border-none"/>
                           </div>
                           <SheetClose>
-                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Request Prayer</Button>
+                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Post Prayer</Button>
                           </SheetClose>
                         </div>
                       </SheetDescription>
@@ -201,10 +201,9 @@ export default function HomePage() {
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
                 <div>
                 {posts.map((post) => (
-
                 <Dialog key={post.id}>
                   <DialogTrigger asChild>
-                    <button className="w-[600px] text-left border-b-[1px] py-2 transition-all duration-300 hover:bg-gray-100 active:scale-95">
+                    <button className="text-left border-b-[1px] w-full py-2 transition-all duration-300 hover:bg-gray-100 active:scale-95">
                       <div className="grid grid-cols-[40px_1fr] items-start">
                         <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                         <div className="pl-4">
@@ -218,22 +217,22 @@ export default function HomePage() {
                       </div>
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="flex flex-col w-full max-w-[600px] ml-24 border min-h-screen">
-                    <div className="bg-white p-8 rounded-lg max-w-[598px] h-[750px] overflow-y-auto flex flex-col">
+                  <DialogContent className={`flex flex-col ${GeistSans.className}`}>
+                    <div className="rounded-lg p-8 flex flex-col">
                       <DialogHeader className="flex justify-between items-center w-full">
                         <div className="flex items-center space-x-2 w-full justify-between">
-                          <DialogTitle className="font-serif text-lg">{post.name}'s Prayer</DialogTitle>
+                          <DialogTitle className="text-lg">{post.name}'s Prayer</DialogTitle>
                           <button onClick={() => toggleBookmark(post.id)}>
                             {bookmarkedPosts.includes(post.id) ? (
                               <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />
                             ) : (
-                              <Bookmark className="w-6 h-6 text-gray-500" />
+                              <Bookmark className="w-6 h-6 text-gray-600" />
                             )}
                           </button>
                         </div>
                       </DialogHeader>
                       <div className="flex-1 overflow-y-auto">
-                        <DialogDescription className="break-words font-serif">
+                        <DialogDescription className="break-words text-black overflow-y-auto max-h-[450px]">
                           {post.text}
                         </DialogDescription>
                       </div>

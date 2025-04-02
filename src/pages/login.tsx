@@ -37,6 +37,7 @@ import { useState } from "react";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { FirebaseError } from "firebase/app";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { a } from "node_modules/framer-motion/dist/types.d-B50aGbjN";
 
 const db = getFirestore(app);
 
@@ -58,7 +59,28 @@ export default function AuthPage() {
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
-        if (user) void router.push("/");
+        async function fetchUser(){
+            try {
+                if (!user?.uid) {
+                    throw new Error("User UID is undefined.");
+                }
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                const userData = userDoc.data() as { role?: string };
+    
+                if (!user?.emailVerified) {
+                    alert("Please verify your email before logging in.");
+                    void auth.signOut();
+                    await sendEmailVerification(user);
+                    setIsSubmitting(false);
+                    void router.push("/login");
+                    return;
+                }
+        
+                void router.push("/" + userData?.role + "/home");
+            } catch (error) {
+            }
+        }
+        void fetchUser();
     }, [user, loading, router, redirect]);
 
 
@@ -93,7 +115,7 @@ export default function AuthPage() {
             if (!user?.emailVerified) {
                 alert("Please verify your email before logging in.");
                 void auth.signOut();
-                sendEmailVerification(user);
+                await sendEmailVerification(user);
                 setIsSubmitting(false);
                 void router.push("/login");
                 return;

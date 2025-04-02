@@ -118,16 +118,6 @@ export default function ProfilePage() {
         console.error("Error accepting prayer request:", error);
       }
     }
-    
-    const shareInternational = async (id: string) => {
-      try {
-        await updateDoc(doc(db, "posts", id), { postFor: "international", status: "requested" });
-        setSheetOpen(false); // Close the sheet after accepting
-        console.log("Prayer request accepted!");
-      } catch (error) {
-        console.error("Error accepting prayer request:", error);
-      }
-    }
 
     const deletePrayer = async (id: string) => {
       try {
@@ -241,9 +231,8 @@ export default function ProfilePage() {
                         </div>
                       </SheetDescription>
                       <SheetFooter className="">
-                      <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 pr-6">
+                      <div className="flex items-center justify-between w-full max-w-[360px] right-5 fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 pr-6">
                         <Button onClick={() => editPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
-                        <Button onClick={() => shareInternational(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Share for International</Button>
                         <Button onClick={() => deletePrayer(postId)} className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Delete</Button>
                       </div>
                       </SheetFooter>

@@ -188,7 +188,7 @@ export default function HomePage() {
                               className="resize-none min-h-[600px] border-none"/>
                           </div>
                           <SheetClose>
-                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Post Prayer</Button>
+                            <Button className="fixed justify-center items-center right-4 bottom-3 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePost}>Request Prayer</Button>
                           </SheetClose>
                         </div>
                       </SheetDescription>

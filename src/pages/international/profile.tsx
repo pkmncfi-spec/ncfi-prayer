@@ -53,7 +53,7 @@ export default function ProfilePage() {
                     id: doc.id,
                     text: data.text,
                     uid: data.uid,
-                    createdAt: data.createdAt.toDate() || new Date(), // Convert Firestore Timestamp to Date
+                    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
                   };
                 });
         

@@ -184,6 +184,16 @@ export default function RequestPage() {
       console.error("Error accepting prayer request:", error);
     }
   };
+  
+  const editPrayer = async (id: string) => {
+      try {
+        await updateDoc(doc(db, "posts", id), { text: content });
+        setSheetOpen(false); 
+        console.log("Prayer request accepted!");
+      } catch (error) {
+        console.error("Error accepting prayer request:", error);
+      }
+    }
 
   return (
     <Layout>

@@ -81,6 +81,7 @@ export default function HomePage() {
                   const enrichedPosts = postsData.map((post) => ({
                     ...post,
                     name: usersMap[post.uid] ?? "Unknown",
+                    createdAt: post.createdAt ? post.createdAt.toISOString() : undefined, // Convert Date to string
                   }));
                   setPosts(enrichedPosts);
                 })

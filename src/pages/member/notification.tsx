@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getFirestore, collection, query, onSnapshot, orderBy, where } from "firebase/firestore";
+import { getFirestore, collection, query, onSnapshot, orderBy, where, Timestamp } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
@@ -46,7 +46,7 @@ export default function NotificationPage() {
             uid: data.uid ?? "",
             name: data.name ?? "Unknown",
             status: data.status ?? "",
-            createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore Timestamp to Date
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
           };
         });
         setNotifications(notificationsData);

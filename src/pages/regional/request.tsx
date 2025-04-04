@@ -2,7 +2,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Image from "next/image";
 import { app } from "~/lib/firebase";
-import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import Head from "next/head";
@@ -50,7 +50,7 @@ export default function RequestPage() {
               id: doc.id,
               text: data.text,
               uid: data.uid,
-              createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore Timestamp to Date
+              createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
             };
           });
   

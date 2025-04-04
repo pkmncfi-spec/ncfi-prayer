@@ -264,7 +264,7 @@ export default function HomePage() {
                     <div className="rounded-lg p-8 flex flex-col">
                       <DialogHeader className="flex justify-between items-center w-full">
                         <div className="flex items-center space-x-2 w-full justify-between">
-                          <DialogTitle className="text-lg">{post.name}'s Prayer</DialogTitle>
+                          <DialogTitle className="text-lg">{post.name}&#39;s Prayer</DialogTitle>
                           <button onClick={() => toggleBookmark(post.id)}>
                             {bookmarkedPosts.includes(post.id) ? (
                               <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />

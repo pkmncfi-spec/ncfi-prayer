@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs, Timestamp } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
@@ -61,7 +61,7 @@ export default function HomePage() {
                   id: doc.id,
                   text: data.text,
                   uid: data.uid,
-                  createdAt: data.createdAt?.toDate() || null, // Convert Firestore Timestamp to Date or set to null
+                  createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : null, // Safely convert Firestore Timestamp to Date or set to null
                 };
               });
             

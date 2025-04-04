@@ -161,7 +161,7 @@ export default function HomePage() {
 
       if (!querySnapshot.empty) {
         // If the post is already bookmarked, remove it
-        const bookmarkDocId = querySnapshot.docs[0].id;
+        const bookmarkDocId = querySnapshot.docs[0]?.id ?? "";
         await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
         setBookmarkedPosts((prev) => prev.filter((id) => id !== postId)); // Update state
       } else {

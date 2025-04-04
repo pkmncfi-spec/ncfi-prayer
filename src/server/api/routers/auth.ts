@@ -39,7 +39,7 @@ export const authRouter = createTRPCRouter({
         if (error instanceof z.ZodError) {
           throw new Error("Invalid user data format");
         }
-        if (error.message === "User not found") {
+        if (error instanceof Error && error.message === "User not found") {
           throw new Error("User not found in Firestore");
         }
         throw new Error("Invalid or expired token");

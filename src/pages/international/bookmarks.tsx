@@ -1,63 +1,82 @@
-import { Separator } from "~/components/ui/separator";
+import { useState, useEffect } from "react";
+import { collection, doc, getDoc, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { useAuth } from "~/context/authContext";
 import Layout from "~/components/layout/sidebar-international";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import Image from "next/image";
-import SearchBar from "~/components/ui/searchbar";
-import { useState, useEffect } from "react";
-import { Bookmark } from "lucide-react";
+import { Separator } from "~/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
+import { GeistSans } from "geist/font/sans";
 
-export default function SearchPage() {
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [bookmarked, setBookmarked] = useState<boolean[]>([]);
-  const [allBookmarkedItems, setAllBookmarkedItems] = useState<string[]>(["Prayer", "Faith", "Hope", "Love"]);
+const db = getFirestore();
 
-  const handleSearch = (query: string) => {
-    if (!query) return;
-
-    setHasSearched(true);
-
-    if (!recentSearches.includes(query)) {
-      setRecentSearches([query, ...recentSearches]);
-    }
-
-    const results = mockSearchFunction(query);
-    setSearchResults(results);
-  };
-
-  const mockSearchFunction = (query: string) => {
-    return allBookmarkedItems.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
-  };
+export default function BookmarksPage() {
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Array<{ id: string; text: string; createdAt: Date; name: string }>>([]);
+  const [selectedPost, setSelectedPost] = useState<{ id: string; text: string; createdAt: Date; name: string } | null>(null); // State for selected post
+  const { user } = useAuth();
 
   useEffect(() => {
-    setBookmarked(new Array(searchResults.length).fill(true));
-  }, [searchResults]);
+    const fetchBookmarkedPosts = async () => {
+      if (!user?.uid) return;
 
-  useEffect(() => {
-    setSearchResults(allBookmarkedItems);
-  }, []);
+      try {
+        // Query the bookmarks collection for the current user's bookmarks
+        const bookmarksQuery = query(
+          collection(db, "bookmarks"),
+          where("uid", "==", user.uid)
+        );
 
-  const toggleBookmark = (index: number) => {
-    setBookmarked((prev) => {
-      const newBookmarks = [...prev];
-      newBookmarks[index] = !newBookmarks[index];
-      return newBookmarks;
-    });
-    
-    setAllBookmarkedItems((prev) => {
-      const item = searchResults[index];
-      if (!item) return prev;
-      return prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item];
-    });
-  };
+        const unsubscribe = onSnapshot(bookmarksQuery, async (querySnapshot) => {
+          const postIds = querySnapshot.docs.map((doc) => doc.data().postId);
+
+          // Fetch the details of each bookmarked post
+          const posts = await Promise.all(
+            postIds.map(async (postId) => {
+              const postDoc = await getDoc(doc(db, "posts", postId));
+              if (postDoc.exists()) {
+                const postData = postDoc.data() as { text: string; createdAt: any; uid: string };
+                const userDoc = await getDoc(doc(db, "users", postData.uid));
+                const userName = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
+
+                return {
+                  id: postId,
+                  text: postData.text,
+                  createdAt: postData.createdAt?.toDate() || new Date(),
+                  name: userName,
+                };
+              }
+              return null;
+            })
+          );
+
+          // Filter out any null values (in case a post was deleted)
+          setBookmarkedPosts(posts.filter((post) => post !== null));
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error fetching bookmarked posts:", error);
+      }
+    };
+
+    fetchBookmarkedPosts();
+  }, [user]);
+
+  function formatDate(date: Date): string {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }
 
   return (
     <Layout>
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-        <div className="fixed w-full bg-white max-w-[598px]">
+        {/* Fixed Header */}
+        <div className="fixed w-full bg-white max-w-[598px] z-10">
           <div className="flex flex-col w-full items-center justify-center">
-            <div className="sticky top-3 bg-white w-full z-10 py-3">
+            <div className="sticky top-3 bg-white w-full z-10 mt-4">
               <div className="flex items-center justify-between px-4">
                 <SidebarTrigger />
                 <div className="flex flex-col items-center justify-center pr-7 w-full">
@@ -68,38 +87,45 @@ export default function SearchPage() {
               <div className="w-full h-4 border-b border-gray-300"></div>
             </div>
           </div>
+        </div>
+  
+        <div className="flex-1 mt-20 overflow-y-auto p-4">
+          {bookmarkedPosts.length === 0 && (
+            <p className="text-center text-gray-500">No bookmarked posts found.</p>
+          )}
 
-          <SearchBar onSearch={handleSearch} />
-          <Separator className="my-2" />
-
-          <div className="p-4">
-            {hasSearched && searchResults.length === 0 && (
-              <p className="text-center text-gray-500">Not Found</p>
-            )}
-
-            {searchResults.map((result, index) => (
-              bookmarked[index] && (
+          {bookmarkedPosts.map((post) => (
+            <Dialog key={post.id}>
+              <DialogTrigger asChild>
                 <div
-                  key={index}
-                  className="bg-white p-3 rounded-xl flex items-center border border-gray-300 shadow-sm mb-2 justify-between"
+                  className="bg-white p-3 rounded-xl flex items-center border border-gray-300 shadow-sm mb-2 justify-between cursor-pointer"
+                  onClick={() => setSelectedPost(post)} // Set the selected post
                 >
-                  <div className="flex-1">
-                    <p className="text-gray-700 text-sm">{result}</p>
-                    <a href="#" className="text-blue-500 text-xs">...click to see more</a>
+                <div className="grid grid-cols-[40px_1fr] items-start">
+                  <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full  mt-1" />
+                  <div>
+                    <div className="flex gap-1 items-center">
+                      <p className="font-semibold">{post.name}</p>
+                      <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
+                    </div>
+                    <p className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-6">{post.text}</p>
+                    <p className="text-blue-500">click to see more....</p>
                   </div>
-                  <button
-                    onClick={() => toggleBookmark(index)}
-                    className="p-1 rounded-full hover:bg-gray-100 flex justify-center items-center"
-                  >
-                    <Bookmark
-                      className={allBookmarkedItems.includes(result) ? "text-blue-500 fill-current" : "text-gray-500"}
-                      size={18}
-                    />
-                  </button>
                 </div>
-              )
-            ))}
-          </div>
+                </div>
+
+              </DialogTrigger>
+              <DialogContent className={`${GeistSans.className}`}>
+                <DialogHeader>
+                  <DialogTitle>{selectedPost?.name}</DialogTitle>
+                  <DialogDescription>
+                    <p className="text-black">{selectedPost?.text}</p>
+                    <p className="text-gray-500 mt-2">{selectedPost?.createdAt.toLocaleString()}</p>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          ))}
         </div>
       </div>
     </Layout>

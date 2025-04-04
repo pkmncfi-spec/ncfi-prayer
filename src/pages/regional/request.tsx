@@ -2,7 +2,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Image from "next/image";
 import { app } from "~/lib/firebase";
-import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import Head from "next/head";
@@ -11,11 +11,13 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import Layout from "~/components/layout/sidebar-regional";
 import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
+import { read } from "fs";
+import { createDecipheriv } from "crypto";
 
 const db = getFirestore(app);
 
 export default function RequestPage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date; uid: string }>>([]);
   const {user, loading} = useAuth();
   const [content, setContent] = useState("");
   const [contentAuthor, setContentAuthor] = useState("");
@@ -43,7 +45,7 @@ export default function RequestPage() {
   
         const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
           const postsData = querySnapshot.docs.map((doc) => {
-            const data = doc.data() as { text: string; uid: string; createdAt: unknown };
+            const data = doc.data() as { text: string; uid: string; createdAt: unknown;};
             return {
               id: doc.id,
               text: data.text,
@@ -100,12 +102,47 @@ export default function RequestPage() {
       setPostId(selectedPost.id);
       setSheetOpen(true); // Open the sheet
       setPostDate(selectedPost.createdAt); // Set the post date
+
     }
   };
 
+  function fetchUserName(uid: string): Promise<string> {
+    return getDoc(doc(db, "users", uid)).then((docSnapshot) => {
+      if (docSnapshot.exists()) {
+        return (docSnapshot.data() as { name: string }).name;
+      }
+      return "Unknown";
+    });
+  }
+
   const acceptPrayer = async (postId: string) => {
     try {
+      // Update the prayer request status to "posted"
       await updateDoc(doc(db, "posts", postId), { status: "posted", uid: user?.uid });
+  
+      if (user?.uid) {
+        const post = posts.find((p) => p.id === postId);
+        if (post?.uid) {
+          // Fetch the user's name
+          const userName = await fetchUserName(user.uid);
+  
+          // Add a notification for the user who submitted the prayer request
+          await addDoc(collection(db, "notifications"), {
+            uid: post.uid, // User ID of the prayer request author
+            text: "Prayer request posted", // Notification message
+            status: "posted", // Status of the prayer request
+            postId: postId, // ID of the prayer request post
+            read: false, // Mark the notification as unread
+            createdAt: new Date(), // Timestamp of the notification
+            name: userName, // Resolved name of the user
+          });
+        } else {
+          console.error("Post UID is undefined");
+        }
+      } else {
+        console.error("User UID is undefined");
+      }
+  
       setSheetOpen(false); // Close the sheet after accepting
       console.log("Prayer request accepted!");
     } catch (error) {
@@ -115,8 +152,33 @@ export default function RequestPage() {
 
   const rejectPrayer = async (postId: string) => {
     try {
-      await updateDoc(doc(db, "posts", postId), { status: "rejected" });
-      setSheetOpen(false); // Close the sheet after rejecting
+      // Update the prayer request status to "posted"
+      await updateDoc(doc(db, "posts", postId), { status: "rejected", uid: user?.uid });
+  
+      if (user?.uid) {
+        const post = posts.find((p) => p.id === postId);
+        if (post?.uid) {
+          // Fetch the user's name
+          const userName = await fetchUserName(user.uid);
+  
+          // Add a notification for the user who submitted the prayer request
+          await addDoc(collection(db, "notifications"), {
+            uid: post.uid, // User ID of the prayer request author
+            text: "Prayer request posted", // Notification message
+            status: "posted", // Status of the prayer request
+            postId: postId, // ID of the prayer request post
+            read: false, // Mark the notification as unread
+            createdAt: new Date(), // Timestamp of the notification
+            name: userName, // Resolved name of the user
+          });
+        } else {
+          console.error("Post UID is undefined");
+        }
+      } else {
+        console.error("User UID is undefined");
+      }
+  
+      setSheetOpen(false); // Close the sheet after accepting
       console.log("Prayer request accepted!");
     } catch (error) {
       console.error("Error accepting prayer request:", error);

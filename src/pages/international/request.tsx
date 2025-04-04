@@ -2,7 +2,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import * as React from "react";
 import Image from "next/image";
 import { app } from "~/lib/firebase";
-import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "~/context/authContext";
 import Head from "next/head";
@@ -16,7 +16,7 @@ import { Textarea } from "~/components/ui/textarea";
 const db = getFirestore(app);
 
 export default function RequestPage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date; uid: string }>>([]);
   const {user, loading} = useAuth();
   const [content, setContent] = useState("");
   const [contentAuthor, setContentAuthor] = useState("");
@@ -112,10 +112,28 @@ export default function RequestPage() {
     }
   };
 
+  function fetchUserName(uid: string): Promise<string> {
+    return getDoc(doc(db, "users", uid)).then((docSnapshot) => {
+      if (docSnapshot.exists()) {
+        return (docSnapshot.data() as { name: string }).name;
+      }
+      return "Unknown";
+    });
+  }
+
   const acceptPrayer = async (postId: string) => {
     try {
       await updateDoc(doc(db, "posts", postId), { status: "posted" });
-      setSheetOpen(false); // Close the sheet after accepting
+      await addDoc(collection(db, "notifications"), {
+        uid: posts.find((post) => post.id === postId)?.uid ?? "Unknown", // User ID of the prayer request author
+        text: "Prayer request posted", // Notification message
+        status: "posted", // Status of the prayer request
+        postId: postId, // ID of the prayer request post
+        read: false, // Mark the notification as unread
+        createdAt: new Date(), // Timestamp of the notification
+        name: await fetchUserName(posts.find((post) => post.id === postId)?.uid ?? "Unknown"), // Resolved name of the user
+      });
+      setSheetOpen(false); // Close the sheet after rejecting
       console.log("Prayer request accepted!");
     } catch (error) {
       console.error("Error accepting prayer request:", error);
@@ -125,6 +143,15 @@ export default function RequestPage() {
   const rejectPrayer = async (postId: string) => {
     try {
       await updateDoc(doc(db, "posts", postId), { status: "rejected" });
+      await addDoc(collection(db, "notifications"), {
+        uid: posts.find((post) => post.id === postId)?.uid ?? "Unknown", // User ID of the prayer request author
+        text: "Prayer request rejected", // Notification message
+        status: "rejected", // Status of the prayer request
+        postId: postId, // ID of the prayer request post
+        read: false, // Mark the notification as unread
+        createdAt: new Date(), // Timestamp of the notification
+        name: await fetchUserName(posts.find((post) => post.id === postId)?.uid ?? "Unknown"), // Resolved name of the user
+      });
       setSheetOpen(false); // Close the sheet after rejecting
       console.log("Prayer request accepted!");
     } catch (error) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
@@ -95,6 +95,24 @@ export default function HomePage() {
       }
     };
 
+    const fetchBookmarkedPosts = async () => {
+      if(user?.uid === undefined) return;
+
+      const bookmarksQuery = query(
+        collection(db, "bookmarks"),
+        where("uid", "==", user.uid)
+      );
+
+      const unsubscribe = onSnapshot(bookmarksQuery, (querySnapshot) => {
+        const bookmarkedIds = querySnapshot.docs.map((doc) => doc.data().postId);
+        setBookmarkedPosts(bookmarkedIds); // Update the state with bookmarked post IDs
+      });
+
+      return unsubscribe;
+    };
+
+    void fetchBookmarkedPosts();
+
     void fetchPosts();
   }, [user, loading, tab]);
 
@@ -129,10 +147,35 @@ export default function HomePage() {
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
 
-  const toggleBookmark = (postId: string) => {
-    setBookmarkedPosts((prev) =>
-      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
-    );
+  const toggleBookmark = async (postId: string) => {
+    if (!user?.uid) return;
+
+    try {
+      const bookmarksQuery = query(
+        collection(db, "bookmarks"),
+        where("uid", "==", user.uid),
+        where("postId", "==", postId)
+      );
+
+      const querySnapshot = await getDocs(bookmarksQuery);
+
+      if (!querySnapshot.empty) {
+        // If the post is already bookmarked, remove it
+        const bookmarkDocId = querySnapshot.docs[0].id;
+        await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
+        setBookmarkedPosts((prev) => prev.filter((id) => id !== postId)); // Update state
+      } else {
+        // If the post is not bookmarked, add it
+        await addDoc(collection(db, "bookmarks"), {
+          uid: user.uid,
+          postId: postId,
+          createdAt: new Date(),
+        });
+        setBookmarkedPosts((prev) => [...prev, postId]); // Update state
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
   };
 
   return (

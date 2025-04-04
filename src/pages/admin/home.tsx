@@ -3,7 +3,7 @@ import { getFirestore, collection, query, onSnapshot, getDoc, doc, orderBy } fro
 import { app } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
-import Layout from "~/components/layout/sidebar-member";
+import Layout from "~/components/layout/sidebar-admin";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";

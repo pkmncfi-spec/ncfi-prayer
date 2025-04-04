@@ -50,7 +50,7 @@ const items = [
   { title: "Help", url: "/admin/help", icon: Info },
   { title: "Profile", url: "/admin/profile", icon: User },
   { title: "Request", url: "/admin/request", icon: Send },
-  { title: "Log Out", url: "/login", icon: LogOut },
+  { title: "Log Out", url: "/admin/home", icon: LogOut },
 ];
 
 const regions = [

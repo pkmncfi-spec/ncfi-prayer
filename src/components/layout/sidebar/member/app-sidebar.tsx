@@ -46,7 +46,7 @@ const items = [
   { title: "Bookmarks", url: "/member/bookmarks", icon: Bookmark },
   { title: "Notification", url: "/member/notification", icon: Bell },
   { title: "Help", url: "/member/help", icon: Info },
-  { title: "Log Out", url: "/login", icon: LogOut },
+  { title: "Log Out", url: "/member/home", icon: LogOut },
 ];
 
 const regions = [

@@ -97,7 +97,7 @@ export default function RegisterPage() {
                     await sendEmailVerification(users);
                 }
                 catch(e){
-                    alert("Error sending email verification:", e);
+                    alert("Error sending email verification: " + String(e));
                     return null;
                 }
 

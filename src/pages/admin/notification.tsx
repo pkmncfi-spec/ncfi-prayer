@@ -103,16 +103,16 @@ export default function NotificationPage() {
           <Dialog>
             <DialogTrigger asChild>
               <button className="bg-white p-4 rounded-2xl w-full text-left transition-all duration-300 hover:bg-gray-100 active:scale-95 border border-gray-300">
-                <p className="text-sm font-semibold">Today's devotion has been posted</p>
+                <p className="text-sm font-semibold">Today&#39;s devotion has been posted</p>
                  <span className="text-blue-500 text-xs underline">Click to see more..</span>
                    </button>
             </DialogTrigger>
               <DialogContent className="flex flex-col w-full max-w-[600px] ml-24 border min-h-screen">
                 <div className="bg-white p-8 rounded-lg max-w-[598px]">
                   <DialogHeader>
-                    <DialogTitle>Today's Devotion</DialogTitle>
+                    <DialogTitle>Today	&#39;s Devotion</DialogTitle>
                       <DialogDescription>
-                        "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." (Proverbs 3:5-6)
+                      &#39;	&#39;Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.&#39;	&#39; (Proverbs 3:5-6)
                       </DialogDescription>
                    </DialogHeader>
                 </div>
@@ -134,7 +134,7 @@ export default function NotificationPage() {
                   <div className="bg-white p-8 rounded-lg max-w-[598px] h-[750px] overflow-y-auto flex flex-col">
                   <DialogHeader className="flex justify-between items-center w-full">
                       <div className="flex items-center space-x-2 w-full justify-between">
-                        <DialogTitle className="font-serif text-lg">{post.name}'s Prayer</DialogTitle>
+                        <DialogTitle className="font-serif text-lg">{post.name}&#39;s Prayer</DialogTitle>
                           <button onClick={() => toggleBookmark(post.id)}>
                             {bookmarkedPosts.includes(post.id) ? (
                               <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />

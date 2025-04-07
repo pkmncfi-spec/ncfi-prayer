@@ -64,19 +64,19 @@ export default function Home() {
             className="absolute inset-0 bg-cover bg-center" 
             style={{ backgroundImage: "url('/LandingPage1.jpg')" }}
           ></div>
-          <div className="relative z-10 text-center text-white px-6 py-16 md:py-20 bg-white bg-opacity-80 rounded-lg shadow-lg w-full max-w-3xl mx-auto mt-28">
+          <div className="relative z-10 text-center text-white px-6 py-16 md:py-20 bg-white bg-opacity-80 rounded-lg shadow-lg w-full max-w-3xl mx-auto mt-40">
             <h2 className="text-3xl md:text-5xl font-bold text-gray-900">Welcome to PrayerLink</h2>
             <p className="text-gray-700 mt-4 text-sm md:text-base">Connecting people through prayer</p>
             <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
               <Button 
                 onClick={() => router.push("/register")} 
-                className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-full md:w-auto"
+                className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-60 md:w-auto"
               >
                 Try PrayerLink
               </Button>
               <Button 
                 onClick={() => router.push("/login")} 
-                className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all w-full md:w-auto"
+                className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-200 transition-all w-60 md:w-auto"
               >
                 Already have an account?
               </Button>

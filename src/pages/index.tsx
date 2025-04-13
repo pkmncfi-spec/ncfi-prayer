@@ -92,6 +92,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-blue-950 text-white text-center py-4 px-4">
         <p>&copy; 2025 PrayerLink. All rights reserved.</p>
+      <footer className="bg-blue-950 text-white text-center py-4 px-4">
+        <p>&copy; 2025 PrayerLink. All rights reserved.</p>
       </footer>
     </div>
   );

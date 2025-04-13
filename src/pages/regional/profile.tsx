@@ -13,7 +13,6 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { deleteDoc, doc, getDoc, getFirestore, query, Timestamp, updateDoc } from "firebase/firestore";
 import { collection, onSnapshot, orderBy, where } from "firebase/firestore";
-import { format } from "path";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import  Image  from "next/image";
 import { GeistSans } from "geist/font/sans";
@@ -33,7 +32,6 @@ export default function ProfilePage() {
   const [postId, setPostId] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [postDate, setPostDate] = useState<Date>(new Date());
-  const [text, setText] = useState("");
   
     useEffect(() => {
       const fetchPosts = async () => {
@@ -43,7 +41,10 @@ export default function ProfilePage() {
               const regional = (userDoc.data() as { regional?: string })?.regional;
               console.log("User Regional:", regional);
         
-              const queryCondition = query(collection(db, "posts"), orderBy("createdAt", "desc"), where("uid", "==", user.uid), where("status", "==", "posted"), where("postFor", "==", "regional"));
+              const queryCondition = query(collection(db, "posts"),
+              orderBy("createdAt", "desc"),
+              where("uid", "==", user.uid),
+              where("status", "==", "posted"));
 
         
               const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
@@ -121,7 +122,7 @@ export default function ProfilePage() {
     
     const shareInternational = async (id: string) => {
       try {
-        await updateDoc(doc(db, "posts", id), { postFor: "international", status: "requested" });
+        await updateDoc(doc(db, "posts", id), { postFor: "international", status: "requested"});
         setSheetOpen(false); // Close the sheet after accepting
         console.log("Prayer request accepted!");
       } catch (error) {
@@ -211,11 +212,11 @@ export default function ProfilePage() {
                 </div>
               </div>
             ))}
-            <SheetContent className={`flex flex-col w-full mx-autoborder ${GeistSans.className} overflow-y-auto`}>
+            <SheetContent className={`flex flex-col w-full ${GeistSans.className} overflow-y-auto`}>
                     <SheetHeader className="">
-                      <div className="flex items-center fixed min-w-screen bg-white top-0 pt-4 pb-4 pl-2 mr-4">
+                      <div className="flex items-center fixed w-screen bg-white top-0 pt-4 pb-4 pl-2">
                         <SheetClose className="pr-5 text-xl ">&#10006;</SheetClose>
-                        <SheetTitle className="text-2xl w-full font-bold text-left pr-20">Prayer Request</SheetTitle>
+                        <SheetTitle className="text-2xl w-full font-bold text-left">Prayer Request</SheetTitle>
                       </div>
                       </SheetHeader>
                       <Separator className="w-full"/>
@@ -234,9 +235,8 @@ export default function ProfilePage() {
                               value={content}
                               placeholder="Type your message here."
                               onChange={(e) => setContent(e.target.value)}
-                              className="resize-none min-h-[600px] border-none"/>
+                              className="resize-none min-h-[500px] border-none"/>
                             </div>
-                            {/* <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5 mb-5">{content}</p> */}
                           </div>
                         </div>
                       </SheetDescription>

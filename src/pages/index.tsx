@@ -1,14 +1,9 @@
-import Head from "next/head";
-
-import { signOut } from "firebase/auth";
-import { auth } from "~/lib/firebase";
 import { useAuth } from "~/context/authContext";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { Separator } from "~/components/ui/separator";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 
@@ -17,40 +12,51 @@ const db = getFirestore(app);
 export default function Home() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  
+
   useEffect(() => {
     async function userRole() {
-      try{
-        if(user){
+      if (user) {
+        try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           const userData = userDoc.data() as { role?: string };
-          void router.push("/"+ userData?.role + "/home");
-          return;
-        } // Pastikan user tidak null
-
-        if (loading) return <>loading...</>; // Jangan redirect saat masih loading
-      } catch (error) {
-        console.error("Error fetching user role:", error);
+          if (userData?.role) {
+            void router.push(`/${userData.role}/home`);
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
       }
     }
     void userRole();
-  }, [user, loading, router]);
+  }, [user, router]);
 
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 w-full">
       {/* Header */}
-      <header className="bg-black shadow-md fixed top-0 left-0 w-full z-50">
-        <nav className="container mx-auto flex justify-between items-center py-4 px-6">
-          <div className="text-2xl font-bold text-white">SugengRahayu</div>
-          <ul className="flex space-x-6 items-center">
-            <li><Link href="#home" className="text-white hover:text-gray-400">Home</Link></li>
-            <li><Link href="#about" className="text-white hover:text-gray-400">About</Link></li>
-            <li><Link href="#services" className="text-white hover:text-gray-400">Services</Link></li>
+      <header className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+        <nav className="container mx-auto flex justify-between items-center py-4 px-4 md:px-6">
+          <div className="text-xl md:text-2xl font-bold text-blue-900">PrayerLink</div>
+          <ul className="flex space-x-4 md:space-x-6 items-center">
+            <li><Link href="#home" className="text-gray-800 hover:text-blue-900">Home</Link></li>
+            <li><Link href="#about" className="text-gray-800 hover:text-blue-900">About</Link></li>
+            <li><Link href="#services" className="text-gray-800 hover:text-blue-900">Services</Link></li>
+            <li><Link href="#events" className="text-gray-800 hover:text-blue-900">Events</Link></li>
             <li>
-              <Button onClick={() => router.push("/login")} className="border border-black bg-white text-black px-4 py-2 rounded-xl hover:bg-gray-200">
-                Login
+              <Button 
+                onClick={() => router.push("/login")} 
+                className="bg-white text-gray-800 hover:text-blue-100 px-6 py-3 rounded-full shadow-none"
+              >
+                Log In
+              </Button>
+            </li>
+            <li>
+              <Button 
+                onClick={() => router.push("/register")} 
+                className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700 transition-all"
+              >
+                Try PrayerLink
               </Button>
             </li>
           </ul>
@@ -58,60 +64,35 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section id="home" className="relative flex items-center justify-center min-h-screen pt-16">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6">
-          <div>
-            <h2 className="text-5xl font-bold text-gray-900">Welcome to SugengRahayu</h2>
-            <p className="text-gray-600 mt-4">A place for spiritual growth and community</p>
-            <div className="flex space-x-4 mt-6">
-              <Button onClick={() => router.push("/login")} className="bg-black text-white px-6 py-3">Login</Button>
-              <Button onClick={() => router.push("/register")} className="border border-black text-black px-6 py-3 bg-transparent">Sign Up</Button>
-            </div>
+      <section id="home" className="relative flex items-center justify-center min-h-screen pt-20 px-4 md:px-6">
+        <div 
+          className="absolute inset-0 bg-cover bg-center" 
+          style={{ backgroundImage: "url('/LandingPage1.jpg')" }}
+        ></div>
+        <div className="relative z-10 text-center text-white px-6 py-20 bg-white bg-opacity-80 rounded-lg shadow-lg w-full max-w-full mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">Welcome to PrayerLink</h2>
+          <p className="text-gray-700 mt-4">Connecting people through prayer</p>
+          <div className="flex flex-wrap justify-center space-x-4 mt-6">
+            <Button 
+              onClick={() => router.push("/register")} 
+              className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all"
+            >
+              Try PrayerLink
+            </Button>
+            <Button 
+              onClick={() => router.push("/login")} 
+              className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all"
+            >
+              Already have an account?
+            </Button>
           </div>
-          <div className="flex justify-center">
-            <Image src="/1.png" alt="Hero Image" width={600} height={400} className="rounded-lg" />
-          </div>
         </div>
-      </section>
-
-      {/* About Section */}
-      
-      <section id="about" className="bg-gray-300 py-16 px-6">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6">
-        <div className="ml-auto w-full md:w-3/4 p-6 rounded-3xl">
-          <h2 className="text-3xl font-bold text-gray-900">Pray together in groups</h2>
-          <p className="text-black mt-4">
-            Create a prayer group and start sharing prayer requests and praying for each other within your own country or region.
-            Pray with your spouse, your Bible study group, or your friends. Don't wait until you see each other to share and pray together—
-            SugengRahayu helps you pray for each other every day, wherever you are.
-          </p>
-          <p className="text-gray-800 mt-4 italic">
-            Want to use prayer groups in your church?
-            <Link href="/register" className="text-blue-900 font-semibold hover:underline"> Sign up to our Platform!</Link>
-          </p>
-        </div>
-        <div className="flex justify-center -mr-auto">
-          <Image src="/2.png" alt="About Image" width={400} height={500} className="rounded-lg" />
-        </div>
-      </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="bg-gray-200 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800">Our Services</h2>
-        <p className="text-gray-600 mt-4">Join our Sunday Worship, Prayer Meetings, and more.</p>
-      </section>
-
-      {/* Events Section */}
-      <section id="events" className="container mx-auto py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800">Upcoming Events</h2>
-        <p className="text-gray-600 mt-4">Stay updated with our latest events and gatherings.</p>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white text-center py-4">
-        <p>&copy; 2025 SugengRahayu. All rights reserved.</p>
+      <footer className="bg-blue-950 text-white text-center py-4 px-4">
+        <p>&copy; 2025 PrayerLink. All rights reserved.</p>
       </footer>
     </div>
   );
-};
+}

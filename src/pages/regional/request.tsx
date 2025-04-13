@@ -1,29 +1,28 @@
-import { SidebarTrigger } from "~/components/ui/sidebar";
-import * as React from "react";
-import Image from "next/image";
-import { app } from "~/lib/firebase";
 import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { useAuth } from "~/context/authContext";
-import Head from "next/head";
 import { GeistSans } from "geist/font/sans";
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import Head from "next/head";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import Layout from "~/components/layout/sidebar-regional";
-import { Separator } from "~/components/ui/separator";
 import { Button } from "~/components/ui/button";
-import { read } from "fs";
-import { createDecipheriv } from "crypto";
+import { Separator } from "~/components/ui/separator";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
+import { SidebarTrigger } from "~/components/ui/sidebar";
+import { useAuth } from "~/context/authContext";
+import { app } from "~/lib/firebase";
+
 
 const db = getFirestore(app);
 
 export default function RequestPage() {
-  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date; uid: string }>>([]);
+  const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date; uid: string; imageURL?: string | null }>>([]);
   const {user, loading} = useAuth();
   const [content, setContent] = useState("");
   const [contentAuthor, setContentAuthor] = useState("");
   const [postId, setPostId] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [postDate, setPostDate] = useState<Date>(new Date());
+  const [image, setImage] = useState<string>("");
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -45,12 +44,13 @@ export default function RequestPage() {
   
         const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
           const postsData = querySnapshot.docs.map((doc) => {
-            const data = doc.data() as { text: string; uid: string; createdAt: unknown;};
+            const data = doc.data() as { text: string; uid: string; createdAt: unknown; image?: string };
             return {
               id: doc.id,
               text: data.text,
               uid: data.uid,
               createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
+              image: data.imageURL ?? null,
             };
           });
   
@@ -102,7 +102,7 @@ export default function RequestPage() {
       setPostId(selectedPost.id);
       setSheetOpen(true); // Open the sheet
       setPostDate(selectedPost.createdAt); // Set the post date
-
+      setImage(selectedPost.image ?? "");
     }
   };
 
@@ -193,7 +193,7 @@ export default function RequestPage() {
       } catch (error) {
         console.error("Error accepting prayer request:", error);
       }
-    }
+  }
 
   return (
     <Layout>
@@ -237,9 +237,9 @@ export default function RequestPage() {
                   </div>
                     
                 ))}
-                <SheetContent className={`flex flex-col w-full mx-autoborder ${GeistSans.className} overflow-y-auto`}>
+                <SheetContent className={`flex flex-col w-full mx-autoborder ${GeistSans.className}`}>
                     <SheetHeader className="">
-                      <div className="flex items-center fixed min-w-screen bg-white top-0 pt-4 pb-4 pl-2 mr-4">
+                      <div className="flex items-center fixed min-w-[500px] bg-white top-0 pt-4 pb-4 pl-2">
                         <SheetClose className="pr-5 text-xl ">&#10006;</SheetClose>
                         <SheetTitle className="text-2xl w-full font-bold text-left pr-20">Prayer Request</SheetTitle>
                       </div>
@@ -250,20 +250,56 @@ export default function RequestPage() {
                           <div>
                           <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full mt-1" />
                           </div>
-                          <div>
+                          <div className="">
                             <div className="flex gap-1 items-center">
                               <p className="flex font-semibold">{contentAuthor}</p>
                               <p className="text-muted-foreground">&#x2022; {formatDate(postDate)}</p>
                             </div>
-                            <p className="text-sm whitespace-normal text-left break-all overflow-hidden pr-5 mb-5">{content}</p>
+                            <div className="whitespace-normal break-all overflow-y-auto min-h-[750px] max-h-[760px]">
+                              <p className="text-sm text-left pr-5 mb-5">{content}</p>
+                              <Image
+                                src={image}
+                                alt="Post Image"
+                                width={400}
+                                height={400}
+                                className="rounded-lg object-cover mb-2"
+                              />
+                            </div>
                           </div>
                         </div>
                       </SheetDescription>
                       <SheetFooter className="">
                       <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 mr-4 pr-6">
-                        <Button onClick={() => acceptPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Accept Prayer</Button>
-                        <Button onClick={() => editPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
-                        <Button onClick={() => rejectPrayer(postId)} className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Reject Prayer</Button>
+                        <Button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to accept this prayer request?")) {
+                              void acceptPrayer(postId);
+                            }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2"
+                        >
+                          Accept Prayer
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to edit this prayer request?")) {
+                              void editPrayer(postId);
+                            }
+                          }}
+                          className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to reject this prayer request?")) {
+                              void rejectPrayer(postId);
+                            }
+                          }}
+                          className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2"
+                        >
+                          Reject Prayer
+                        </Button>
                       </div>
                       </SheetFooter>
                 </SheetContent>

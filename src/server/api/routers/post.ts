@@ -1,6 +1,9 @@
 import { z } from "zod";
-
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { collection, addDoc, getFirestore } from "firebase/firestore";
+import { app } from "~/lib/firebase";
+
+const db = getFirestore(app); // Ensure you have the Firestore instance
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -11,17 +14,15 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  create: publicProcedure
-  .input(z.object({ title: z.string().min(1), userId: z.string() }))
-  .mutation(async ({ ctx, input }) => {
-    return ctx.db.post.create({
-      data: {
-        title: input.title, // ✅ Menggunakan 'title' sesuai model Prisma
-        userId: input.userId,
-        createdAt: new Date(), // Pastikan ada createdAt jika dipakai di getLatest
-      },
-    });
-  }),
+    create: publicProcedure
+      .input(z.object({ imageUrl: z.string().url() })) // Ensure this matches the input
+      .mutation(async ({ input }) => {
+        await addDoc(collection(db, "posts"), {
+          imageUrl: input.imageUrl,
+          createdAt: new Date(),
+        });
+        return { success: true };
+      }),
 
   getLatest: publicProcedure.query(async ({ ctx }) => {
     const post = await ctx.db.post.findFirst({

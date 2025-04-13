@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
-import path from "path";
 
 type VerifyTokenOutput = inferRouterOutputs<AppRouter>["auth"]["verifyToken"];
 

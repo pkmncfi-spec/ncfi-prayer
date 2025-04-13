@@ -46,7 +46,7 @@ const items = [
   { title: "Bookmarks", url: "/member/bookmarks", icon: Bookmark },
   { title: "Notification", url: "/member/notification", icon: Bell },
   { title: "Help", url: "/member/help", icon: Info },
-  { title: "Log Out", url: "/member/home", icon: LogOut },
+  { title: "Log Out", url: "/login", icon: LogOut },
 ];
 
 const regions = [
@@ -80,7 +80,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={title}>
                     <SidebarMenuButton
                       onClick={title === "Log Out" ? handleLogout : undefined}
-                      className={`h-12 text-xl flex items-center ${isActive ? "font-bold bg-gray-200" : ""}`}
+                      className={`h-12 text-xl flex items-center ${isActive ? "font-bold" : ""}`}
                     >
                       <Icon className={`mr-3 !w-6 !h-6 ${isActive ? "stroke-2" : "stroke-[1]"}`} />
                       <Link href={url} aria-label={title} className="w-full">

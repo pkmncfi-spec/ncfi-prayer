@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
-import { collection, doc, getDoc, getFirestore, onSnapshot, query, where } from "firebase/firestore";
-import { useAuth } from "~/context/authContext";
-import Layout from "~/components/layout/sidebar-regional";
-import { SidebarTrigger } from "~/components/ui/sidebar";
-import Image from "next/image";
-import { Separator } from "~/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { GeistSans } from "geist/font/sans";
+import { Bookmark } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import Layout from "~/components/layout/sidebar-regional";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { SidebarTrigger } from "~/components/ui/sidebar";
+import { useAuth } from "~/context/authContext";
 
 const db = getFirestore();
 
 export default function BookmarksPage() {
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Array<{ id: string; text: string; createdAt: Date; name: string }>>([]);
-  const [selectedPost, setSelectedPost] = useState<{ id: string; text: string; createdAt: Date; name: string } | null>(null); // State for selected post
+  const [selectedPost, setSelectedPost] = useState<{ id: string; text: string; createdAt: Date; name: string; imageURL?: string } | null>(null); // State for selected post
   const { user } = useAuth();
 
   useEffect(() => {
@@ -23,34 +24,38 @@ export default function BookmarksPage() {
         // Query the bookmarks collection for the current user's bookmarks
         const bookmarksQuery = query(
           collection(db, "bookmarks"),
-          where("uid", "==", user.uid)
+          orderBy("createdAt", "desc"),
+          where("uid", "==", user.uid),
         );
 
-        const unsubscribe = onSnapshot(bookmarksQuery, async (querySnapshot) => {
-          const postIds = querySnapshot.docs.map((doc) => doc.data().postId);
-
-          // Fetch the details of each bookmarked post
-          const posts = await Promise.all(
-            postIds.map(async (postId) => {
-              const postDoc = await getDoc(doc(db, "posts", postId));
-              if (postDoc.exists()) {
-                const postData = postDoc.data() as { text: string; createdAt: any; uid: string };
-                const userDoc = await getDoc(doc(db, "users", postData.uid));
-                const userName = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
-
-                return {
-                  id: postId,
-                  text: postData.text,
-                  createdAt: postData.createdAt?.toDate() || new Date(),
-                  name: userName,
-                };
-              }
-              return null;
-            })
-          );
-
-          // Filter out any null values (in case a post was deleted)
-          setBookmarkedPosts(posts.filter((post) => post !== null));
+        const unsubscribe = onSnapshot(bookmarksQuery, (querySnapshot) => {
+          const fetchPosts = async () => {
+            const postIds: string[] = querySnapshot.docs.map((doc) => doc.data().postId as string);
+        
+            const posts = await Promise.all(
+              postIds.map(async (postId) => {
+                const postDoc = await getDoc(doc(db, "posts", postId));
+                if (postDoc.exists()) {
+                  const postData = postDoc.data() as { text: string; createdAt: any; uid: string; imageURL?: string };
+                  const userDoc = await getDoc(doc(db, "users", postData.uid));
+                  const userName = userDoc.exists() ? (userDoc.data() as { name: string }).name : "Unknown";
+        
+                  return {
+                    id: postId,
+                    text: postData.text,
+                    createdAt: postData.createdAt instanceof Timestamp ? postData.createdAt.toDate() : new Date(),
+                    name: userName,
+                    imageURL: postData.imageURL ?? "", // Add imageURL if it exists
+                  };
+                }
+                return null;
+              })
+            );
+        
+            setBookmarkedPosts(posts.filter((post) => post !== null) as Array<{ id: string; text: string; createdAt: Date; name: string; imageURL?: string }>);
+          };
+        
+          void fetchPosts(); // Call the async function
         });
 
         return unsubscribe;
@@ -59,7 +64,7 @@ export default function BookmarksPage() {
       }
     };
 
-    fetchBookmarkedPosts();
+    void fetchBookmarkedPosts();
   }, [user]);
 
   function formatDate(date: Date): string {
@@ -68,6 +73,46 @@ export default function BookmarksPage() {
       day: "2-digit",
       year: "numeric",
     }).format(date);
+  }
+
+  async function handleUnbookmark(postId: string) {
+    if (!user?.uid) {
+      console.error("User is not logged in.");
+      return;
+    }
+  
+    try {
+      console.log("Unbookmarking post with ID:", postId);
+  
+      // Query the bookmarks collection to find the document with the matching postId and user.uid
+      const bookmarksQuery = query(
+        collection(db, "bookmarks"),
+        where("uid", "==", user.uid),
+        where("postId", "==", postId)
+      );
+  
+      const querySnapshot = await getDocs(bookmarksQuery);
+  
+      if (!querySnapshot.empty) {
+        // Get the document ID of the bookmark
+        const bookmarkDocId = querySnapshot.docs[0].id;
+  
+        // Delete the bookmark document from Firestore
+        await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
+  
+        // Update the state to remove the unbookmarked post
+        setBookmarkedPosts((prev) => prev.filter((post) => post.id !== postId));
+  
+        // Close the dialog by resetting the selected post
+        setSelectedPost(null);
+  
+        console.log(`Bookmark for post ${postId} deleted successfully.`);
+      } else {
+        console.error("No matching bookmark found.");
+      }
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
+    }
   }
 
   return (
@@ -113,16 +158,37 @@ export default function BookmarksPage() {
                   </div>
                 </div>
                 </div>
-
               </DialogTrigger>
-              <DialogContent className={`${GeistSans.className}`}>
-                <DialogHeader>
-                  <DialogTitle>{selectedPost?.name}</DialogTitle>
-                  <DialogDescription>
-                    <p className="text-black">{selectedPost?.text}</p>
-                    <p className="text-gray-500 mt-2">{selectedPost?.createdAt.toLocaleString()}</p>
-                  </DialogDescription>
-                </DialogHeader>
+              <DialogContent className={`flex flex-col ${GeistSans.className}`}>
+                <div className="rounded-lg p-8 flex flex-col">
+                  <DialogHeader className="flex justify-between items-center w-full">
+                    <div className="flex items-center space-x-2 w-full justify-between">
+                      <DialogClose className="flex items-center space-x-2 w-full justify-between">
+                        <DialogTitle className="text-lg">{selectedPost?.name}</DialogTitle>
+                        <button onClick={() => handleUnbookmark(selectedPost?.id ?? "")}>
+                          <Bookmark className="w-6 h-6 text-blue-500 fill-current"  />
+                        </button>
+                      </DialogClose>
+                    </div>
+                  </DialogHeader>
+                  <div className="flex-1 overflow-y-auto">
+                    <DialogDescription className="break-words text-black overflow-y-auto max-h-[450px]">
+                      <p>{selectedPost?.text}</p>
+                      {selectedPost?.imageURL ? (
+                        <div className="w-full mt-2">
+                          <Image
+                            src={selectedPost?.imageURL ?? ""}
+                            alt="Post Image"
+                            width={500}
+                            height={300}
+                            className="rounded-lg object-cover mb-2"
+                          />
+                        </div>
+                      ):(<></>)}
+                      <p className="text-gray-500 mt-2">{selectedPost?.createdAt.toLocaleString()}</p>
+                    </DialogDescription>
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           ))}

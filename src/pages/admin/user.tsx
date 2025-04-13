@@ -94,7 +94,7 @@ useEffect(() => {
             isNew: data.isNew ?? false,
           };
 
-          groupedUsers[role].push(user);
+          (groupedUsers[role] ??= []).push(user);
 
           // Perbarui status isNew dan unbanned jika perlu
           const updates: any = {};

@@ -3,7 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import Head from "next/head";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Layout from "~/components/layout/sidebar-international";
+import Layout from "~/components/layout/sidebar-regional";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
@@ -116,7 +116,7 @@ export default function RequestPage() {
   const acceptPrayer = async (postId: string) => {
     try {
       // Update the prayer request status to "posted"
-      await updateDoc(doc(db, "posts", postId), { status: "posted", uid: user?.uid });
+      await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "international"});
   
       if (user?.uid) {
         const post = posts.find((p) => p.id === postId);
@@ -151,7 +151,7 @@ export default function RequestPage() {
   const rejectPrayer = async (postId: string) => {
     try {
       // Update the prayer request status to "posted"
-      await updateDoc(doc(db, "posts", postId), { status: "rejected", uid: user?.uid });
+      await updateDoc(doc(db, "posts", postId), { status: "rejected", postFor: "international"});
   
       if (user?.uid) {
         const post = posts.find((p) => p.id === postId);

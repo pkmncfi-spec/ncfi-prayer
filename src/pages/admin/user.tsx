@@ -97,7 +97,7 @@ useEffect(() => {
           (groupedUsers[role] ??= []).push(user);
 
           // Perbarui status isNew dan unbanned jika perlu
-          const updates: any = {};
+          const updates: Partial<User> = {};
 
           if (role !== "guest" && data.isNew === true) {
             updates.isNew = false;
@@ -127,7 +127,7 @@ useEffect(() => {
     newRole: string
   ) => {
     try {
-      const updateData: any = { role: newRole };
+      const updateData: Partial<User> = { role: newRole };
 
       if (newRole === "member") {
         updateData.isNew = true;
@@ -165,7 +165,7 @@ useEffect(() => {
       const updated = { ...prev };
   
       for (const key of Object.keys(updated)) {
-        updated[key] = updated[key].filter((u) => u.id !== user.id);
+        updated[key] = (updated[key] ?? []).filter((u) => u.id !== user.id);
       }
   
       const updatedUser: User = {
@@ -198,9 +198,9 @@ useEffect(() => {
       setUsersByRole((prev) => {
         const updated = { ...prev };
         for (const key of Object.keys(updated)) {
-          updated[key] = updated[key].filter((u) => u.id !== activeUser.id);
+          updated[key] = (updated[key] ?? []).filter((u) => u.id !== activeUser.id);
         }
-        updated.banned.push({ ...activeUser, role: "banned" });
+        (updated.banned ??= []).push({ ...activeUser, role: "banned" });
         return updated;
       });
 
@@ -232,7 +232,7 @@ useEffect(() => {
             </div>
           </div>
 
-          <SearchBar />
+          <SearchBar onSearch={(query, pageType) => console.log(`Search query: ${query}, Page type: ${pageType}`)} />
           <Separator className="my-2" />
 
           <div className="p-4">

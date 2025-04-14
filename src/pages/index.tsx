@@ -41,7 +41,7 @@ export default function Home() {
             <li>
               <Button 
                 onClick={() => router.push("/login")} 
-                className="bg-white text-gray-800 hover:text-blue-100 px-6 py-3 rounded-full shadow-none"
+                className="text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-300 transition-all"
               >
                 Log In
               </Button>
@@ -70,13 +70,21 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6 w-full">
           <Button 
             onClick={() => router.push("/register")} 
+<<<<<<< HEAD
             className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-full md:w-auto"
+=======
+            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-80 md:w-auto"
+>>>>>>> afbf96e9d7c1af56d32eadc33429f0689c4b80fe
           >
             Try PrayerLink
           </Button>
           <Button 
             onClick={() => router.push("/login")} 
+<<<<<<< HEAD
             className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all w-full md:w-auto"
+=======
+            className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-300 transition-all w-80 md:w-auto"
+>>>>>>> afbf96e9d7c1af56d32eadc33429f0689c4b80fe
           >
             Already have an account?
           </Button>

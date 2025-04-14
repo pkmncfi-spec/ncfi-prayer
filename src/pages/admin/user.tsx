@@ -159,7 +159,7 @@ useEffect(() => {
     // Jika role sebelumnya banned dan sekarang di-unban, langsung jadikan member
     const targetRole = user.role === "banned" && unbanned ? "guest" : newRole;
   
-    await updateUserRoleInDatabase(user.id, targetRole, unbanned);
+    await updateUserRoleInDatabase(user.id, targetRole);
   
     setUsersByRole((prev) => {
       const updated = { ...prev };

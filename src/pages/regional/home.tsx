@@ -378,7 +378,7 @@ export default function HomePage() {
                       {isOverflowing[post.id] && <p className="text-blue-500 hover:underline hover:cursor-pointer">...see more</p>}
 
                       {post.imageURL ? (
-                        <div className="w-full mt-2">
+                        <div className="w-full mt-2 pr-10">
                           <Image
                             src={post.imageURL}
                             alt="Post Image"
@@ -411,17 +411,21 @@ export default function HomePage() {
                     <DialogDescription className="break-words text-black overflow-y-auto max-h-[450px]">
                       <p className="font-semibold">{post.title ? post.title : "No Title"}</p>
                       <p>{post.text}</p>
+                      <div className="flex mr-2 pr-2">
                       {post.imageURL ? (
-                        <div className="w-full mt-2">
+                        <div className="w-screen ">
                           <Image
                             src={post.imageURL}
                             alt="Post Image"
                             width={500}
                             height={300}
-                            className="rounded-lg object-cover mb-2"
+                            className="rounded-lg object-cover"
                           />
                         </div>
-                      ):(<></>)}
+                      ) : (
+                        <></>
+                      )}
+                      </div>
                     </DialogDescription>
                   </div>
                   <DialogFooter className="pt-6">

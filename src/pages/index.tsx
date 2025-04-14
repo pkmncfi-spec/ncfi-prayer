@@ -41,7 +41,7 @@ export default function Home() {
             <li>
               <Button 
                 onClick={() => router.push("/login")} 
-                className="bg-white text-gray-800 hover:text-blue-100 px-6 py-3 rounded-full shadow-none"
+                className="text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-300 transition-all"
               >
                 Log In
               </Button>
@@ -76,7 +76,7 @@ export default function Home() {
           </Button>
           <Button 
             onClick={() => router.push("/login")} 
-            className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all w-80 md:w-auto"
+            className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-300 transition-all w-80 md:w-auto"
           >
             Already have an account?
           </Button>

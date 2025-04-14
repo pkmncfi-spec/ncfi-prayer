@@ -70,13 +70,13 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6 w-full">
           <Button 
             onClick={() => router.push("/register")} 
-            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-full md:w-auto"
+            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-blue-700 transition-all w-80 md:w-auto"
           >
             Try PrayerLink
           </Button>
           <Button 
             onClick={() => router.push("/login")} 
-            className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all w-full md:w-auto"
+            className="border border-gray-800 text-gray-800 px-6 py-3 rounded-full bg-white hover:bg-gray-100 transition-all w-80 md:w-auto"
           >
             Already have an account?
           </Button>

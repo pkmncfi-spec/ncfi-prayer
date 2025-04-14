@@ -95,7 +95,11 @@ export default function BookmarksPage() {
   
       if (!querySnapshot.empty) {
         // Get the document ID of the bookmark
-        const bookmarkDocId = querySnapshot.docs[0].id;
+        const bookmarkDocId = querySnapshot.docs[0]?.id;
+        if (!bookmarkDocId) {
+          console.error("Bookmark document ID is undefined.");
+          return;
+        }
   
         // Delete the bookmark document from Firestore
         await deleteDoc(doc(db, "bookmarks", bookmarkDocId));

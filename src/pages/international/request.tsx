@@ -42,7 +42,7 @@ export default function RequestPage() {
   
         const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
           const postsData = querySnapshot.docs.map((doc) => {
-            const data = doc.data() as { text: string; uid: string; createdAt: unknown; image?: string };
+            const data = doc.data() as { text: string; uid: string; createdAt: unknown; imageURL?: string };
             return {
               id: doc.id,
               text: data.text,
@@ -100,7 +100,7 @@ export default function RequestPage() {
       setPostId(selectedPost.id);
       setSheetOpen(true); // Open the sheet
       setPostDate(selectedPost.createdAt); // Set the post date
-      setImage(selectedPost.image ?? "");
+      setImage(selectedPost.imageURL ?? "");
     }
   };
 

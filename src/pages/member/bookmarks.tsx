@@ -2,10 +2,13 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { GeistSans } from "geist/font/sans";
 import { Bookmark } from "lucide-react";
+import Head from "next/head";
 import Image from "next/image";
+import router from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "~/components/layout/sidebar-member";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";
 
@@ -119,36 +122,36 @@ export default function BookmarksPage() {
     }
   }
 
+  const handleRedirect = async (postId: string) => {
+    await router.push("/member/post/" + postId);
+  }
+
   return (
     <Layout>
-      <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
+      <Head>
+        <title>Bookmarks</title>
+      </Head>
+      <div className="w-full max-w-[600px] border min-h-screen">
         {/* Fixed Header */}
-        <div className="fixed w-full bg-white max-w-[598px] z-10">
-          <div className="flex flex-col w-full items-center justify-center">
-            <div className="sticky top-3 bg-white w-full z-10 mt-4">
-              <div className="flex items-center justify-between px-4">
-                <SidebarTrigger />
-                <div className="flex flex-col items-center justify-center pr-7 w-full">
-                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                  <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
-                </div>
-              </div>
-              <div className="w-full h-4 border-b border-gray-300"></div>
-            </div>
+        <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
+          <div className="">
+          <SidebarTrigger />
+          </div>
+          <div className="w-full items-center justify-center pr-7">
+            <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+            <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
           </div>
         </div>
-  
-        <div className="flex-1 mt-20 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 pt-20">
           {bookmarkedPosts.length === 0 && (
             <p className="text-center text-gray-500">No bookmarked posts found.</p>
           )}
 
           {bookmarkedPosts.map((post) => (
-            <Dialog key={post.id}>
-              <DialogTrigger asChild>
-                <div
-                  className="bg-white p-3 rounded-xl flex items-center border border-gray-300 shadow-sm mb-2 justify-between cursor-pointer"
-                  onClick={() => setSelectedPost(post)} // Set the selected post
+            <button className="text-left w-full" onClick={() => handleRedirect(post.id)} key={post.id}>
+              
+              <div
+                  className="bg-white p-3 rounded-xl flex items-center border border-gray-300 shadow-sm mb-2 justify-between cursor-pointer" // Set the selected post
                 >
                 <div className="grid grid-cols-[40px_1fr] items-start">
                   <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full  mt-1" />
@@ -157,44 +160,12 @@ export default function BookmarksPage() {
                       <p className="font-semibold">{post.name}</p>
                       <p className="flex pr-10 text-muted-foreground">&#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}</p>
                     </div>
-                    <p className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-6">{post.text}</p>
+                    <p className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-2">{post.text}</p>
                     <p className="text-blue-500">click to see more....</p>
                   </div>
                 </div>
                 </div>
-              </DialogTrigger>
-              <DialogContent className={`flex flex-col ${GeistSans.className}`}>
-                <div className="rounded-lg p-8 flex flex-col">
-                  <DialogHeader className="flex justify-between items-center w-full">
-                    <div className="flex items-center space-x-2 w-full justify-between">
-                      <DialogClose className="flex items-center space-x-2 w-full justify-between">
-                        <DialogTitle className="text-lg">{selectedPost?.name}</DialogTitle>
-                        <button onClick={() => handleUnbookmark(selectedPost?.id ?? "")}>
-                          <Bookmark className="w-6 h-6 text-blue-500 fill-current"  />
-                        </button>
-                      </DialogClose>
-                    </div>
-                  </DialogHeader>
-                  <div className="flex-1 overflow-y-auto">
-                    <DialogDescription className="break-words text-black overflow-y-auto max-h-[450px]">
-                      <p>{selectedPost?.text}</p>
-                      {selectedPost?.imageURL ? (
-                        <div className="w-full mt-2">
-                          <Image
-                            src={selectedPost?.imageURL ?? ""}
-                            alt="Post Image"
-                            width={500}
-                            height={300}
-                            className="rounded-lg object-cover mb-2"
-                          />
-                        </div>
-                      ):(<></>)}
-                      <p className="text-gray-500 mt-2">{selectedPost?.createdAt.toLocaleString()}</p>
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            </button>
           ))}
         </div>
       </div>

@@ -20,9 +20,10 @@ import { useAuth } from "~/context/authContext";
 import Image from 'next/image';
 import Head from "next/head";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, ImageDown } from "lucide-react";
 import UploadImageForm from "~/components/UploadImageForm";
 import axios from "axios";
+import router from "next/router";
 
 const db = getFirestore(app);
 
@@ -148,38 +149,6 @@ export default function HomePage() {
   const regionalTab = () => setTab("regional");
   const internationalTab = () => setTab("international");
 
-  const toggleBookmark = async (postId: string) => {
-    if (!user?.uid) return;
-
-    try {
-      const bookmarksQuery = query(
-        collection(db, "bookmarks"),
-        where("uid", "==", user.uid),
-        where("postId", "==", postId)
-      );
-
-      const querySnapshot = await getDocs(bookmarksQuery);
-
-      if (!querySnapshot.empty) {
-        // If the post is already bookmarked, remove it
-        const bookmarkDocId = querySnapshot.docs[0]?.id ?? "";
-        await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
-        setBookmarkedPosts((prev) => prev.filter((id) => id !== postId)); // Update state
-      } else {
-        // If the post is not bookmarked, add it
-        await addDoc(collection(db, "bookmarks"), {
-          uid: user.uid,
-          postId: postId,
-          createdAt: new Date(),
-          imageURL: imageURL,
-        });
-        setBookmarkedPosts((prev) => [...prev, postId]); // Update state
-      }
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-    }
-  };
-
   const handlePostPrayer = async () => {
     if (!title.trim() || !text.trim()) {
       alert("Please fill in the title and description.");
@@ -242,23 +211,27 @@ export default function HomePage() {
     }
   };
 
+  const handleSeeMore = async (postId: string) => {
+    await router.push("/member/post/" + postId);
+  }
+
   return (
         <Layout>
           <Head>
-            <title>NCFI Prayer</title>
+            <title>PrayerLink</title>
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
             <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
-                <div className="flex flex-cols mt-2 mb-2">
+                <div className="flex flex-cols mt-3 mb-2">
                   <div className="">
                   <SidebarTrigger />
                   </div>
                   <div className="w-full items-center justify-center pr-7">
                     <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                    <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
+                    <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                   </div>
                 </div>
                 <Separator className="mb-4 w-full" />
@@ -278,10 +251,10 @@ export default function HomePage() {
               <Separator className="my-4 w-full" />
               <div>
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Request Prayer Here ......</SheetTrigger>
+                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
                   <SheetContent className={`w-full ${GeistSans.className} overflow-y-scroll`}>  
                     <SheetHeader>
-                      <SheetTitle>Request Prayer</SheetTitle>
+                      <SheetTitle>Post Prayer</SheetTitle>
                       </SheetHeader>
                       <SheetDescription>
                         <div className="tems-start">
@@ -301,7 +274,7 @@ export default function HomePage() {
                           </div>
                           <SheetClose className="fixed items-center mt-2 mb-2">
                             <div className="fixed items-center mt-2 mb-2">
-                              <Button className="fixed right-4 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePostPrayer}>Request Prayer</Button>
+                              <Button className="fixed right-4 bg-blue-600 hover:bg-blue-800 active:bg-primary/30" onClick={handlePostPrayer}>Post Prayer</Button>
                             </div>
                           </SheetClose>
                         </div>
@@ -314,83 +287,50 @@ export default function HomePage() {
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
         <div>
           {posts.map((post) => (
-            <Dialog key={post.id}>
-              
-                  <div className="grid grid-cols-[40px_1fr] items-start border-b pb-2 pt-2">
-                    <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
-                    <DialogTrigger asChild className="hover:cursor-pointer">
-                    <div className="pl-4">
-                      <div className="flex gap-1 items-center">
-                        <p className="font-bold text-lg">{post.name}</p>
-                        <p className="flex pr-10 text-muted-foreground">
-                          &#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-gray-700 whitespace-normal break-all pr-10">
-                        {post.title ? post.title : "No Title"}
-                      </p>
-                      <p
-                        ref={(el) => {
-                          paragraphRefs.current[post.id] = el;
-                        }}
-                        className="whitespace-normal break-all overflow-hidden pr-10 line-clamp-3"
-                      >
-                        {post.text}
-                      </p>
-                      
-                      {isOverflowing[post.id] && <p className="text-blue-500 hover:underline hover:cursor-pointer">...see more</p>}
-
-                      {post.imageURL ? (
-                        <div className="w-full mt-2">
-                          <Image
-                            src={post.imageURL}
-                            alt="Post Image"
-                            width={500}
-                            height={300}
-                            className="rounded-lg object-cover max-h-[200px] mb-2"
-                          />
-                        </div>
-                      ):(<></>)}
-                    </div>
-                    
-                    </DialogTrigger>
-                    
-                  </div>
-              <DialogContent className={`flex flex-col ${GeistSans.className}`}>
-                <div className="rounded-lg p-8 flex flex-col">
-                  <DialogHeader className="flex justify-between items-center w-full">
-                    <div className="flex items-center space-x-2 w-full justify-between">
-                      <DialogTitle className="text-lg">{post.name}&#39;s Prayer</DialogTitle>
-                      <button onClick={() => toggleBookmark(post.id)}>
-                        {bookmarkedPosts.includes(post.id) ? (
-                          <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current" />
-                        ) : (
-                          <Bookmark className="w-6 h-6 text-gray-600" />
-                        )}
-                      </button>
-                    </div>
-                  </DialogHeader>
-                  <div className="flex-1 overflow-y-auto">
-                    <DialogDescription className="break-words text-black overflow-y-auto max-h-[450px]">
-                      <p className="font-semibold">{post.title ? post.title : "No Title"}</p>
-                      <p>{post.text}</p>
-                      {post.imageURL ? (
-                        <div className="w-full mt-2">
-                          <Image
-                            src={post.imageURL}
-                            alt="Post Image"
-                            width={500}
-                            height={300}
-                            className="rounded-lg object-cover mb-2"
-                          />
-                        </div>
-                      ):(<></>)}
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          ))}
+                        
+                            <div key={post.id} className="grid grid-cols-[40px_1fr] items-start border-b pb-2 pt-2">
+                              <div>
+                              <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                              </div>
+                              <button onClick={() => handleSeeMore(post.id)} className="hover:cursor-pointer">
+                              <div className="pl-4">
+                                <div className="flex gap-1 items-center">
+                                  <p className="font-bold text-lg">{post.name}</p>
+                                  <p className="flex pr-10 text-muted-foreground">
+                                    &#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}
+                                  </p>
+                                </div>
+                                <p className="text-left font-semibold text-gray-700 whitespace-normal break-all pr-10">
+                                  {post.title ? post.title : "No Title"}
+                                </p>
+                                <p
+                                  ref={(el) => {
+                                    paragraphRefs.current[post.id] = el;
+                                  }}
+                                  className="text-left  whitespace-normal break-all overflow-hidden pr-10 line-clamp-3"
+                                >
+                                  {post.text}
+                                </p>
+                                
+                                {isOverflowing[post.id] && <p className="text-left  text-blue-500 hover:underline hover:cursor-pointer">...see more</p>}
+          
+                                {post.imageURL ? (
+                                  <div className="w-full mt-2 pr-10">
+                                    <Image
+                                      src={post.imageURL}
+                                      alt="Post Image"
+                                      width={500}
+                                      height={300}
+                                      className="text-left rounded-lg object-cover max-h-[200px] mb-2"
+                                    />
+                                  </div>
+                                ):(<></>)}
+                              </div>
+                              
+                              </button>
+                              
+                            </div>
+                    ))}
         </div>
       </div>
       </div>

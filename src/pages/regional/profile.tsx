@@ -27,11 +27,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [content, setContent] = useState("");
-  const [contentAuthor, setContentAuthor] = useState("");
-  const [postId, setPostId] = useState("");
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [postDate, setPostDate] = useState<Date>(new Date());
+
   
     useEffect(() => {
       const fetchPosts = async () => {
@@ -99,46 +95,9 @@ export default function ProfilePage() {
       void getUserData();
     }, [user]);
 
-    const handleRequest = (id: string) => {
-      const selectedPost = posts.find((post) => post.id === id);
-      if (selectedPost) {
-        setContent(selectedPost.text);
-        setContentAuthor(selectedPost.name);
-        setPostId(selectedPost.id);
-        setSheetOpen(true); // Open the sheet
-        setPostDate(selectedPost.createdAt); // Set the post date
-      }
+    const handleRequest = async (id: string) => {
+      await router.push("/regional/edit/" + id);
     };
-
-    const editPrayer = async (id: string) => {
-      try {
-        await updateDoc(doc(db, "posts", id), { text: content });
-        setSheetOpen(false); // Close the sheet after accepting
-        console.log("Prayer request accepted!");
-      } catch (error) {
-        console.error("Error accepting prayer request:", error);
-      }
-    }
-    
-    const shareInternational = async (id: string) => {
-      try {
-        await updateDoc(doc(db, "posts", id), { postFor: "international", status: "requested"});
-        setSheetOpen(false); // Close the sheet after accepting
-        console.log("Prayer request accepted!");
-      } catch (error) {
-        console.error("Error accepting prayer request:", error);
-      }
-    }
-
-    const deletePrayer = async (id: string) => {
-      try {
-        await deleteDoc(doc(db, "posts", id));
-        setSheetOpen(false); // Close the sheet after accepting
-        console.log("Prayer request accepted!");
-      } catch (error) {
-        console.error("Error accepting prayer request:", error);
-      }
-    }
   
     const handleLogout = async () => {
       try {
@@ -187,7 +146,6 @@ export default function ProfilePage() {
 
           {/* Scrollable Content */}
           <div className="flex-1 mt-64 overflow-y-auto px-4">
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>   
             {posts.map((post) => (
               <div
                 key={post.id}
@@ -202,53 +160,15 @@ export default function ProfilePage() {
                     <p className="line-clamp-2">
                       {post.text}{" "}
                     </p>
-                    <SheetTrigger>
                       <button onClick= {() => handleRequest(post.id)} className="text-blue-600 font-xs">
                         ...click to edit
                       </button>
-                    </SheetTrigger>
 
                   </p>
                 </div>
               </div>
             ))}
-            <SheetContent className={`flex flex-col w-full ${GeistSans.className} overflow-y-auto`}>
-                    <SheetHeader className="">
-                      <div className="flex items-center fixed w-screen bg-white top-0 pt-4 pb-4 pl-2">
-                        <SheetClose className="pr-5 text-xl ">&#10006;</SheetClose>
-                        <SheetTitle className="text-2xl w-full font-bold text-left">Prayer Request</SheetTitle>
-                      </div>
-                      </SheetHeader>
-                      <Separator className="w-full"/>
-                      <SheetDescription className="pt-6">
-                        <div className="grid grid-cols-[40px_1fr] items-start">
-                          <div>
-                          <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full mt-1" />
-                          </div>
-                          <div>
-                            <div className="flex gap-1 items-center">
-                              <p className="flex font-semibold">{contentAuthor}</p>
-                              <p className="text-muted-foreground">&#x2022; {formatDate(postDate)}</p>
-                            </div>
-                            <div>
-                            <Textarea
-                              value={content}
-                              placeholder="Type your message here."
-                              onChange={(e) => setContent(e.target.value)}
-                              className="resize-none min-h-[500px] border-none"/>
-                            </div>
-                          </div>
-                        </div>
-                      </SheetDescription>
-                      <SheetFooter className="">
-                      <div className="flex items-center justify-between fixed bg-white bottom-0 pt-4 pb-2 pl-10 right-0 pr-6">
-                        <Button onClick={() => editPrayer(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Edit</Button>
-                        <Button onClick={() => shareInternational(postId)} className="bg-blue-600 hover:bg-blue-800 active:bg-primary/30 w-full text-xs mr-2">Share for International</Button>
-                        <Button onClick={() => deletePrayer(postId)} className="bg-red-700 hover:bg-red-900 active:bg-primary/30 w-full text-xs mr-2">Delete</Button>
-                      </div>
-                      </SheetFooter>
-                </SheetContent>
-            </Sheet>
+
           </div>
     
           {/* Logout Confirmation */}

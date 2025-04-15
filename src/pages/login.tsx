@@ -76,7 +76,7 @@ export default function AuthPage() {
                     return;
                 }
         
-                void router.push("/" + userData?.role + "/home");
+                await router.push("/" + userData?.role + "/home");
             } catch (error) {
             }
         }

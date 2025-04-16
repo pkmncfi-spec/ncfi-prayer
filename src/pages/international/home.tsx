@@ -54,7 +54,7 @@ export default function HomePage() {
 
         const queryCondition =
           tab === "regional"
-            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("regional", "==", regional)) 
+            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("regional", "==", regional), where("postFor", "==", "posted")) 
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
             const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
@@ -223,7 +223,7 @@ export default function HomePage() {
               <div>
                 <div className="flex flex-cols mt-3 mb-2">
                   <div className="">
-                  <SidebarTrigger />
+                  <SidebarTrigger className="!h-8 !w-8"/>
                   </div>
                   <div className="w-full items-center justify-center pr-7">
                     <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />

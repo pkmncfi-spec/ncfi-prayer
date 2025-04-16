@@ -108,7 +108,7 @@ export default function PostPage() {
     const acceptPrayer = async (postId: string) => {
         try {
           // Update the prayer request status to "posted"
-          await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "international", createdAt: new Date()});
+          await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "international", createdAt: new Date(), regional: ""});
           alert("Prayer request accepted!");
           router.back();
           console.log("Prayer request accepted!");

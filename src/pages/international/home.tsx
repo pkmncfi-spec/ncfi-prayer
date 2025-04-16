@@ -54,8 +54,7 @@ export default function HomePage() {
 
         const queryCondition =
           tab === "regional"
-            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("regional", "==", regional), where("postFor", "==", "regional")) ||
-            query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "requested"), where("regional", "==", regional), where("postFor", "==", "international"))
+            ? query(collection(db, "posts"), orderBy("createdAt", "desc"), where("regional", "==", regional)) 
             : query(collection(db, "posts"), orderBy("createdAt", "desc"), where("status", "==", "posted"), where("postFor", "==", "international"));
 
             const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {

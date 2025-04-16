@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { Checkbox } from "~/components/ui/checkbox"
 import { GoogleAuthProvider, sendEmailVerification, signInWithPopup, signOut} from "firebase/auth";
+import {DatePicker} from "@heroui/date-picker";
 
 import {
   Card,
@@ -39,7 +40,7 @@ import {
   } from "~/components/ui/select"
 
 import { Input } from "~/components/ui/input"
-import { useState } from "react";
+import { use, useState } from "react";
 
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { auth } from "~/lib/firebase";
@@ -49,6 +50,13 @@ import { db } from "~/lib/firebase";
 import { doc, setDoc} from "firebase/firestore";
 import { GeistSans } from "geist/font/sans";
 
+const countries = [
+    "Argentina", "Australia", "Bangladesh", "Canada", "Chile", "Colombia", "Cuba", "Denmark", 
+    "Ecuador", "Fiji", "Finland", "Ghana", "Hong Kong", "India", "Indonesia", "Japan", 
+    "Malaysia", "Mongolia", "Nepal", "New Zealand", "Nigeria", "Norway", "Pakistan", 
+    "Papua New Guinea", "Philippines", "Sierra Leone", "Singapore", "South Korea", 
+    "Spain", "Taiwan", "USA", "United Kingdom & Ireland", "Zambia"
+];
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -58,12 +66,14 @@ const formSchema = z.object({
       .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
       .regex(/[0-9]/, { message: "Password must contain at least one number" })
       .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
-    country: z.string().min(2, { message: "Country is required" }),
     dateOfBirth: z.string().regex(/^\d{2}-\d{2}-\d{4}$/, { message: "Date format must be MM-DD-YYYY" }),
     gender: z.string().min(1, { message: "..." }),
+    country: z.string().min(1, { message: "..." }),
     role: z.string().min(1, { message: "..." }),
     isverified: z.boolean().default(false),
   });
+
+  const sortedCountries = countries.sort();
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -80,11 +90,11 @@ export default function RegisterPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            country: "",
             dateOfBirth: "",
             email: "",
             password: "",
-            gender: "male",
+            gender: "",
+            country: "",
             role: "guest"
         },
     })
@@ -101,6 +111,26 @@ export default function RegisterPage() {
                     return null;
                 }
 
+                let regionals = "";
+
+                if (["Ghana", "Nigeria", "Sierra Leone", "Zambia"].includes(values.country)) {
+                    regionals = "africa";
+                } else if (["Canada", "Haiti", "USA"].includes(values.country)) {
+                    regionals = "cana";
+                } else if (["Denmark", "United Kingdom & Ireland", "Finland", "Norway", "Spain"].includes(values.country)) {
+                    regionals = "europe";
+                } else if (["Argentina", "Colombia", "Chile", "Cuba", "Ecuador"].includes(values.country)) {
+                    regionals = "latin america";
+                } else if ([
+                    "Australia", "Fiji", "Hong Kong", "Indonesia", "Japan", "New Zealand", 
+                    "Mongolia", "Papua New Guinea", "Philippines", "Singapore", "Malaysia", 
+                    "South Korea", "Taiwan"
+                ].includes(values.country)) {
+                    regionals = "pacea";
+                } else if (["Bangladesh", "India", "Nepal", "Pakistan"].includes(values.country)) {
+                    regionals = "same";
+                }
+
                 await setDoc(doc(db, "users", users.uid), {
                     name: values.name,
                     uid: users.uid,
@@ -109,7 +139,8 @@ export default function RegisterPage() {
                     dateOfBirth: values.dateOfBirth,
                     isVerified: false,
                     gender: values.gender,
-                    role: "guest"
+                    role: "guest",
+                    regional: regionals,
                 });
 
                 await signOut(auth);
@@ -140,7 +171,7 @@ export default function RegisterPage() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
-            <Card className="w-full max-w-[500px] self-center mt-4 mb-4">
+            <Card className="w-full max-w-[500px] self-center mt-4 mb-4 border-gray-300">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -166,11 +197,11 @@ export default function RegisterPage() {
                         <FormField
                         control={form.control}
                         name="gender"
-                        render={({ }) => (
+                        render={({ field }) => (
                             <FormItem>
                             <FormLabel>Gender</FormLabel>
                             <FormControl>
-                                <Select>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <SelectTrigger className="">
                                         <SelectValue placeholder="Select Gender" />
                                     </SelectTrigger>
@@ -208,7 +239,20 @@ export default function RegisterPage() {
                             <FormItem>
                             <FormLabel>Country</FormLabel>
                             <FormControl>
-                                <Input type="text" placeholder="Indonesia" {...field} />
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger className="">
+                                        <SelectValue placeholder="Select Country" />
+                                    </SelectTrigger>
+                                    <SelectContent className={GeistSans.className}>
+                                        <SelectGroup>
+                                            {sortedCountries.map((country) => (
+                                                <SelectItem key={country} value={country}>
+                                                    {country}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </FormControl>
                             <FormMessage />
                             </FormItem>

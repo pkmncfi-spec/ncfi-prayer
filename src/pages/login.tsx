@@ -104,15 +104,18 @@ export default function AuthPage() {
     
         try {
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
+            console.log("User Credential:", userCredential); // Debugging
+    
             const user = userCredential?.user;
-
-            if (!user?.uid) {
+    
+            if (!user || !user.uid) {
                 throw new Error("User UID is undefined.");
             }
+    
             const userDoc = await getDoc(doc(db, "users", user.uid));
             const userData = userDoc.data() as { role?: string };
-
-            if (!user?.emailVerified) {
+    
+            if (!user.emailVerified) {
                 alert("Please verify your email before logging in.");
                 void auth.signOut();
                 await sendEmailVerification(user);
@@ -124,6 +127,7 @@ export default function AuthPage() {
             void router.push("/" + userData?.role + "/home");
         } catch (e) {
             if (e instanceof FirebaseError) {
+                console.log("Error Code:", e.code); // Log the error code for debugging
                 switch (e.code) {
                     case "auth/user-not-found":
                         alert("Email belum terdaftar. Silakan daftar terlebih dahulu.");
@@ -141,10 +145,10 @@ export default function AuthPage() {
                         alert("Terlalu banyak percobaan login. Silakan coba lagi nanti.");
                         break;
                     default:
-                        alert("Terjadi kesalahan. Silakan coba lagi.");
+                        alert(`Terjadi kesalahan. Kode error: ${e.code}. Silakan coba lagi.`);
                 }
             } else {
-                console.error(e);
+                console.error(e); // Log the error for debugging
                 alert("Terjadi kesalahan yang tidak diketahui.");
             }
         } finally {
@@ -167,7 +171,7 @@ export default function AuthPage() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
-            <Card className="w-full max-w-[500px] self-center mb-4">
+            <Card className="w-full max-w-[500px] self-center mb-4 border-gray-300">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Sign In</CardTitle>
                 <CardDescription className="">NCFI Prayer</CardDescription>

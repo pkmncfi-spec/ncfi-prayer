@@ -62,6 +62,43 @@ const regions = [
   { name: "South Asia And Middle East", url: "https://example.com/south-asia" }
 ];
 
+const country = [
+  "Ghana",
+  "Nigeria",
+  "Sierra Leone",
+  "Zambia",
+  "Canada",
+  "Haiti",
+  "USA",
+  "Denmark",
+  "United Kingdom & Ireland",
+  "Finland",
+  "Norway",
+  "Spain",
+  "Argentina",
+  "Colombia",
+  "Chile",
+  "Cuba",
+  "Ecuador",
+  "Australia",
+  "Fiji",
+  "Hong Kong",
+  "Indonesia",
+  "Japan",
+  "New Zealand",
+  "Mongolia",
+  "Papua New Guinea",
+  "Philippines",
+  "Singapore",
+  "Malaysia",
+  "South Korea",
+  "Taiwan",
+  "Bangladesh",
+  "India",
+  "Nepal",
+  "Pakistan"
+];
+
 export function AppSidebar() {
   const auth = getAuth();
   const router = useRouter();

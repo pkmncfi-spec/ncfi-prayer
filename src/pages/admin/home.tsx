@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react"; 
+import { useState, useEffect, useRef, useCallback } from "react"; 
 import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs, Timestamp } from "firebase/firestore";
 import { app } from "~/lib/firebase";
 import Layout from "~/components/layout/sidebar-member";
@@ -13,19 +13,48 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Bookmark, BookmarkCheck, SlidersHorizontal } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "~/components/ui/sheet";
 import axios from "axios";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 const db = getFirestore(app);
 
+interface Region {
+  id: string;
+  name: string;
+  countries: string[];
+}
 
-const regions = [
-  { id: 'All', name: 'All' },
-  { id: 'africa', name: 'Africa' },
-  { id: 'cana', name: 'Caribean & North America' },
-  { id: 'europe', name: 'Europe' },
-  { id: 'latin america', name: 'Latin America' },
-  { id: 'pacea', name: 'Pacific & East Asia' },
-  { id: 'same', name: 'South Asia & Middle East' },
+const regions: Region[] = [
+  { id: 'All', name: 'All', countries: [] },
+  {
+    id: 'africa',
+    name: 'Africa',
+    countries: ["Ghana", "Nigeria", "Sierra Leone", "Zambia"],
+  },
+  {
+    id: 'cana',
+    name: 'Caribbean & North America',
+    countries: ["Canada", "Haiti", "USA"],
+  },
+  {
+    id: 'europe',
+    name: 'Europe',
+    countries: ["Denmark", "United Kingdom & Ireland", "Finland", "Norway", "Spain"],
+  },
+  {
+    id: 'latin america',
+    name: 'Latin America',
+    countries: ["Argentina", "Colombia", "Chile", "Cuba", "Ecuador"],
+  },
+  {
+    id: 'pacea',
+    name: 'Pacific & East Asia',
+    countries: [ "Australia", "Fiji", "Hong Kong", "Indonesia", "Japan", "New Zealand", "Mongolia", "Papua New Guinea", "Philippines", "Singapore", "Malaysia", "South Korea", "Taiwan"],
+  },
+  {
+    id: 'same',
+    name: 'South Asia & Middle East',
+    countries: ["Bangladesh", "India", "Nepal", "Pakistan"],
+  },
 ];
 
 interface Post {
@@ -44,6 +73,7 @@ interface Post {
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const { user, loading } = useAuth();
   const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
   const [isOverflowing, setIsOverflowing] = useState<Record<string, boolean>>({});
@@ -52,13 +82,114 @@ export default function HomePage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [activeRegion, setActiveRegion] = useState("All");
-  const [openRegionDropdown, setOpenRegionDropdown] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState("All");
-  const [openCountryDropdown, setOpenCountryDropdown] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>("All");
   const [selectedCountry, setSelectedCountry] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState('All');
+  const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Sample country data - replace with your actual country list
-  const countries = ["All", "Argentina", "Australia", "Bangladesh", "Canada", "Chile", "Colombia", "Cuba", "Haiti", "Hong Kong", "Denmark", "Ecuador", "Finland", "Ghana", "India", "Indonesia", "Japan", "Malaysia", "Mongolia", "Nepal", "New Zealand", "Nigeria", "Norway", "Pakistan", "Papua New Guinea", "Philippines", "Sierra Leone", "Singapore", "Spain", "United Kingdom & Ireland", "USA", "South Korea", "Taiwan"];
+  const toggleRegionDropdown = useCallback(() => {
+    setOpenDropdown(prev => prev === 'region' ? null : 'region');
+  }, []);
+
+  const toggleCountryDropdown = useCallback(() => {
+    setOpenDropdown(prev => prev === 'country' ? null : 'country');
+  }, []);
+
+  const formatDate = useCallback((dateInput: string | Date): string => {
+    try {
+      const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+      return new Intl.DateTimeFormat("en-US", {
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }).format(date);
+    } catch {
+      return "Unknown Date";
+    }
+  }, []);
+
+  const applyFilters = useCallback((postsToFilter = posts) => {
+    let result = [...postsToFilter];
+  
+    // Filter by region
+    if (activeRegion !== "All") {
+      result = result.filter(post => post.regional === activeRegion);
+    }
+  
+    // Filter by country
+    if (selectedCountry !== "All") {
+      result = result.filter(post => post.country === selectedCountry);
+    }
+  
+    // Filter by status
+    if (selectedStatus !== "All") {
+      result = result.filter(post => post.status === selectedStatus);
+    }
+  
+    // Filter by date range
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+  
+      result = result.filter(post => {
+        if (!post.createdAt) return false;
+        const postDate = new Date(post.createdAt);
+        return postDate >= start && postDate <= end;
+      });
+    } else if (startDate) {
+      const start = new Date(startDate);
+      result = result.filter(post => {
+        if (!post.createdAt) return false;
+        return new Date(post.createdAt) >= start;
+      });
+    } else if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      result = result.filter(post => {
+        if (!post.createdAt) return false;
+        return new Date(post.createdAt) <= end;
+      });
+    }
+  
+    setFilteredPosts(result);
+  }, [posts, activeRegion, selectedCountry, selectedStatus, startDate, endDate]);
+
+  useEffect(() => {
+    if (!startDate && !endDate) {
+      setSelectedStatus('All');
+    } else {
+      setSelectedStatus('');
+    }
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      const newOverflowState: Record<string, boolean> = {};
+      Object.entries(paragraphRefs.current).forEach(([postId, element]) => {
+        if (element) {
+          const isOverflow = element.scrollHeight > element.clientHeight;
+          newOverflowState[postId] = isOverflow;
+        }
+      });
+      setIsOverflowing(newOverflowState);
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [filteredPosts]);
+
+  useEffect(() => {
+    if (selectedRegion === "All") {
+      setFilteredCountries([]);
+    } else {
+      const selected = regions.find(r => r.id === selectedRegion);
+      setFilteredCountries(selected?.countries || []);
+    }
+  }, [selectedRegion]);
 
   useEffect(() => {
     let unsubscribePosts: () => void;
@@ -68,7 +199,6 @@ export default function HomePage() {
       try {
         if (!user?.uid) return;
 
-        // Create query based on activeRegion
         let postsQuery;
         
         if (activeRegion === "All") {
@@ -79,7 +209,7 @@ export default function HomePage() {
         } else {
           postsQuery = query(
             collection(db, "posts"),
-            where("regional", "==", activeRegion), // ✅ pakai "regional"
+            where("regional", "==", activeRegion),
             orderBy("createdAt", "desc")
           );
         }
@@ -111,7 +241,6 @@ export default function HomePage() {
             }
           }
 
-          // Fetch user names
           const userPromises = Object.keys(usersMap).map(async (uid) => {
             const userDoc = await getDoc(doc(db, "users", uid));
             usersMap[uid] = userDoc.exists() 
@@ -121,13 +250,15 @@ export default function HomePage() {
 
           await Promise.all(userPromises);
 
-          setPosts(postsData.map(post => ({
+          const postsWithNames = postsData.map(post => ({
             ...post,
             name: usersMap[post.uid] || "Unknown"
-          })));
+          }));
+
+          setPosts(postsWithNames);
+          applyFilters(postsWithNames);
         });
 
-        // Fetch bookmarks
         if (user?.uid) {
           const bookmarksQuery = query(
             collection(db, "bookmarks"),
@@ -151,111 +282,66 @@ export default function HomePage() {
       if (unsubscribePosts) unsubscribePosts();
       if (unsubscribeBookmarks) unsubscribeBookmarks();
     };
-  }, [user, loading, activeRegion]);
+  }, [user, loading, activeRegion, applyFilters]);
 
-  useEffect(() => {
-    // Check overflow after posts are rendered
-    const checkOverflow = () => {
-      const newOverflowState: Record<string, boolean> = {};
-      Object.entries(paragraphRefs.current).forEach(([postId, element]) => {
-        if (element) {
-          const isOverflow = element.scrollHeight > element.clientHeight;
-          newOverflowState[postId] = isOverflow;
-        }
-      });
-      setIsOverflowing(newOverflowState);
-    };
+  const handleSelectRegion = useCallback((regionId: string) => {
+    setSelectedRegion(regionId);
+    setSelectedCountry("All");
+    setOpenDropdown(null);
+  }, []);
 
-    checkOverflow();
-  }, [posts]);
-
-  function formatDate(dateInput: string | Date): string {
-      try {
-        const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-        return new Intl.DateTimeFormat("en-US", {
-          month: "long",
-          day: "2-digit",
-          year: "numeric",
-        }).format(date);
-      } catch {
-        return "Unknown Date";
-      }
-    }
-
-  const toggleBookmark = async (postId: string) => {
-    if (!user?.uid) return;
-
-    try {
-      const bookmarksQuery = query(
-        collection(db, "bookmarks"),
-        where("uid", "==", user.uid),
-        where("postId", "==", postId)
-      );
-
-      const querySnapshot = await getDocs(bookmarksQuery);
-
-      if (!querySnapshot.empty) {
-        const bookmarkDocId = querySnapshot.docs[0]?.id;
-        if (!bookmarkDocId) return;
-        await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
-        setBookmarkedPosts(prev => prev.filter(id => id !== postId));
-      } else {
-        await addDoc(collection(db, "bookmarks"), {
-          uid: user.uid,
-          postId: postId,
-          createdAt: new Date()
-        });
-        setBookmarkedPosts(prev => [...prev, postId]);
-      }
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-    }
-  };
-
-  const handleSelectRegion = (region: string) => {
-    setSelectedRegion(region);
-    setOpenRegionDropdown(false);
-  };
-
-  const handleSelectCountry = (country: string) => {
+  const handleSelectCountry = useCallback((country: string) => {
     setSelectedCountry(country);
-    setOpenCountryDropdown(false);
-  };
+    setOpenDropdown(null);
+  }, []);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setSelectedRegion("All");
     setSelectedCountry("All");
+    setSelectedStatus("All");
     setStartDate("");
     setEndDate("");
     setActiveRegion("All");
-  };
+    setFilteredCountries([]);
+    applyFilters();
+  }, [applyFilters]);
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
     setActiveRegion(selectedRegion);
+    applyFilters();
     setSettingsSheetOpen(false);
-  };
+  }, [selectedRegion, applyFilters]);
 
-  const handleSeeMore = async (postId: string) => {
-    await router.push("/regional/post/" + postId);
-  }
+  const handleSeeMore = useCallback((postId: string) => {
+    router.push("/regional/post/" + postId);
+  }, [router]);
 
   return (
     <Layout>
       <div className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen`}>
-        <div className="fixed w-full bg-white max-w-[598px]">
+        <div className="fixed w-full bg-white max-w-[598px] z-20">
           <div className="flex flex-cols-2 mt-4">
             <SidebarTrigger />
             <div className="w-full items-center justify-center pr-7">
-              <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+              <Image 
+                src="/favicon.ico" 
+                alt="NFCI Prayer" 
+                width={25} 
+                height={25} 
+                className="mx-auto"
+                priority
+              />
               <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
             </div>
-            <button onClick={() => setSettingsSheetOpen(true)}>
+            <button 
+              onClick={() => setSettingsSheetOpen(true)}
+              aria-label="Filter posts"
+            >
               <SlidersHorizontal className="mr-2 h-5 w-5 text-gray-600 rounded-md hover:bg-gray-100 transition" />
             </button>
           </div>
           <Separator className="mb-4 w-full" />
           
-          {/* Tab Post */}
           <div className="flex h-1 mb-[1px] items-center justify-center text-sm w-full mx-auto">
             <button className="py-2 px-4 border-b-4 border-blue-400 font-semibold">
               Posts
@@ -266,7 +352,6 @@ export default function HomePage() {
 
         <Sheet open={settingsSheetOpen} onOpenChange={setSettingsSheetOpen}>
           <SheetContent side="right" className={`${GeistSans.className} flex flex-col h-full p-0`}>
-            {/* Header */}
             <div className="p-4">
               <SheetHeader>
                 <SheetTitle>Post Filter</SheetTitle>
@@ -274,56 +359,87 @@ export default function HomePage() {
               </SheetHeader>
             </div>
 
-            {/* Scrollable Content */}
             <div className="flex-1 overflow-auto px-4 space-y-4">
-              {/* Region */}
-              <div>
-                <label className="text-sm font-medium block mb-1">Regional</label>
-                <div className="relative">
-                  <div
-                    className="w-full border rounded-md px-3 py-2 cursor-pointer bg-white"
-                    onClick={() => setOpenRegionDropdown(!openRegionDropdown)}
+              {/* Region Filter */}
+              <div className="space-y-2">
+                <label className="text-base font-medium">Regional</label>
+              <div className="relative">
+                <button
+                  className="w-full flex items-center justify-between border rounded-md px-3 py-2 text-sm text-left bg-white"
+                  onClick={toggleRegionDropdown}
+                >
+                  <span>{selectedRegion && selectedRegion !== "All" ? regions.find(r => r.id === selectedRegion)?.name : "Select Region"}</span> 
+                  <svg
+                    className={`w-4 h-4 ml-2 transition-transform ${openDropdown === 'region' ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    {selectedRegion}
-                  </div>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-                  {openRegionDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow max-h-48 overflow-y-auto">
-                      <ul className="divide-y divide-gray-100">
-                        {regions.map((region, index) => (
+                {openDropdown === 'region' && (
+                  <div className="absolute z-10 mt-1 w-full text-sm  bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <ul className="py-1">
+                      {regions.filter(region => region.name !== "All").map((region) => (
                           <li
-                            key={index}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            key={region.id}
+                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                              selectedRegion === region.id ? "bg-blue-50 text-blue-600" : ""
+                            }`}
                             onClick={() => handleSelectRegion(region.id)}
+                            role="option"
+                            aria-selected={selectedRegion === region.id}
                           >
                             {region.name}
                           </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Country */}
-              <div>
-                <label className="text-sm font-medium block mb-1">Country</label>
-                <div className="relative">
-                  <div
-                    className="w-full border rounded-md px-3 py-2 cursor-pointer bg-white"
-                    onClick={() => setOpenCountryDropdown(!openCountryDropdown)}
-                  >
-                    {selectedCountry}
+                      ))}
+                    </ul>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  {openCountryDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow max-h-48 overflow-y-auto">
-                      <ul className="divide-y divide-gray-100">
-                        {countries.map((country, index) => (
+              {/* Country Filter */}
+              <div className="space-y-2">
+                <label className="text-base font-medium">Country</label>
+              <div className="relative">
+                <button
+                  className="w-full flex items-center justify-between border rounded-md px-3 py-2 text-left text-sm  bg-white"
+                  onClick={toggleCountryDropdown}
+                >
+                  <span>{selectedCountry && selectedCountry !== "All" ? selectedCountry : "Select Country"}</span>
+                  <svg
+                    className={`w-4 h-4 ml-2 transition-transform ${openDropdown === 'country' ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {openDropdown === 'country' && (
+                    <div 
+                      className="absolute z-10 mt-1 w-full text-sm  bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto"
+                      role="listbox"
+                    >
+                      <ul className="py-1 max-h-48 overflow-y-auto">
+                        {(selectedRegion === "All"
+                          ? regions.flatMap(region => region.countries)
+                          : regions.find(region => region.id === selectedRegion)?.countries || []
+                        ).map((country) => (
                           <li
-                            key={index}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            key={country}
+                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                              selectedCountry === country ? "bg-blue-50 text-blue-600" : ""
+                            }`}
                             onClick={() => handleSelectCountry(country)}
+                            role="option"
+                            aria-selected={selectedCountry === country}
                           >
                             {country}
                           </li>
@@ -331,17 +447,17 @@ export default function HomePage() {
                       </ul>
                     </div>
                   )}
-                </div>
               </div>
+            </div>
 
-              {/* Dates */}
-              <div>
-                <label className="text-sm font-medium block mb-1">Dates</label>
-                <div className="flex items-center space-x-2">
+              {/* Date Filter */}
+              <div className="space-y-2">
+                <label className="text-base font-medium">Dates</label>
+                <div className="flex items-center gap-2">
                   {/* Start Date */}
-                  <div className="relative w-28">
-                    {startDate === "" && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black text-sm pointer-events-none">
+                  <div className="relative w-[120px]">
+                    {!startDate && (
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-800 pointer-events-none">
                         None
                       </span>
                     )}
@@ -349,18 +465,19 @@ export default function HomePage() {
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className={`border rounded-md px-2 py-1 text-sm w-full ${
-                        startDate === "" ? "text-transparent" : "text-black"
+                      className={`w-full border rounded-md px-3 py-2 text-xs ${
+                        !startDate ? "text-transparent" : "text-black"
                       }`}
+                      max={endDate || undefined}
                     />
                   </div>
 
                   <span className="text-gray-500">-</span>
 
                   {/* End Date */}
-                  <div className="relative w-28">
-                    {endDate === "" && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black text-sm pointer-events-none">
+                  <div className="relative w-[120px]">
+                    {!endDate && (
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-800 pointer-events-none">
                         None
                       </span>
                     )}
@@ -368,45 +485,47 @@ export default function HomePage() {
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className={`border rounded-md px-2 py-1 text-sm w-full ${
-                        endDate === "" ? "text-transparent" : "text-black"
+                      className={`w-full border rounded-md px-3 py-2 text-xs ${
+                        !endDate ? "text-transparent" : "text-black"
                       }`}
+                      min={startDate || undefined}
                     />
                   </div>
 
-                  {/* All Button */}
-                  <div className="relative justify-end">
                   <button
+                    className={`justify-end ml-auto border rounded-md px-3 py-2 text-sm ${
+                      selectedStatus === 'All'
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-100'
+                    }`}
                     onClick={() => {
-                      setStartDate("");
-                      setEndDate("");
+                      setStartDate('');
+                      setEndDate('');
+                      setSelectedStatus('All');
                     }}
-                    className="text-sm text-black bg-white px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition"
                   >
                     All
                   </button>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Sticky Footer */}
-            <SheetFooter className="border-t border-gray-200 px-4 py-4">
-              <div className="flex justify-right w-full space-x-2">
-                <button 
+            <div className="border-t p-4">
+              <div className="flex justify-right gap-2">
+                <button
                   onClick={handleResetFilters}
-                  className="bg-blue-500 text-white rounded-full px-4 py-1 text-sm hover:bg-blue-700 transition"
+                  className="py-1 px-4 bg-blue-500 text-white rounded-full hover:bg-blue-700 transition"
                 >
                   Reset
                 </button>
-                <button 
+                <button
                   onClick={handleApplyFilters}
-                  className="bg-blue-500 text-white rounded-full px-4 py-1 text-sm hover:bg-blue-700 transition"
+                  className="py-1 px-4 bg-blue-500 text-white rounded-full hover:bg-blue-700 transition"
                 >
                   Apply
                 </button>
               </div>
-            </SheetFooter>
+            </div>
           </SheetContent>
         </Sheet>
 
@@ -420,7 +539,10 @@ export default function HomePage() {
               {regions.map((region) => (
                 <button
                   key={region.id}
-                  onClick={() => setActiveRegion(region.id)}
+                  onClick={() => {
+                    setActiveRegion(region.id);
+                    applyFilters();
+                  }}
                   className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition 
                     ${activeRegion === region.id 
                       ? "bg-blue-500 text-white border-blue-500" 
@@ -433,11 +555,12 @@ export default function HomePage() {
           </div>
 
           {/* Filtered Posts */}
-          {posts
-            .filter(post => 
-              activeRegion === "All" || post.regional === activeRegion
-            )
-            .map((post) => (
+          {(() => {
+            const visiblePosts = filteredPosts.filter(
+              (post) => activeRegion === "All" || post.regional === activeRegion
+            );
+
+            return visiblePosts.map((post) => (
               <div key={post.id} className="grid grid-cols-[40px_1fr] items-start border-b pb-2 pt-2">
                 <div>
                   <Image
@@ -467,14 +590,14 @@ export default function HomePage() {
                     >
                       {post.text}
                     </p>
-            
+
                     {isOverflowing[post.id] && (
                       <p className="text-left text-blue-500 hover:underline hover:cursor-pointer">
                         ...see more
                       </p>
                     )}
-            
-                    {post.imageURL ? (
+
+                    {post.imageURL && (
                       <div className="w-full mt-2 pr-10">
                         <Image
                           src={post.imageURL}
@@ -484,22 +607,21 @@ export default function HomePage() {
                           className="text-left rounded-lg object-cover max-h-[200px] mb-2"
                         />
                       </div>
-                    ) : (
-                      <></>
                     )}
                   </div>
                 </button>
               </div>
-            ))}
-          
+            ));
+          })()}
+
           {/* Empty State */}
-          {posts.filter(post => 
+          {filteredPosts.filter(post => 
             activeRegion === "All" || post.regional === activeRegion
           ).length === 0 && (
             <div className="text-center py-10 text-gray-500">
               {activeRegion === "All" 
                 ? "No posts available" 
-                : `No posts found in ${activeRegion} region`}
+                : `No posts found`}
             </div>
           )}
         </div>

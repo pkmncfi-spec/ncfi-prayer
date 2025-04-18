@@ -1,16 +1,6 @@
 import { GeistSans } from "geist/font/sans";
 import Link from "next/link";
-import {
-  Home,
-  Search,
-  Bookmark,
-  Bell,
-  Info,
-  User,
-  Send,
-  LogOut
-} from "lucide-react";
-
+import { Home, Users, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +13,6 @@ import {
 } from "~/components/ui/sidebar";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
-
 import {
   Dialog,
   DialogTrigger,
@@ -32,7 +21,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "~/components/ui/dialog";
-
 import {
   Sheet,
   SheetTrigger,
@@ -40,26 +28,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import ClockFading from '~/components/icon/ClockFading'; // Custom import path
 
 // Menu items.
 const items = [
   { title: "Home", url: "/admin/home", icon: Home },
-  { title: "Search", url: "/admin/search", icon: Search },
-  { title: "Bookmarks", url: "/admin/bookmarks", icon: Bookmark },
-  { title: "Notification", url: "/admin/notification", icon: Bell },
-  { title: "Help", url: "/admin/help", icon: Info },
-  { title: "Profile", url: "/admin/profile", icon: User },
-  { title: "Request", url: "/admin/request", icon: Send },
+  { title: "Users", url: "/admin/user", icon: Users },
+  { title: "Activity", url: "/admin/activity", icon: ClockFading },
   { title: "Log Out", url: "/login", icon: LogOut },
 ];
 
 const regions = [
-  { name: "Afrika", url: "https://example.com/afrika" },
-  { name: "Caribbean and North America", url: "https://example.com/caribbean" },
-  { name: "Europe", url: "https://example.com/europe" },
-  { name: "Latin America", url: "https://example.com/latin-america" },
-  { name: "Pacific And East Asia", url: "https://example.com/pacific-asia" },
-  { name: "South Asia And Middle East", url: "https://example.com/south-asia" }
+  { name: "Afrika", url: "https://ncfi.org/regions/africa/" },
+  { name: "Caribbean and North America", url: "https://ncfi.org/regions/caribbean-and-north-america/" },
+  { name: "Europe", url: "https://ncfi.org/regions/europe/" },
+  { name: "Latin America", url: "https://ncfi.org/regions/latin-america" },
+  { name: "Pacific And East Asia", url: "https://ncfi.org/regions/pacific-and-east-asia/" },
+  { name: "South Asia And Middle East", url: "https://ncfi.org/regions/south-asia-and-middle-east/" }
 ];
 
 export function AppSidebar() {
@@ -105,12 +90,12 @@ export function AppSidebar() {
                   Today&#39;s Devotion
                 </button>
               </DialogTrigger>
-                <DialogContent className="flex flex-col w-full max-w-[500px] mx-autoborder min-h-screen">
-                  <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <DialogContent className="flex flex-col w-full max-w-[500px] max-h-[450px] mx-autoborder">
+                  <div className={`p-6 rounded-lg shadow-lg w-full max-w-md ${GeistSans.className}`}>
                     <DialogHeader>
                       <DialogTitle>Today&#39;s Devotion</DialogTitle>
-                      <DialogDescription>
-                      &#39;&#39;Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.&#39;&#39; (Proverbs 3:5-6)
+                      <DialogDescription className={` ${GeistSans.className}`}>
+                        <p>&#39;&#39;Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.&#39;&#39; (Proverbs 3:5-6)</p>
                       </DialogDescription>
                     </DialogHeader>
                   </div>

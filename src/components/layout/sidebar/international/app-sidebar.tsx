@@ -54,12 +54,12 @@ const items = [
 ];
 
 const regions = [
-  { name: "Afrika", url: "https://example.com/afrika" },
-  { name: "Caribbean and North America", url: "https://example.com/caribbean" },
-  { name: "Europe", url: "https://example.com/europe" },
-  { name: "Latin America", url: "https://example.com/latin-america" },
-  { name: "Pacific And East Asia", url: "https://example.com/pacific-asia" },
-  { name: "South Asia And Middle East", url: "https://example.com/south-asia" }
+  { name: "Afrika", url: "https://ncfi.org/regions/africa/" },
+  { name: "Caribbean and North America", url: "https://ncfi.org/regions/caribbean-and-north-america/" },
+  { name: "Europe", url: "https://ncfi.org/regions/europe/" },
+  { name: "Latin America", url: "https://ncfi.org/regions/latin-america" },
+  { name: "Pacific And East Asia", url: "https://ncfi.org/regions/pacific-and-east-asia/" },
+  { name: "South Asia And Middle East", url: "https://ncfi.org/regions/south-asia-and-middle-east/" }
 ];
 
 const country = [

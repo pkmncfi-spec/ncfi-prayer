@@ -24,6 +24,9 @@ import { Bookmark, BookmarkCheck, ImageDown } from "lucide-react";
 import UploadImageForm from "~/components/UploadImageForm";
 import axios from "axios";
 import router from "next/router";
+import { FiSidebar } from "react-icons/fi";
+import { GoSidebarCollapse } from "react-icons/go";
+
 
 const db = getFirestore(app);
 
@@ -226,8 +229,8 @@ export default function HomePage() {
               <div>
                 <div className="flex flex-cols mt-3 mb-2">
                   <div className="">
-                  <SidebarTrigger />
-                                    </div>
+                    <SidebarTrigger />
+                  </div>
                   <div className="w-full items-center justify-center pr-7">
                     <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
                     <p className="text-sm text-center text-muted-foreground">PrayerLink</p>

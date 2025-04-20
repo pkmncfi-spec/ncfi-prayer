@@ -75,7 +75,7 @@ export default function AuthPage() {
                     void router.push("/login");
                     return;
                 }
-        
+                
                 await router.push("/" + userData?.role + "/home");
             } catch (error) {
             }
@@ -170,7 +170,7 @@ export default function AuthPage() {
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <main className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
+        <div className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4"> 
             <Card className="w-full max-w-[500px] self-center mb-4 border-gray-300">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Sign In</CardTitle>
@@ -238,7 +238,7 @@ export default function AuthPage() {
                 <p>Dont Have Account?<Link href="/register" className="font-bold text-blue-700 ml-1">Register</Link></p>
             </CardFooter>
             </Card>
-        </main>
+        </div>
         </>
     );
 }

@@ -37,6 +37,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-, "src/components/icon/ClockFading.ts"  ],
+, "src/components/icon/ClockFading.tsx"  ],
   "exclude": ["node_modules"]
 }

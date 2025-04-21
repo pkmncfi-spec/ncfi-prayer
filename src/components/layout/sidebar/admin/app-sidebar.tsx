@@ -28,12 +28,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { IoBookOutline } from "react-icons/io5";
 import ClockFading from '~/components/icon/ClockFading'; // Custom import path
 
 // Menu items.
 const items = [
   { title: "Home", url: "/admin/home", icon: Home },
   { title: "Users", url: "/admin/user", icon: Users },
+  { title: "Devotion", url: "/admin/devotion", icon: IoBookOutline},
   { title: "Activity", url: "/admin/activity", icon: ClockFading },
   { title: "Log Out", url: "/login", icon: LogOut },
 ];

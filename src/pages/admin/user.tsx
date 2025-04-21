@@ -1,6 +1,6 @@
 'use client';
 
-import Layout from "~/components/layout/sidebar-regional";
+import Layout from "~/components/layout/sidebar-admin";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -178,7 +178,15 @@ useEffect(() => {
       (updated[targetRole] ??= []).push(updatedUser);
       return updated;
     });
-  
+
+    if(targetRole === "regional"){
+      await updateDoc(doc(db, "users", user.id), {
+        regional: user.regional,
+        originalName: user.name,
+        name: user.country,
+      });
+    }
+    
     setActiveUser((prev) =>
       prev
         ? {

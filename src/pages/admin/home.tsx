@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"; 
 import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs, Timestamp } from "firebase/firestore";
 import { app } from "~/lib/firebase";
-import Layout from "~/components/layout/sidebar-member";
+import Layout from "~/components/layout/sidebar-admin";
 import { Separator } from "~/components/ui/separator";
 import { GeistSans } from "geist/font/sans";
 import { SidebarTrigger } from "~/components/ui/sidebar";

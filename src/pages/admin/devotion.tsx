@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, Timestamp } from "firebase/firestore";
-import { app } from "~/lib/firebase";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
+import axios from "axios";
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
+import { GeistSans } from "geist/font/sans";
+import { Plus } from "lucide-react";
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "~/components/layout/sidebar-admin";
+import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -13,16 +16,12 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "~/components/ui/sheet"
-import { GeistSans } from "geist/font/sans";
+} from "~/components/ui/sheet";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { useAuth } from "~/context/authContext";
-import Image from 'next/image';
+import { Textarea } from "~/components/ui/textarea";
 import UploadImageForm from "~/components/UploadImageForm";
-import axios from "axios";
-import {Plus} from "lucide-react";
-import { useRouter } from 'next/router'; 
-import Head from "next/head";
+import { useAuth } from "~/context/authContext";
+import { app } from "~/lib/firebase";
 
 const db = getFirestore(app);
 
@@ -30,13 +29,9 @@ export default function HomePage() {
   const [devotions, setDevotions] = useState<Array<{ id: string; title: string; text: string; postedAt: Date;}>>([]);
   const [text, setText] = useState("");
   const [title, setTitle] = useState("");
-  const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
-  const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
-  const [isOverflowing, setIsOverflowing] = useState<Record<string, boolean>>({});
   const [image, setImage] = useState<File | null>(null);
   const [loadings, setLoadings] = useState(false);
-  const [expandedPosts, setExpandedPosts] = useState<Record<string, boolean>>({});
   const paragraphRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
   const router = useRouter();
 
@@ -101,7 +96,7 @@ export default function HomePage() {
     };
 
     void fetchPosts();
-  }, [user, loading, tab]);
+  }, [user, loading]);
 
   function formatDate(date: Date): string {
     return new Intl.DateTimeFormat("en-US", {

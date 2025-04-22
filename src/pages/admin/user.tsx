@@ -37,7 +37,7 @@ type User = {
   isNew?: boolean; 
 };
 
-const validRoles = ["member", "regional", "internasional", "guest", "banned", "rejected"];
+const validRoles = ["member", "regional", "international", "guest", "banned", "rejected"];
 
 export default function SearchPage() {
   const [usersByRole, setUsersByRole] = useState<Record<string, User[]>>({});
@@ -63,7 +63,7 @@ useEffect(() => {
       const groupedUsers: Record<string, User[]> = {
         member: [],
         regional: [],
-        internasional: [],
+        international: [],
         guest: [],
         banned: [],
         rejected: [],
@@ -73,8 +73,8 @@ useEffect(() => {
         const data = docSnap.data();
         let role = data.role?.toLowerCase();
 
-        // Konversi 'international' jadi 'internasional'
-        if (role === "international") role = "internasional";
+        // Konversi 'international' jadi 'international'
+        if (role === "international") role = "international";
 
         const username = data.username ?? data.name ?? "Unknown";
 
@@ -292,7 +292,7 @@ useEffect(() => {
               if (users.length === 0) return null;
 
               const capitalizedRole =
-              role === "internasional"
+              role === "international"
                 ? "International"
                 : role === "banned"
                 ? "Banned Users"
@@ -453,9 +453,9 @@ useEffect(() => {
             </div>
 
             {/* Daftar Role */}
-            {["member", "regional", "internasional", "guest", "banned", "rejected"].map((role) => {
+            {["member", "regional", "international", "guest", "banned", "rejected"].map((role) => {
               const capitalizedRole =
-                role === "internasional"
+                role === "international"
                   ? "International"
                   : role.charAt(0).toUpperCase() + role.slice(1);
 
@@ -573,7 +573,7 @@ useEffect(() => {
           ) : (
             <div className="mt-2 space-y-3 text-sm">
               {["Member", "Regional", "International"].map((role) => {
-              const normalizedRole = role.toLowerCase() === "international" ? "internasional" : role.toLowerCase();
+              const normalizedRole = role.toLowerCase() === "international" ? "international" : role.toLowerCase();
 
               return (
                 <label key={role} className="flex items-center gap-2 cursor-pointer">

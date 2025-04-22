@@ -37,7 +37,7 @@ import { useState } from "react";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { FirebaseError } from "firebase/app";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { a } from "node_modules/framer-motion/dist/types.d-B50aGbjN";
+import Spinner from "react-loading";
 
 const db = getFirestore(app);
 
@@ -49,8 +49,11 @@ const formSchema = z.object({
 export default function AuthPage() {
     const [showPass, setShowPass] = useState<boolean>(false);
     const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [error, setError] = useState(false);
 
     const router = useRouter();
     const { user, loading } = useAuth();
@@ -68,11 +71,7 @@ export default function AuthPage() {
                 const userData = userDoc.data() as { role?: string };
     
                 if (!user?.emailVerified) {
-                    alert("Please verify your email before logging in.");
-                    void auth.signOut();
-                    await sendEmailVerification(user);
-                    setIsSubmitting(false);
-                    void router.push("/login");
+                    await router.push("/verify/" + user.uid);
                     return;
                 }
                 
@@ -93,7 +92,8 @@ export default function AuthPage() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        if (isSubmitting) return;
+        if (isSubmitting || isLoading) return; // Check if already submitting or loading
+        setIsLoading(true);
         setIsSubmitting(true);
     
         if (!values.email || !values.password) {
@@ -148,30 +148,28 @@ export default function AuthPage() {
                         alert(`Terjadi kesalahan. Kode error: ${e.code}. Silakan coba lagi.`);
                 }
             } else {
-                console.error(e); // Log the error for debugging
+                console.error("sdaosdasd" + e); // Log the error for debugging
                 alert("Terjadi kesalahan yang tidak diketahui.");
             }
         } finally {
             setIsSubmitting(false);
+            setIsLoading(false);
         }
     }
-    
-    
-
     const handleLoginGoogle = async () => {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
     };
 
     return (
-        <>
+        <div className="bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500">
         <Head>
             <title>NCFI Prayer</title>
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <div className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4"> 
-            <Card className="w-full max-w-[500px] self-center mb-4 border-gray-300">
+        <div className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
+            <Card className="w-full max-w-[500px] self-center mb-4 shadow-2xl">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Sign In</CardTitle>
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -216,7 +214,13 @@ export default function AuthPage() {
                                 </label>
                             </div>
                             <div className="pt-4">
-                                <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                                <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">
+                                {isLoading ? (
+                                        <Spinner color="white" height={20} width={20}/>
+                                    ) : (
+                                        <>Submit</>
+                                    )}
+                                </Button>
                             </div>
                         </form>
                         </Form>
@@ -232,13 +236,13 @@ export default function AuthPage() {
                 </div>
 
                 <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"}>
-                    <FcGoogle/> Login with Google (sementara blom)
+                    <FcGoogle/> Login with Google (currently not available)
                 </Button>
 
                 <p>Dont Have Account?<Link href="/register" className="font-bold text-blue-700 ml-1">Register</Link></p>
             </CardFooter>
             </Card>
         </div>
-        </>
+        </div>
     );
 }

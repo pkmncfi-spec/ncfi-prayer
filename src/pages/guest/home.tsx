@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
-import { app } from "~/lib/firebase";
+import { app, auth } from "~/lib/firebase";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import Layout from "~/components/layout/sidebar-guest";
@@ -24,6 +24,7 @@ import { Bookmark, BookmarkCheck, ImageDown } from "lucide-react";
 import UploadImageForm from "~/components/UploadImageForm";
 import axios from "axios";
 import router from "next/router";
+import { signOut } from "firebase/auth";
 
 const db = getFirestore(app);
 
@@ -43,10 +44,16 @@ export default function HomePage() {
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
   useEffect(() => {
+    const checkEmail = async () => {
+      if(!user?.emailVerified){
+        await signOut(auth);
+      }
+    }
     const setRoles = async () => {
       try {
         if (!user?.uid) return; // Ensure user ID is defined
         const userDoc = await getDoc(doc(db, "users", user.uid));
+
         const userData = userDoc.data() as { isVerified?: boolean };
         if (userData?.isVerified) {
           setIsVerified(userData.isVerified);
@@ -55,10 +62,9 @@ export default function HomePage() {
 
       }
     }
+    checkEmail();
     setRoles();
   })
-
-    
 
   return (
         <Layout>

@@ -15,6 +15,9 @@ import {
   CardTitle,
 } from "~/components/ui/card"
 
+import Spinner from "react-loading";
+
+
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -80,6 +83,8 @@ export default function RegisterPage() {
     const [showPass, setShowPass] = useState<boolean>(false);
     const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
     const { user, loading } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
+    
 
     useEffect(() => {
         if (loading) return; // Jangan redirect saat masih loading
@@ -99,6 +104,7 @@ export default function RegisterPage() {
         },
     })
     async function onSubmit(values: z.infer<typeof formSchema>){
+        setIsLoading(true);
         try{
             const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
             if(userCredential){
@@ -143,17 +149,20 @@ export default function RegisterPage() {
                     regional: regionals,
                 });
 
-                await signOut(auth);
+                // await signOut(auth);
                 
                 alert("Register successful!");
                 form.reset();
 
-                router.push("/login");
+                router.push("/verify/" + users.uid);
             } else {
+                alert("Please use a different email address.");
                 console.error('Failed to create user credential');
             }
         } catch(e){
             console.error(e);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -164,14 +173,14 @@ export default function RegisterPage() {
     };
 
     return (
-        <>
+        <div className="bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500">
         <Head>
             <title>NCFI Prayer</title>
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <main className="flex min-h-screen flex-col justify-center items-center mr-4 ml-4">
-            <Card className="w-full max-w-[500px] self-center mt-4 mb-4 border-gray-300">
+            <Card className="w-full max-w-[500px] self-center mt-4 mb-4 shadow-2xl">
             <CardHeader className="items-center">
                 <CardTitle className="font-bold text-2xl">Create Account</CardTitle> 
                 <CardDescription className="">NCFI Prayer</CardDescription>
@@ -297,7 +306,13 @@ export default function RegisterPage() {
                             </label>
                         </div>
                         <div className="pt-7">
-                            <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">Submit</Button>
+                            <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">
+                            {isLoading ? (
+                                    <Spinner color="white" height={20} width={20}/>
+                                ) : (
+                                    <>Submit</>
+                                )}
+                            </Button>
                         </div>
                     </form>
                     </Form>
@@ -313,13 +328,13 @@ export default function RegisterPage() {
                 </div>
 
                 <Button className="w-full mt-8 mb-10 hover:bg-primary/10" variant={"outline"}>
-                    <FcGoogle/> Register with Google (sementara blom)
+                    <FcGoogle/> Register with Google (currently not available)
                 </Button>
 
                 <p>Already Have an Account?<Link href="/login" className="font-bold text-blue-700 ml-1">Login</Link></p>
             </CardFooter>
             </Card>
         </main>
-        </>
+        </div>
     );
 }

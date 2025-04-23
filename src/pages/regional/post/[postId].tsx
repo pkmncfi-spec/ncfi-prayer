@@ -66,7 +66,7 @@ export default function PostPage() {
                         title: data.title,
                         text: data.text,
                         imageURL: data.imageURL,
-                        createdAt: data.createdAt?.toDate().toLocaleString(),
+                        createdAt: data.createdAt?.toDate().toISOString(),
                         status: data.status,
                         uid: data.uid,
                         postFor: data.postFor
@@ -268,12 +268,7 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">
-                            {post.createdAt && !isNaN(new Date(post.createdAt).getTime())
-                                ? formatDate(new Date(post.createdAt))
-                                : "Unknown date"}
-                            </p>
-
+                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>
                         </div>
                     ) : (
                         <p>Loading post...</p>

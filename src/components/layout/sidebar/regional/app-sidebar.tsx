@@ -44,7 +44,7 @@ import {
 // Menu items.
 const items = [
   { title: "Home", url: "/regional/home", icon: Home },
-  { title: "Search", url: "/regional/search", icon: Search },
+  // { title: "Search", url: "/regional/search", icon: Search },
   { title: "Bookmarks", url: "/regional/bookmarks", icon: Bookmark },
   { title: "Notification", url: "/regional/notification", icon: Bell },
   { title: "Help", url: "/regional/help", icon: Info },
@@ -101,7 +101,7 @@ export function AppSidebar() {
          <div className="mt-6 flex flex-col space-y-3">
             <Dialog>
               <DialogTrigger asChild>
-                <button className="px-4 py-3 border-2 border-gray-400 rounded-2xl text-center font-bold text-xl w-full transition-all duration-300 hover:bg-gray-300 active:scale-95">
+                <button onClick={() => router.push("/regional/devotion")} className="px-4 py-3 border-2 border-gray-400 rounded-2xl text-center font-bold text-xl w-full transition-all duration-300 hover:bg-gray-300 active:scale-95">
                   Today&#39;&#39;s Devotion
                 </button>
               </DialogTrigger>

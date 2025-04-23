@@ -44,7 +44,7 @@ import {
 // Menu items.
 const items = [
   { title: "Home", url: "/international/home", icon: Home },
-  { title: "Search", url: "/international/search", icon: Search },
+  // { title: "Search", url: "/international/search", icon: Search },
   { title: "Bookmarks", url: "/international/bookmarks", icon: Bookmark },
   { title: "Notification", url: "/international/notification", icon: Bell },
   { title: "Help", url: "/international/help", icon: Info },

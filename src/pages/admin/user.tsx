@@ -221,7 +221,7 @@ useEffect(() => {
   return (
     <Layout>
       <div
-        className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen`}
+        className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen scroll-y-auto`}
       >
         <div className="fixed w-full bg-white max-w-[598px]">
           <div className="flex flex-col w-full items-center justify-center">
@@ -243,7 +243,7 @@ useEffect(() => {
           <SearchBar onSearch={(query, pageType) => console.log(`Search query: ${query}, Page type: ${pageType}`)} />
           <Separator className="my-2" />
 
-          <div className="p-4">
+          <div className="p-4 scroll-y-auto">
           {validCurrentRole ? (
             <div className="mb-6">
               <h2 className="text-sm font-semibold mb-2">

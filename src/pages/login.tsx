@@ -79,7 +79,12 @@ export default function AuthPage() {
             } catch (error) {
             }
         }
-        void fetchUser();
+        
+        if (user) {
+            void fetchUser();
+        } else {
+            return;
+        }
     }, [user, loading, router, redirect]);
 
 

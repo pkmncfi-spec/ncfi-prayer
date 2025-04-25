@@ -18,7 +18,21 @@ const db = getFirestore(app);
 export default function RequestPage() {
   const [posts, setPosts] = useState<Array<{ id: string; text: string; name: string; createdAt: Date; uid: string; imageURL?: string | null }>>([]);
   const {user, loading} = useAuth();
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+          // Detect if the screen width is mobile
+      const handleResize = () => {
+          setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+      };
+
+      handleResize(); // Check on initial render
+      window.addEventListener("resize", handleResize); // Listen for window resize
+
+      return () => {
+          window.removeEventListener("resize", handleResize); // Cleanup listener
+      };
+  }, []);
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -96,21 +110,23 @@ export default function RequestPage() {
   return (
     <Layout>
           <Head>
-            <title>PrayerLink</title>
+            <title>Request</title>
             <meta name="description" content="Prayer app for NCFI" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
             <div className="fixed w-full bg-white border-b max-w-[598px]">
-              <div>
-                <div className="flex flex-cols mt-3 mb-2">
-                  <div className="">
+              <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
+              {isMobile ? (
+                <div className="ml-2 mt-1.5">
                   <SidebarTrigger />
-                  </div>
-                  <div className="w-full items-center justify-center pr-7">
-                    <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                    <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
-                  </div>
+                </div>
+              ) : (
+                <div className="ml-8 mt-1.5"></div>
+              )}
+                <div className="w-full items-center justify-center pr-9">
+                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+                  <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                 </div>
               </div>
             </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { getFirestore, collection, query, onSnapshot, orderBy, where, Timestamp } from "firebase/firestore";
 import { app } from "~/lib/firebase";
@@ -13,19 +11,34 @@ const db = getFirestore(app);
 
 interface Notification {
   id: string;
-  text: string;
+  message: string;
   uid: string;
   name: string;
-  status: string;
   createdAt?: Date;
 }
 
 export default function NotificationPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+            // Detect if the screen width is mobile
+      const handleResize = () => {
+          setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+      };
+
+      handleResize(); // Check on initial render
+      window.addEventListener("resize", handleResize); // Listen for window resize
+
+      return () => {
+          window.removeEventListener("resize", handleResize); // Cleanup listener
+      };
+  }, []);
 
   useEffect(() => {
     const fetchNotifications = async () => {
+      if (loading) return;
       if (!user?.uid) {
         console.error("User UID is undefined. Cannot fetch notifications.");
         return; // Exit the function if user.uid is undefined
@@ -33,7 +46,6 @@ export default function NotificationPage() {
   
       const q = query(
         collection(db, "notifications"),
-        where("uid", "==", user.uid), // Fetch notifications for the logged-in user
         orderBy("createdAt", "desc") // Order notifications by creation date
       );
   
@@ -42,10 +54,9 @@ export default function NotificationPage() {
           const data = doc.data() as Partial<Notification>;
           return {
             id: doc.id,
-            text: data.text ?? "No content",
+            message: data.message ?? "No content",
             uid: data.uid ?? "",
             name: data.name ?? "Unknown",
-            status: data.status ?? "",
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
           };
         });
@@ -55,8 +66,8 @@ export default function NotificationPage() {
       return () => unsubscribe(); // Cleanup the listener on unmount
     };
   
-    void fetchNotifications();
-  }, [user]);
+    fetchNotifications();
+  }, [user, loading]);
 
   function formatDate(date: Date): string {
     return new Intl.DateTimeFormat("en-US", {
@@ -70,19 +81,18 @@ export default function NotificationPage() {
     <Layout>
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
         {/* Fixed Header */}
-        <div className="fixed w-full bg-white max-w-[598px]">
-          <div>
-              <div className="flex flex-cols mt-2 mb-2">
-                <div className="">
-                <SidebarTrigger />
-                </div>
-                <div className="w-full items-center justify-center pr-7">
-                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                  <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
-                </div>
-            </div>
+        <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
+        {isMobile ? (
+          <div className="ml-2 mt-1.5">
+            <SidebarTrigger />
           </div>
-          <Separator className="my-0" />
+        ) : (
+          <div className="ml-8 mt-1.5"></div>
+        )}
+          <div className="w-full items-center justify-center pr-9">
+            <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+            <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
+          </div>
         </div>
 
         {/* Notifications List */}
@@ -93,14 +103,13 @@ export default function NotificationPage() {
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className="bg-white p-4 rounded-2xl w-full text-left transition-all duration-300 hover:bg-gray-100 active:scale-95 flex items-center space-x-3 mb-2"
+                className="bg-white p-2 rounded-2xl w-full text-left transition-all duration-300 hover:bg-gray-100 active:scale-95 flex items-center space-x-3 hover:cursor-pointer"
               >
                 <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
                 <div className="text-xs break-words w-full">
-                  <p className="font-semibold text-base">{notification.name}</p>
-                  <p>{notification.text}</p>
+                  <p className="font-semibold text-base">{notification.message}</p>
                   <p className="text-muted-foreground text-xs">
-                    &#x2022; {notification.createdAt ? formatDate(notification.createdAt) : "Unknown Date"}
+                    {notification.createdAt ? formatDate(notification.createdAt) : "Unknown Date"}
                   </p>
                 </div>
               </div>

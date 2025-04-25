@@ -42,7 +42,6 @@ export default function ProfilePage() {
               where("uid", "==", user.uid),
               where("status", "==", "posted"));
 
-        
               const unsubscribe = onSnapshot(queryCondition, (querySnapshot) => {
                 const postsData = querySnapshot.docs.map((doc) => {
                   const data = doc.data() as { text: string; uid: string; createdAt: unknown };
@@ -119,7 +118,7 @@ export default function ProfilePage() {
     return (
       <Layout>
         <Head>
-          <title>{fullName} - Profile</title>
+          <title>Profile - {fullName}</title>
           <meta name="description" content="User Profile Page" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -130,13 +129,13 @@ export default function ProfilePage() {
             <SidebarTrigger />
             <Separator className="my" />
             <div className="bg-gray-400 h-24 flex justify-center"></div>
-            <div className="relative flex flex-col items-right -mt-12 p-4">
+            <div className="relative flex flex-col items-right -mt-14 p-4">
               <div className="w-20 h-20 bg-gray-300 rounded-full"></div>
-              <h3 className="text-lg font-bold mt-2">{fullName}</h3>
-              <h3 className="text-sm font-semibold mt-2">Your Posts</h3>
+              <h3 className="text-xl font-bold mt-2">{fullName}</h3>
+              <h3 className="text-md font-semibold mt-2">Your Posts</h3>
               <Button
                 variant="ghost"
-                className="absolute top-16 right-1 -translate-y-1/2 p-2"
+                className="absolute top-16 right-1 -translate-y-1/2 mt-4 p-2"
                 onClick={() => setShowLogoutConfirm(true)}
               >
                 <LogOut className="w-5 h-5 text-gray-600" />
@@ -152,11 +151,11 @@ export default function ProfilePage() {
                 className="bg-white p-3 rounded-lg flex items-start border border-gray-300 shadow-sm mb-2"
               >
                 <div className="flex-1">
-                  <p className="font-bold text-sm">
+                  <p className="font-bold text-">
                     {post.name}{" "}
                     <span className="text-gray-500 font-normal">&#x2022; {formatDate(post.createdAt)}</span>
                   </p>
-                  <p className="text-gray-700 text-xs break-all">
+                  <p className="text-gray-700 text- break-all">
                     <p className="line-clamp-2">
                       {post.text}{" "}
                     </p>

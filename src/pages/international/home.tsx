@@ -192,7 +192,8 @@ export default function HomePage() {
         regional: (currentUser.data() as { regional?: string })?.regional,
         postFor: "international",
         country: (currentUser.data() as { country?: string })?.country,
-        imageURL: imageURL
+        imageURL: imageURL,
+        forInternational: true
       });
 
       alert("Prayer posted successfully!");

@@ -17,35 +17,28 @@ export async function middleware(request: NextRequest) {
   try {
     const pathname = request.nextUrl.pathname;
 
-    if (token && pathname.startsWith("/login")) {
-      console.warn("Auth token is undefined");
-      return NextResponse.redirect(new URL("/regional/home", request.url));
-    }
     // Verify the token using the Edge-compatible function
     const userData: VerifyTokenOutput = await verifyTokenOnEdge(token);
-
-    console.log( "asdasda", request.nextUrl.pathname);
-
     // Redirect guests trying to access restricted areas
     if (pathname.startsWith("/member") && userData.role !== "member") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/"+userData.role+"/home", request.url));
     }
     else if (pathname.startsWith("/regional") && userData.role !== "regional") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/"+userData.role+"/home", request.url));
     }
     else if (pathname.startsWith("/international") && userData.role !== "international") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/"+userData.role+"/home", request.url));
     }
     else if (pathname.startsWith("/admin") && userData.role !== "admin") {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+      return NextResponse.redirect(new URL("/"+userData.role+"/home", request.url));
     }
     else if (pathname.startsWith("/login") && userData) {
       console.warn("Unauthorized access attempt by non-guest user");
-      return NextResponse.redirect(new URL("/regional/home", request.url));
+      return NextResponse.redirect(new URL("/"+userData.role+"/home", request.url));
     }
 
     // Allow the request to proceed
@@ -57,7 +50,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/member/:path*", "/regional/:path*", "/admin/:path*"],
+  matcher: ["/member/:path*", "/regional/:path*", "/admin/:path*", "/international/:path*"],
 };
 
 // Lightweight token verification function for Edge Runtime

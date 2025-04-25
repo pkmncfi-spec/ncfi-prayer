@@ -1,24 +1,21 @@
+import { Dialog } from "@radix-ui/react-dialog";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { GeistSans } from "geist/font/sans";
+import { Bookmark, BookmarkCheck } from "lucide-react";
+import Head from "next/head";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
-import Head from "next/head";
-import Layout from "~/components/layout/sidebar-regional";
-import { SidebarTrigger } from "~/components/ui/sidebar";
-import Image from "next/image";
-import { app } from "~/lib/firebase";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import { HiDotsVertical } from "react-icons/hi";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogClose, DialogContent, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
-import { GeistSans } from "geist/font/sans";
-import { useAuth } from "~/context/authContext";
-import { FaShareFromSquare } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
+import { FaShareFromSquare } from "react-icons/fa6";
+import { HiDotsVertical } from "react-icons/hi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
-import { Bookmark, BookmarkCheck } from "lucide-react";
-import { set } from "zod";
-import { is } from "immutable";
+import Layout from "~/components/layout/sidebar-regional";
+import { Button } from "~/components/ui/button";
+import { DialogClose, DialogContent, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
+import { useAuth } from "~/context/authContext";
+import { app } from "~/lib/firebase";
 
 const db = getFirestore(app);
 
@@ -33,12 +30,12 @@ export default function PostPage() {
         status?: string;
         uid?: string;
         postFor?: string;
+        forInternational?: boolean
     } | null>(null);
     const [isMobile, setIsMobile] = useState(false);
     const { user } = useAuth(); // Assuming you have a user context or auth provider
     const [userName, setUserName] = useState<string | null>(null); // State to store user role
-    const [prayerFor, setPrayerFor] = useState("");
-    const [bookmarkedPosts, setBookmarkedPosts] = useState<Array<{ id: string; text: string; createdAt: Date; name: string }>>([]);
+    const [prayerFor, setPrayerFor] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
@@ -69,7 +66,8 @@ export default function PostPage() {
                         createdAt: data.createdAt?.toDate().toISOString(),
                         status: data.status,
                         uid: data.uid,
-                        postFor: data.postFor
+                        postFor: data.postFor,
+                        forInternational: data.forInternational
                     });
                 } else {
                     console.error("Post not found");
@@ -77,22 +75,10 @@ export default function PostPage() {
             } catch (error) {
                 console.error("Error fetching post:", error);
             }
+
+            fetchPostUserName();
         };
 
-        const fetchUser = async () => {
-            try {
-                if (!user?.uid) return; // Ensure user is logged in
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    setUserName(userData.name); // Set the user name from the fetched data
-                } else {
-                    console.error("User not found");
-                }
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            }
-        };
 
         const fetchBookmarkedPosts = async () => {
             try {
@@ -119,11 +105,26 @@ export default function PostPage() {
             }
         };
 
+        const fetchPostUserName = async () => {
+            if (!post?.uid) {
+                return;
+            }
+            try {
+                const postDoc = await getDoc(doc(db, "users", post.uid as string));
+                if (postDoc.exists()) {
+                    setUserName(postDoc.data().name);
+                } else {
+                    console.error("Post not found");
+                }
+            } catch (error) {
+                console.error("Error fetching post name:", error);
+            }
+        }
+        
         fetchBookmarkedPosts();
-        setPrayerFor(post?.postFor || "");
-        fetchUser();
+        setPrayerFor(post?.forInternational || false);
         fetchPost();
-    }, [router.isReady, postId, user?.uid, post?.postFor]);
+    }, [router.isReady, postId, user?.uid, post?.postFor, post?.forInternational, post?.uid]);
 
     function formatDate(date: Date): string {
         return new Intl.DateTimeFormat("en-US", {
@@ -136,7 +137,7 @@ export default function PostPage() {
     const shareForInternational = async (postId: string) => {
         try {
           // Update the prayer request status to "posted"
-          await updateDoc(doc(db, "posts", postId), { status: "requested", postFor: "international" });
+          await updateDoc(doc(db, "posts", postId), { forInternational: true });
           alert("Prayer request shared for international!");
           console.log("Prayer request accepted!");
         } catch (error) {
@@ -223,7 +224,7 @@ export default function PostPage() {
                     <DialogContent className={`${GeistSans.className} max-w-[350px]`}>
                         <DialogDescription className="mt-6">
                             <DialogClose className="w-full">
-                                    {prayerFor === "regional" && (
+                                    {!prayerFor && (
                                         <Button variant={"outline"} onClick={() => shareForInternational(postId as string)} className="h-14 border-gray-500 text-xl w-full mb-6 hover:bg-gray-200 active:bg-primary/30">
                                             <FaShareFromSquare /> Share for International
                                         </Button>
@@ -268,7 +269,7 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">"Unknown date</p>
+                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>                        
                         </div>
                     ) : (
                         <p>Loading post...</p>

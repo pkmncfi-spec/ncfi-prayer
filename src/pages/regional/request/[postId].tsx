@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { addDoc, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import Head from "next/head";
 import Layout from "~/components/layout/sidebar-regional";
 import { SidebarTrigger } from "~/components/ui/sidebar";
@@ -18,6 +18,7 @@ import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { FaRegWindowClose } from "react-icons/fa";
+import { set } from "zod";
 
 const db = getFirestore(app);
 
@@ -37,6 +38,7 @@ export default function PostPage() {
     const { user } = useAuth(); // Assuming you have a user context or auth provider
     const [userName, setUserName] = useState<string | null>(null); // State to store user role
     const [prayerFor, setPrayerFor] = useState("");
+    const [users, setUsers] = useState("");
 
     useEffect(() => {
         // Detect if the screen width is mobile
@@ -74,7 +76,24 @@ export default function PostPage() {
             } catch (error) {
                 console.error("Error fetching post:", error);
             }
+            fetchPostUserName();
         };
+
+        const fetchPostUserName = async () => {
+            if (!post?.uid) {
+                return;
+            }
+            try {
+                const postDoc = await getDoc(doc(db, "users", post.uid as string));
+                if (postDoc.exists()) {
+                    setUserName(postDoc.data().name);
+                } else {
+                    console.error("Post not found");
+                }
+            } catch (error) {
+                console.error("Error fetching post name:", error);
+            }
+        }
 
         const fetchUser = async () => {
             try {
@@ -82,7 +101,7 @@ export default function PostPage() {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    setUserName(userData.name); // Set the user name from the fetched data
+                    setUsers(userData.name); // Set the user name from the fetched data
                 } else {
                     console.error("User not found");
                 }
@@ -91,11 +110,11 @@ export default function PostPage() {
             }
         };
 
-        setPrayerFor(post?.postFor || "");
         fetchUser();
+        setPrayerFor(post?.postFor || "");
         fetchPost();
         
-    }, [router.isReady, postId, user?.uid, post?.postFor]);
+    }, [router.isReady, postId, user?.uid, post?.postFor, post?.uid]);
 
     function formatDate(date: Date): string {
         return new Intl.DateTimeFormat("en-US", {
@@ -108,7 +127,12 @@ export default function PostPage() {
     const acceptPrayer = async (postId: string) => {
         try {
           // Update the prayer request status to "posted"
-          await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "regional", uid: user?.uid, createdAt: new Date()});
+          await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "regional", uid: user?.uid, createdAt: new Date(), forInternational: false});
+        //   await addDoc(collection(db, "notifications"), { 
+        //     uid: post?.uid, 
+        //     message: "Your prayer request has been accepted by "+ users + "'s admin", 
+        //     createdAt: new Date() 
+        //   });
           alert("Prayer request accepted!");
           router.back();
           console.log("Prayer request accepted!");
@@ -124,6 +148,11 @@ export default function PostPage() {
     const deletePost = async (postId: string) => {
         try {
             await updateDoc(doc(db, "posts", postId), { status: "rejected" });
+            // await addDoc(collection(db, "notifications"), { 
+            //     uid: post?.uid, 
+            //     message: "Your prayer request has been accepted by "+ users + "'s admin", 
+            //     createdAt: new Date()
+            // });
             router.back();
             console.log("Post deleted successfully!");
         } catch (error) {
@@ -192,7 +221,7 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">"Unknown date</p>
+                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>
                             </div>
                     ) : (
                         <p>Loading post...</p>

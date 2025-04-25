@@ -4,9 +4,25 @@ import * as React from "react";
 import Head from "next/head";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "~/components/ui/accordion";
 import Image from 'next/image';
-import { Separator } from "~/components/ui/separator";
+
+import { useEffect, useState } from "react";
 
 export default function HelpPage() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+          // Detect if the screen width is mobile
+      const handleResize = () => {
+          setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+      };
+
+      handleResize(); // Check on initial render
+      window.addEventListener("resize", handleResize); // Listen for window resize
+
+      return () => {
+          window.removeEventListener("resize", handleResize); // Cleanup listener
+      };
+  }, []);
   return (
     <Layout>
       <Head>
@@ -14,20 +30,23 @@ export default function HelpPage() {
         <meta name="description" content="User Help Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+    
       
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
         {/* Header */}
-        <div className="sticky top-2 bg-white w-full z-10 py-3">
-          <div className="flex items-center justify-between px-4">
+        <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
+        {isMobile ? (
+          <div className="ml-2 mt-1.5">
             <SidebarTrigger />
-            <div className="w-full items-center justify-center pr-7">
-              <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
-            </div>
+          </div>
+        ) : (
+          <div className="ml-8 mt-1.5"></div>
+        )}
+          <div className="w-full items-center justify-center pr-9">
+            <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+            <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
           </div>
         </div>
-
-        <Separator className="my-2" />
 
         {/* Accordion Section */}
         <Accordion type="multiple" className="w-full">

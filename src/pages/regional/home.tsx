@@ -241,7 +241,7 @@ export default function HomePage() {
             <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
                 <div className="flex flex-cols mt-3 mb-2">
-                  {isMobile ? (<div className="ml-4 mt-1.5">
+                  {isMobile ? (<div className="ml-2 mt-1.5">
                     <SidebarTrigger />
                   </div>): (<div className="ml-10 mt-1.5"></div>)}
                   <div className="w-full items-center justify-center pr-10">

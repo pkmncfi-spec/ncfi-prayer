@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { getFirestore, collection, addDoc, query, onSnapshot, getDoc, doc, orderBy, where, deleteDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
-import { app } from "~/lib/firebase";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
+import axios from "axios";
+import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp, where } from "firebase/firestore";
+import { GeistSans } from "geist/font/sans";
+import Head from "next/head";
+import Image from 'next/image';
+import router from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { FaLinesLeaning } from "react-icons/fa6";
 import Layout from "~/components/layout/sidebar-international";
+import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import {
   Sheet,
@@ -13,15 +17,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "~/components/ui/sheet"
-import { GeistSans } from "geist/font/sans";
+} from "~/components/ui/sheet";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { useAuth } from "~/context/authContext";
-import Image from 'next/image';
-import Head from "next/head";
+import { Textarea } from "~/components/ui/textarea";
 import UploadImageForm from "~/components/UploadImageForm";
-import axios from "axios";
-import router from "next/router";
+import { useAuth } from "~/context/authContext";
+import { app } from "~/lib/firebase";
+
 
 const db = getFirestore(app);
 
@@ -31,21 +33,35 @@ export default function HomePage() {
   const [title, setTitle] = useState("");
   const [tab, setTab] = useState<"regional" | "international">("regional");
   const { user, loading } = useAuth();
-  const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
   const [isOverflowing, setIsOverflowing] = useState<Record<string, boolean>>({});
-  const [imageURL, setImageURL] = useState<string>("");
   const paragraphRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
   const [image, setImage] = useState<File | null>(null);
   const [loadings, setLoadings] = useState(false);
-
+  const [isMobile, setIsMobile] = useState(false);
+  const [username, setUsername] = useState("");
+  const [userRegional, setUserRegional] = useState("");
+  
+  useEffect(() => {
+          // Detect if the screen width is mobile
+          const handleResize = () => {
+              setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+          };
+  
+          handleResize(); // Check on initial render
+          window.addEventListener("resize", handleResize); // Listen for window resize
+  
+          return () => {
+              window.removeEventListener("resize", handleResize); // Cleanup listener
+          };
+  }, []);
+  
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         if (!user?.uid) return; // Ensure user ID is defined
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const regional = (userDoc.data() as { regional?: string })?.regional;
-        console.log("User Regional:", regional);
-
+        
         if (!regional && tab === "regional") {
           console.warn("Regional value is undefined for the user.");
           setPosts([]); // Clear posts if regional is undefined
@@ -101,22 +117,19 @@ export default function HomePage() {
       }
     };
 
-    const fetchBookmarkedPosts = async () => {
-      if(user?.uid === undefined) return;
+    const fetchUserName = async () => {
+      if (!user?.uid) return; // Ensure user ID is defined
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data() as { name?: string; regional?: string };
+      setUsername(userData?.name ?? "Unknown User");
+      setUserRegional(userData?.regional ?? "");
+    }
 
-      const bookmarksQuery = query(
-        collection(db, "bookmarks"),
-        where("uid", "==", user.uid)
-      );
+    fetchUserName();
+    void fetchPosts();
+  }, [user, loading, tab]);
 
-      const unsubscribe = onSnapshot(bookmarksQuery, (querySnapshot) => {
-        const bookmarkedIds = querySnapshot.docs.map((doc) => (doc.data() as { postId: string }).postId);
-        setBookmarkedPosts(bookmarkedIds); // Update the state with bookmarked post IDs
-      });
-
-      return unsubscribe;
-    };
-
+  useEffect(() => {
     const checkOverflow = () => {
       const newOverflowState: Record<string, boolean> = {};
       Object.entries(paragraphRefs.current).forEach(([postId, element]) => {
@@ -127,11 +140,9 @@ export default function HomePage() {
       });
       setIsOverflowing(newOverflowState);
     };
-
+  
     checkOverflow();
-    void fetchBookmarkedPosts();
-    void fetchPosts();
-  }, [user, loading, tab, posts]);
+  }, [posts]); 
 
   function formatDate(date: Date): string {
     return new Intl.DateTimeFormat("en-US", {
@@ -196,6 +207,13 @@ export default function HomePage() {
         forInternational: true
       });
 
+      await addDoc(collection(db, "notifications"), { 
+          uid: user?.uid,
+          regional: (currentUser.data() as { regional?: string })?.regional,
+          message: username + " has posted a prayer request", 
+          createdAt: new Date()
+      });
+
       alert("Prayer posted successfully!");
       setTitle("");
       setText("");
@@ -223,22 +241,22 @@ export default function HomePage() {
             <div className="fixed w-full bg-white max-w-[598px] top-0">
               <div>
                 <div className="flex flex-cols mt-3 mb-2">
-                  <div className="">
-                  <SidebarTrigger className="!h-8 !w-8"/>
-                  </div>
-                  <div className="w-full items-center justify-center pr-7">
+                  {isMobile ? (<div className="ml-2 mt-1.5">
+                    <SidebarTrigger />
+                  </div>): (<div className="ml-10 mt-1.5"></div>)}
+                  <div className="w-full items-center justify-center pr-10">
                     <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
                     <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                   </div>
                 </div>
                 <Separator className="mb-4 w-full" />
                 <div className="flex h-1 mb-[1px] items-center justify-between gap-x-4 text-sm w-full mx-auto">
-                  <button onClick={regionalTab} className={`ml-4 flex-1 py-2 transition-all ${
+                  <button onClick={() => regionalTab()} className={`ml-4 flex-1 py-2 transition-all ${
                     tab === "regional"
                     ? "w-full border-b-[4px] border-blue-500 font-semibold"
                     : ""
                     }`}>Regional</button>
-                  <button onClick={internationalTab} className={`mr-4 flex-1 py-2 transition-all ${
+                  <button onClick={() => internationalTab()} className={`mr-4 flex-1 py-2 transition-all ${
                     tab === "international"
                     ? "w-full border-b-[4px] border-blue-500 font-semibold"
                     : ""
@@ -246,9 +264,11 @@ export default function HomePage() {
                 </div>
               </div>
               <Separator className="my-4 w-full" />
-              <div>
+              <div className="">
                 <Sheet>
-                  <SheetTrigger className="w-full text-gray-500">Post Prayer Here ......</SheetTrigger>
+                  {tab === "international" && 
+                    <SheetTrigger className="w-full text-gray-500 border-b pb-4">Post Prayer Here ......</SheetTrigger>
+                  }
                   <SheetContent className={`w-full ${GeistSans.className} overflow-y-scroll`}>  
                     <SheetHeader>
                       <SheetTitle>Post Prayer</SheetTitle>
@@ -279,8 +299,9 @@ export default function HomePage() {
                   </SheetContent>
                 </Sheet>            
               </div>
-              <Separator className="mt-4 w-full" />
             </div>
+            
+            {tab === "international" ? (
             <div className="justify-center pt-40 w-full flex flex-col transition-all">
         <div>
           {posts.map((post) => (
@@ -329,7 +350,58 @@ export default function HomePage() {
                             </div>
                     ))}
         </div>
+
       </div>
+      ):(<div className="justify-center pt-28 w-full flex flex-col transition-all">
+        <div>
+          {posts.map((post) => (
+                        
+                            <div key={post.id} className="grid grid-cols-[40px_1fr] items-start border-b pb-2 pt-2">
+                              <div>
+                              <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
+                              </div>
+                              <button onClick={() => handleSeeMore(post.id)} className="hover:cursor-pointer">
+                              <div className="pl-4">
+                                <div className="flex gap-1 items-center">
+                                  <p className="font-bold text-lg">{post.name}</p>
+                                  <p className="flex pr-10 text-muted-foreground">
+                                    &#x2022; {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown Date"}
+                                  </p>
+                                </div>
+                                <p className="text-left font-semibold text-gray-700 whitespace-normal break-all pr-10">
+                                  {post.title ? post.title : "No Title"}
+                                </p>
+                                <p
+                                  ref={(el) => {
+                                    paragraphRefs.current[post.id] = el;
+                                  }}
+                                  className="text-left  whitespace-normal break-all overflow-hidden pr-10 line-clamp-3"
+                                >
+                                  {post.text}
+                                </p>
+                                
+                                {isOverflowing[post.id] && <p className="text-left  text-blue-500 hover:underline hover:cursor-pointer">...see more</p>}
+          
+                                {post.imageURL ? (
+                                  <div className="w-full mt-2 pr-10">
+                                    <Image
+                                      src={post.imageURL}
+                                      alt="Post Image"
+                                      width={500}
+                                      height={300}
+                                      className="text-left rounded-lg object-cover max-h-[200px] mb-2"
+                                    />
+                                  </div>
+                                ):(<></>)}
+                              </div>
+                              
+                              </button>
+                              
+                            </div>
+                    ))}
+        </div>
+
+      </div>)}
       </div>
     </Layout>
   );

@@ -56,7 +56,7 @@ export default function PostPage() {
         if (!router.isReady || !postId) return; // Wait until the router is ready
         const fetchPost = async () => {
             try {
-                const postDoc = await getDoc(doc(db, "devotions", postId as string));
+                const postDoc = await getDoc(doc(db, "posts", postId as string));
                 if (postDoc.exists()) {
                     const data = postDoc.data();
                     setPost({

@@ -132,7 +132,7 @@ export default function RequestPage() {
                 {posts.length === 0 && <p className="mt-2 text-center text-muted-foreground">No prayer requests</p>}
                 {posts.map((post) => (
                   <div key={post.id} className="border-b-[1px] py-2 w-full">
-                    <button onClick={() => handleRequest(post.id)} className="w-[600px] align-left">
+                    <button onClick={() => handleRequest(post.id)} className="w-full align-left">
                     <div className="grid grid-cols-[40px_1fr] items-start">
                       <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                       <div className="pl-4 text-left text-s">

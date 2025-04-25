@@ -203,6 +203,12 @@ export default function SearchPage() {
         originalName: user.name,
         name: user.country,
       });
+    } else if(targetRole === "international"){
+      await updateDoc(doc(db, "users", user.id), {
+        regional: user.regional,
+        originalName: user.name,
+        name: "International",
+      });
     }
     
     setActiveUser((prev) =>

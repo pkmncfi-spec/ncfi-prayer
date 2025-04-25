@@ -109,7 +109,7 @@ export default function RequestPage() {
     <Layout>
           <Head>
             <title>Request</title>
-            <meta name="description" content="Prayer app for NCFI" />
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">

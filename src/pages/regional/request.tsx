@@ -109,28 +109,28 @@ export default function RequestPage() {
     <Layout>
           <Head>
             <title>Request</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <meta name="description" content="User Post Page" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-              <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
-              {isMobile ? (
-                <div className="ml-2 mt-1.5">
-                  <SidebarTrigger />
-                </div>
-              ) : (
-                <div className="ml-8 mt-1.5"></div>
-              )}
-                <div className="w-full items-center justify-center pr-9">
-                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
-                  <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
+              <div className="fixed w-full bg-white max-w-[598px] top-0 border-b">
+                <div>
+                  <div className="flex flex-cols mt-3 mb-2">
+                    {isMobile ? (<div className="ml-2 mt-1.5">
+                      <SidebarTrigger />
+                    </div>): (<div className="ml-10 mt-1.5"></div>)}
+                    <div className="w-full items-center justify-center pr-10">
+                      <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
+                      <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
+                    </div>
+                  </div>
                 </div>
               </div>
                 <div className="pt-16 w-full flex flex-col transition-all">
                 {posts.length === 0 && <p className="mt-2 text-center text-muted-foreground">No prayer requests</p>}
                 {posts.map((post) => (
                   <div key={post.id} className="border-b-[1px] py-2 w-full">
-                    <button onClick={() => handleRequest(post.id)} className="w-[600px] align-left">
+                    <button onClick={() => handleRequest(post.id)} className="w-full align-left">
                     <div className="grid grid-cols-[40px_1fr] items-start">
                       <Image src="/image.png" alt="NFCI Prayer" width="30" height="30" className="rounded-full ml-5 mt-1" />
                       <div className="pl-4 text-left text-s">

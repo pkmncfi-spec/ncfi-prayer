@@ -42,7 +42,7 @@ import {
 // Menu items.
 const items = [
   { title: "Home", url: "/member/home", icon: Home },
-  // { title: "Search", url: "/member/search", icon: Search },
+  { title: "Search", url: "/member/search", icon: Search },
   { title: "Bookmarks", url: "/member/bookmarks", icon: Bookmark },
   { title: "Notification", url: "/member/notification", icon: Bell },
   { title: "Help", url: "/member/help", icon: Info },

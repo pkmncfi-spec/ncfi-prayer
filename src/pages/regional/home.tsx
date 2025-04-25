@@ -204,7 +204,7 @@ export default function HomePage() {
         postFor: "regional",
         country: (currentUser.data() as { country?: string })?.country,
         imageURL: imageURL,
-        forInternational: FaLinesLeaning
+        forInternational: false
       });
 
       await addDoc(collection(db, "notifications"), { 

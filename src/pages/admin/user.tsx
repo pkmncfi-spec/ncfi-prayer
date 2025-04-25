@@ -17,8 +17,7 @@ import {
 } from "~/components/ui/sheet";
 import {Dialog, DialogContent,DialogHeader,DialogTitle } from "~/components/ui/dialog";
 import { GeistSans } from "geist/font/sans";
-import { EllipsisVertical, Ban, SquarePlus, SlidersHorizontal, X } from "lucide-react";
-import SearchBar from "~/components/ui/searchbar";
+import { EllipsisVertical, Ban, SquarePlus, SlidersHorizontal, X, Search } from "lucide-react";
 import { useRouter } from "next/router";
 import { useSearchParams } from 'next/navigation';
 
@@ -41,86 +40,106 @@ const validRoles = ["member", "regional", "international", "guest", "banned", "r
 
 export default function SearchPage() {
   const [usersByRole, setUsersByRole] = useState<Record<string, User[]>>({});
-  const [open, setOpen] = useState(false); // untuk user detail sheet
-  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false); // untuk slider settings sheet
+  const [filteredUsers, setFilteredUsers] = useState<Record<string, User[]>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [confirmBan, setConfirmBan] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentRole = searchParams.get("role");
-  const validCurrentRole = currentRole && validRoles.includes(currentRole) ? currentRole : null;
+  const validCurrentRole = currentRole && validRoles.includes(currentRole) ? currentRole : "all";
   const [confirmRoleDialogOpen, setConfirmRoleDialogOpen] = useState(false);
   const [pendingRoleChange, setPendingRoleChange] = useState<{
     user: User;
     newRole: string;
   } | null>(null);
 
-useEffect(() => {
-  const fetchAllUsers = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const groupedUsers: Record<string, User[]> = {
-        member: [],
-        regional: [],
-        international: [],
-        guest: [],
-        banned: [],
-        rejected: [],
-      };
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "users"));
+        const groupedUsers: Record<string, User[]> = {
+          member: [],
+          regional: [],
+          international: [],
+          guest: [],
+          banned: [],
+          rejected: [],
+        };
 
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        let role = data.role?.toLowerCase();
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          let role = data.role?.toLowerCase();
 
-        // Konversi 'international' jadi 'international'
-        if (role === "international") role = "international";
+          if (role === "international") role = "international";
 
-        const username = data.username ?? data.name ?? "Unknown";
+          const username = data.username ?? data.name ?? "Unknown";
 
-        if (typeof role === "string" && validRoles.includes(role)) {
-          const user: User = {
-            id: docSnap.id,
-            username,
-            role,
-            name: data.name,
-            dateOfBirth: data.dateOfBirth,
-            email: data.email,
-            gender: data.gender,
-            regional: data.regional,
-            country: data.country,
-            isVerified: data.isVerified ?? false,
-            unbanned: data.unbanned ?? false,
-            isNew: data.isNew ?? false,
-          };
+          if (typeof role === "string" && validRoles.includes(role)) {
+            const user: User = {
+              id: docSnap.id,
+              username,
+              role,
+              name: data.name,
+              dateOfBirth: data.dateOfBirth,
+              email: data.email,
+              gender: data.gender,
+              regional: data.regional,
+              country: data.country,
+              isVerified: data.isVerified ?? false,
+              unbanned: data.unbanned ?? false,
+              isNew: data.isNew ?? false,
+            };
 
-          (groupedUsers[role] ??= []).push(user);
+            (groupedUsers[role] ??= []).push(user);
 
-          // Perbarui status isNew dan unbanned jika perlu
-          const updates: Partial<User> = {};
+            const updates: Partial<User> = {};
 
-          if (role !== "guest" && data.isNew === true) {
-            updates.isNew = false;
-          }
+            if (role !== "guest" && data.isNew === true) {
+              updates.isNew = false;
+            }
 
-          if (role !== "guest" && data.unbanned === true) {
-            updates.unbanned = false;
-          }
+            if (role !== "guest" && data.unbanned === true) {
+              updates.unbanned = false;
+            }
 
-          if (Object.keys(updates).length > 0) {
-            await updateDoc(doc(db, "users", docSnap.id), updates);
+            if (Object.keys(updates).length > 0) {
+              await updateDoc(doc(db, "users", docSnap.id), updates);
+            }
           }
         }
+
+        setUsersByRole(groupedUsers);
+        setFilteredUsers(groupedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
       }
+    };
 
-      setUsersByRole(groupedUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    fetchAllUsers();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredUsers(usersByRole);
+    } else {
+      const filtered: Record<string, User[]> = {};
+      const query = searchQuery.toLowerCase();
+
+      Object.keys(usersByRole).forEach((role) => {
+        filtered[role] = usersByRole[role]?.filter(
+          (user) =>
+            user.username.toLowerCase().includes(query) ||
+            (user.name && user.name.toLowerCase().includes(query))
+        ) || [];
+      });
+
+      setFilteredUsers(filtered);
     }
-  };
-
-  fetchAllUsers();
-}, []);
+  }, [searchQuery, usersByRole]);
 
   const updateUserRoleInDatabase = async (
     userId: string,
@@ -156,8 +175,7 @@ useEffect(() => {
     newRole: string,
     unbanned = false
   ) => {
-    // Jika role sebelumnya banned dan sekarang di-unban, langsung jadikan member
-    const targetRole = user.role === "banned" && unbanned ? "guest" : newRole;
+    const targetRole = user.role === "banned" && unbanned ? "member" : newRole;
   
     await updateUserRoleInDatabase(user.id, targetRole);
   
@@ -171,7 +189,7 @@ useEffect(() => {
       const updatedUser: User = {
         ...user,
         role: targetRole,
-        unbanned: false, // sudah tidak perlu status unbanned
+        unbanned: false,
         isNew: targetRole === "member",
       };
   
@@ -218,117 +236,227 @@ useEffect(() => {
     }
   };
 
+  const handleRoleFilter = (role: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (role === "all") {
+      newParams.delete("role");
+    } else {
+      newParams.set("role", role);
+    }
+    router.push(`?${newParams.toString()}`);
+  };
+
+  const getTotalUsers = () => {
+    return Object.values(usersByRole).reduce((acc, users) => acc + users.length, 0);
+  };
+
   return (
     <Layout>
-      <div
-        className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen scroll-y-auto`}
-      >
-        <div className="fixed w-full bg-white max-w-[598px]">
-          <div className="flex flex-col w-full items-center justify-center">
-            <div className="sticky top-3 bg-white w-full z-10 py-3">
-              <div className="flex items-center justify-between px-4">
-                <SidebarTrigger />
-                <div className="flex flex-col items-center justify-center pr-7 w-full">
-                  <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto"/>
-                  <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
+      <div className="flex justify-center w-full">
+        <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
+          <div className="fixed w-full bg-white max-w-[598px] top-0">
+            <div className="flex flex-col w-full items-center justify-center">
+              <div className="sticky top-0 bg-white w-full z-10 py-3">
+                <div className="flex items-center justify-between px-4">
+                  <SidebarTrigger />
+                  <div className="flex flex-col items-center justify-center pr-7 w-full">
+                    <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto"/>
+                    <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
+                  </div>
+                  <button onClick={() => setSettingsSheetOpen(true)}>
+                    <SlidersHorizontal className="mr-2 h-5 w-5 text-gray-600 rounded-md hover:bg-gray-100 transition" />
+                  </button>
                 </div>
-                <button onClick={() => setSettingsSheetOpen(true)}>
-                  <SlidersHorizontal className="mr-2 h-5 w-5 text-gray-600  rounded-md hover:bg-gray-100 transition" />
-                </button>
+                <div className="w-full h-4 border-b border-gray-300"></div>
               </div>
-              <div className="w-full h-4 border-b border-gray-300"></div>
+            </div>
+
+            {/* Custom Search Bar */}
+            <div className="relative px-4 py-2">
+              <div className="absolute inset-y-0 left-6 flex items-center pl-3 pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Separator className="my-2" />
+
+            {/* Horizontal Role Filter Buttons */}
+            <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar">
+              <button
+                onClick={() => handleRoleFilter("all")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "all" 
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => handleRoleFilter("member")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "member"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Member
+              </button>
+              <button
+                onClick={() => handleRoleFilter("regional")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "regional"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Regional
+              </button>
+              <button
+                onClick={() => handleRoleFilter("international")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "international"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                International
+              </button>
+              <button
+                onClick={() => handleRoleFilter("guest")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "guest"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Guest
+              </button>
+              <button
+                onClick={() => handleRoleFilter("banned")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "banned"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Banned
+              </button>
+              <button
+                onClick={() => handleRoleFilter("rejected")}
+                className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
+                  validCurrentRole === "rejected"
+                    ? "bg-blue-500 text-white border-blue-500" 
+                      : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                Rejected
+              </button>
             </div>
           </div>
 
-          <SearchBar onSearch={(query, pageType) => console.log(`Search query: ${query}, Page type: ${pageType}`)} />
-          <Separator className="my-2" />
+          {/* Scrollable Content */}
+          <div className="pt-[250px] pb-20 px-4">
+            {validCurrentRole === "all" ? (
+              validRoles.map((role) => {
+                const users = filteredUsers[role] || [];
+                if (users.length === 0 && searchQuery) return null;
 
-          <div className="p-4 scroll-y-auto">
-          {validCurrentRole ? (
-            <div className="mb-6">
-              <h2 className="text-sm font-semibold mb-2">
-                {validCurrentRole.charAt(0).toUpperCase() + validCurrentRole.slice(1)} (
-                {(usersByRole[validCurrentRole]?.length || 0)})
-              </h2>
-              <ul className="space-y-1">
-              {usersByRole[validCurrentRole]?.map((user) => (
-                <li
-                  key={user.id || user.username}
-                  className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 transition"
-                >
-                  <button
-                    onClick={() => {
-                      setActiveUser(user);
-                      setOpen(true);
-                    }}
-                    className="flex items-center gap-2 text-sm text-left w-full"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-gray-300" />
-                    <span className="flex items-center">
-                      {user.username}
-                      {user.isVerified && (
-                        <span className="text-green-600 font-bold ml-1">(new)</span>
+                const capitalizedRole =
+                  role === "international"
+                    ? "International"
+                    : role === "banned"
+                    ? "Banned Users"
+                    : role === "rejected"
+                    ? "Rejected Users"
+                    : role.charAt(0).toUpperCase() + role.slice(1);            
+
+                return (
+                  <div key={role} className="mb-6">
+                    <h2 className="text-sm font-semibold mb-2">
+                      {capitalizedRole} ({users.length})
+                    </h2>
+                    <ul className="space-y-1">
+                      {users.length > 0 ? (
+                        users.map((user) => (
+                          <li
+                            key={user.id}
+                            className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 transition"
+                          >
+                            <button
+                              onClick={() => {
+                                setActiveUser(user);
+                                setOpen(true);
+                              }}
+                              className="flex items-center gap-2 text-sm text-left w-full"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-gray-300" />
+                              <span className="flex items-center">
+                                {user.username}
+                                {user.isVerified && (
+                                  <span className="text-green-600 font-bold ml-1">(new)</span>
+                                )}
+                              </span>
+                            </button>
+
+                            {user.role !== "rejected" && (
+                              <button
+                                onClick={() => {
+                                  setActiveUser(user);
+                                  setDialogOpen(true);
+                                  setConfirmBan(false);
+                                }}
+                                className="p-1 text-gray-500 hover:text-gray-700"
+                              >
+                                <EllipsisVertical size={16} />
+                              </button>
+                            )}
+                          </li>
+                        ))
+                      ) : (
+                        !searchQuery && <p className="text-sm text-gray-500 text-center py-4">No users in this category</p>
                       )}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveUser(user);
-                      setDialogOpen(true);
-                      setConfirmBan(false);
-                    }}
-                    className="p-1 text-gray-500 hover:text-gray-700"
-                  >
-                    <EllipsisVertical size={16} />
-                  </button>
-                </li>
-              ))}
-              </ul>
-            </div>
-          ) : (
-            validRoles.map((role) => {
-              const users = usersByRole[role] || [];
-              if (users.length === 0) return null;
-
-              const capitalizedRole =
-              role === "international"
-                ? "International"
-                : role === "banned"
-                ? "Banned Users"
-                : role === "rejected"
-                ? "Rejected Users"
-                : role.charAt(0).toUpperCase() + role.slice(1);            
-
-              return (
-                <div key={role} className="mb-6">
-                  <h2 className="text-sm font-semibold mb-2">
-                    {capitalizedRole} ({users.length})
-                  </h2>
-                  <ul className="space-y-1">
-                  {users.map((user) => (
-                    <li
-                      key={user.id}
-                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 transition"
-                    >
-                      <button
-                        onClick={() => {
-                          setActiveUser(user);
-                          setOpen(true);
-                        }}
-                        className="flex items-center gap-2 text-sm text-left w-full"
+                    </ul>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="mb-6">
+                <h2 className="text-sm font-semibold mb-2">
+                  {validCurrentRole === "international" 
+                    ? "International" 
+                    : validCurrentRole.charAt(0).toUpperCase() + validCurrentRole.slice(1)} (
+                  {(filteredUsers[validCurrentRole]?.length || 0)})
+                </h2>
+                <ul className="space-y-1">
+                  {(filteredUsers[validCurrentRole] ?? []).length > 0 ? (
+                    filteredUsers[validCurrentRole]?.map((user) => (
+                      <li
+                        key={user.id || user.username}
+                        className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 transition"
                       >
-                        <div className="w-6 h-6 rounded-full bg-gray-300" />
-                        <span className="flex items-center">
-                          {user.username}
-                          {user.isVerified && (
-                            <span className="text-green-600 font-bold ml-1">(new)</span>
-                          )}
-                        </span>
-                      </button>
+                        <button
+                          onClick={() => {
+                            setActiveUser(user);
+                            setOpen(true);
+                          }}
+                          className="flex items-center gap-2 text-sm text-left w-full"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-gray-300" />
+                          <span className="flex items-center">
+                            {user.username}
+                            {user.isVerified && (
+                              <span className="text-green-600 font-bold ml-1">(new)</span>
+                            )}
+                          </span>
+                        </button>
 
-                      {/* Hanya tampilkan tombol ellipsis jika role bukan "rejected" */}
-                      {user.role !== "rejected" && (
                         <button
                           onClick={() => {
                             setActiveUser(user);
@@ -339,17 +467,17 @@ useEffect(() => {
                         >
                           <EllipsisVertical size={16} />
                         </button>
-                      )}
-                    </li>
-                  ))}
-                  </ul>
-                </div>
-              );
-            })
-          )}
+                      </li>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No users found</p>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
 
       {/* User Detail Sheet */}
       <Sheet open={open} onOpenChange={setOpen}>
@@ -398,7 +526,7 @@ useEffect(() => {
               <div className="w-full flex justify-between items-center">
                 <button
                   onClick={() => {
-                    setPendingRoleChange({ user: activeUser!, newRole: "member" }); // <-- diperbaiki di sini
+                    setPendingRoleChange({ user: activeUser!, newRole: "member" });
                     setConfirmRoleDialogOpen(true);
                   }}
                   className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
@@ -421,7 +549,6 @@ useEffect(() => {
         </SheetContent>
       </Sheet>
 
-
       {/* Settings Sheet */}
       <Sheet open={settingsSheetOpen} onOpenChange={setSettingsSheetOpen}>
         <SheetContent side="right" className={GeistSans.className}>
@@ -431,29 +558,24 @@ useEffect(() => {
           </SheetHeader>
 
           <div className="mt-4 space-y-3">
-            {/* Tombol All */}
+            {/* All Button */}
             <div
               className={`flex items-center justify-between px-3 py-2 border rounded-xl transition cursor-pointer mb-4 p-4 shadow-md ${
                 !currentRole ? "bg-blue-100" : "bg-white hover:bg-gray-100"
               }`}
               onClick={() => {
                 setSettingsSheetOpen(false);
-                const newParams = new URLSearchParams(searchParams);
-                newParams.delete("role");
-                router.push(`?${newParams.toString()}`);
+                handleRoleFilter("all");
               }}
             >
               <span>All</span>
               <span className="text-sm text-muted-foreground">
-                {
-                  Object.values(usersByRole).reduce((acc, users) => acc + users.length, 0)
-                }{" "}
-                users
+                {getTotalUsers()} users
               </span>
             </div>
 
-            {/* Daftar Role */}
-            {["member", "regional", "international", "guest", "banned", "rejected"].map((role) => {
+            {/* Role Buttons */}
+            {validRoles.map((role) => {
               const capitalizedRole =
                 role === "international"
                   ? "International"
@@ -469,9 +591,7 @@ useEffect(() => {
                   }`}
                   onClick={() => {
                     setSettingsSheetOpen(false);
-                    const newParams = new URLSearchParams(searchParams);
-                    newParams.set("role", role);
-                    router.push(`?${newParams.toString()}`);
+                    handleRoleFilter(role);
                   }}
                 >
                   <span>{capitalizedRole}</span>
@@ -539,7 +659,7 @@ useEffect(() => {
                 </button>
                 <button
                   onClick={() => {
-                    setConfirmBan(false); // kembali ke pilihan role
+                    setConfirmBan(false);
                   }}
                   className="w-full py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-300"
                 >
@@ -591,7 +711,6 @@ useEffect(() => {
                 </label>
               );
             })}
-
 
               <hr className="border-t border-gray-300 my-2" />
 

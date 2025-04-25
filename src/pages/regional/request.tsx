@@ -1,13 +1,11 @@
-import { addDoc, collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
-import { GeistSans } from "geist/font/sans";
+"use client";
+
+import { collection, doc, getDoc, getFirestore, onSnapshot, orderBy, query, Timestamp, where } from "firebase/firestore";
 import Head from "next/head";
 import Image from "next/image";
 import router from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "~/components/layout/sidebar-regional";
-import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useAuth } from "~/context/authContext";
 import { app } from "~/lib/firebase";
@@ -33,6 +31,7 @@ export default function RequestPage() {
           window.removeEventListener("resize", handleResize); // Cleanup listener
       };
   }, []);
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -40,7 +39,6 @@ export default function RequestPage() {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const regional = (userDoc.data() as { regional?: string })?.regional;
         const country = (userDoc.data() as { country?: string })?.country;
-        console.log("User Regional:", regional);
   
         const queryCondition = query(
           collection(db, "posts"),
@@ -115,7 +113,6 @@ export default function RequestPage() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
-            <div className="fixed w-full bg-white border-b max-w-[598px]">
               <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
               {isMobile ? (
                 <div className="ml-2 mt-1.5">
@@ -129,7 +126,6 @@ export default function RequestPage() {
                   <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                 </div>
               </div>
-            </div>
                 <div className="pt-16 w-full flex flex-col transition-all">
                 {posts.length === 0 && <p className="mt-2 text-center text-muted-foreground">No prayer requests</p>}
                 {posts.map((post) => (

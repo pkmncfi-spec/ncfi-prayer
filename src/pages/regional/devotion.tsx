@@ -21,7 +21,7 @@ const db = getFirestore(app);
 
 export default function PostPage() {
     const router = useRouter();
-    const { postId } = router.query; // Get postId from the URL
+    const  postId  = "koet5C8rEWAJwBk7ibIj"; // Get postId from the URL
     const [post, setPost] = useState<{
         title: string;
         text: string;
@@ -56,7 +56,7 @@ export default function PostPage() {
         if (!router.isReady || !postId) return; // Wait until the router is ready
         const fetchPost = async () => {
             try {
-                const postDoc = await getDoc(doc(db, "posts", postId as string));
+                const postDoc = await getDoc(doc(db, "devotions", postId as string));
                 if (postDoc.exists()) {
                     const data = postDoc.data();
                     setPost({
@@ -214,50 +214,16 @@ export default function PostPage() {
                         </button>
                     </div>
                     <div className="w-full items-center justify-center">
-                        <p className="text-2xl text-center font-bold mb-1">Post</p>
+                        <p className="text-2xl text-center font-bold mb-1 mr-6">Today's Devotion</p>
                     </div>
-                    {post?.uid === user?.uid && (
-                        <DialogTrigger>
-                            <HiDotsVertical className="text-2xl mb-1 mr-2 flex items-center justify-center" />
-                        </DialogTrigger>
-                    )}
-                    <DialogContent className={`${GeistSans.className} max-w-[350px]`}>
-                        <DialogDescription className="mt-6">
-                            <DialogClose className="w-full">
-                                    {!prayerFor && (
-                                        <Button variant={"outline"} onClick={() => shareForInternational(postId as string)} className="h-14 border-gray-500 text-xl w-full mb-6 hover:bg-gray-200 active:bg-primary/30">
-                                            <FaShareFromSquare /> Share for International
-                                        </Button>
-                                    )}
-                                    <Button variant={"outline"} onClick={() => editPost(postId as string)} className="h-14 border-gray-500 text-xl w-full mb-6 hover:bg-gray-200 active:bg-primary/30">
-                                        <FaEdit /> Edit
-                                    </Button>
-                                    <Button variant={"outline"} onClick={() => deletePost(postId as string)} className="h-14 border-gray-500 text-xl w-full mb-6 hover:bg-gray-200 active:bg-primary/30">
-                                        <MdDelete /> Delete
-                                    </Button>
-                            </DialogClose>
-                        </DialogDescription>
-                    </DialogContent>
+                    
                 </Dialog>
                 </div>
                 <div className="p-4">
-                    <div className="flex items-center mb-4 mt-16 border-b-[3px] pb-4">
-                        <div>
-                            <Image src="/image.png" alt="NFCI Prayer" width="34" height="34" className="rounded-full mt-1" />
-                        </div>
-                        <div className="flex w-full">
-                            <p className="ml-2 text-lg mr-1 font-bold">{userName}</p>
-                            <button onClick={toggleBookmark} className="ml-auto">
-                            {isBookmarked ? (
-                                <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current text-right" />
-                            ) : (
-                                <Bookmark className="w-6 h-6 text-gray-600" />
-                            )}
-                        </button>
-                        </div>
+                    <div className="flex items-center mb-4 mt-8 pb-4">
                     </div>
                     {post ? (
-                        <div className="border-b-[3px] pb-4">
+                        <div className="pb-4">
                             <h1 className="text-2xl font-bold">{post.title}</h1>
                             <p className="mt-2 whitespace-normal break-all">{post.text}</p>
                             {post.imageURL && (
@@ -269,7 +235,7 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>                        
+                            <p className="text-gray-600 mt-2">April 25, 2025</p>                        
                         </div>
                     ) : (
                         <p>Loading post...</p>

@@ -5,21 +5,21 @@ import Spinner from "react-loading";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const { oobCode, continueUrl, actionCode } = router.query;
+  const { oobCode, continueUrl } = router.query;
   
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
+    if (!router.isReady) return; // WAIT until the query is ready
+  
     const verifyEmail = async () => {
-      if (!actionCode || typeof actionCode !== "string") return;
-
+      if (!oobCode || typeof oobCode !== "string") return;
+  
       const auth = getAuth();
       try {
-        await applyActionCode(auth, actionCode);
+        await applyActionCode(auth, oobCode);
         setStatus("success");
-
-        // Optionally reload user info to update emailVerified
         await auth.currentUser?.reload();
       } catch (error: any) {
         console.error(error);
@@ -27,9 +27,9 @@ export default function VerifyEmailPage() {
         setStatus("error");
       }
     };
-
+  
     verifyEmail();
-  }, [actionCode]);
+  }, [router.isReady, oobCode]);
 
   const handleContinue = () => {
     if (continueUrl && typeof continueUrl === "string") {

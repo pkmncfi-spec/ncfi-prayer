@@ -12,9 +12,10 @@ export default function Home() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
+    if (loading || !user) return; // ← Tambahkan pengecekan loading
+  
     async function userRole() {
-      if (!user || !user.uid) return;
-      if (user) {
+      if(user){
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           const userData = userDoc.data() as { role?: string };
@@ -24,11 +25,14 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching user role:", error);
         }
+      } else {
+        return;
       }
     }
-    
-    userRole();
-  }, [user, router]);
+  
+    void userRole();
+  }, [user, loading, router]);
+  
 
   if (loading) return <p>Loading...</p>;
 

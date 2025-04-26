@@ -222,7 +222,11 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>                        
+                            {post && (
+                                <p className="text-gray-600 mt-2">
+                                    {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <p>Loading post...</p>

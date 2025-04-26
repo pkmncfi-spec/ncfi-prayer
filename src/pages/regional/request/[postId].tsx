@@ -1,24 +1,18 @@
+import { Dialog } from "@radix-ui/react-dialog";
+import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { GeistSans } from "geist/font/sans";
+import Head from "next/head";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { addDoc, collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
-import Head from "next/head";
-import Layout from "~/components/layout/sidebar-regional";
-import { SidebarTrigger } from "~/components/ui/sidebar";
-import Image from "next/image";
-import { app } from "~/lib/firebase";
-import { IoMdArrowRoundBack } from "react-icons/io";
+import { FaEdit, FaRegCheckSquare, FaRegWindowClose } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogClose, DialogContent, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import Layout from "~/components/layout/sidebar-regional";
 import { Button } from "~/components/ui/button";
-import { GeistSans } from "geist/font/sans";
+import { DialogClose, DialogContent, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
 import { useAuth } from "~/context/authContext";
-import { FaShareFromSquare } from "react-icons/fa6";
-import { FaEdit } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import { FaRegCheckSquare } from "react-icons/fa";
-import { FaRegWindowClose } from "react-icons/fa";
-import { set } from "zod";
+import { app } from "~/lib/firebase";
 
 const db = getFirestore(app);
 
@@ -221,7 +215,11 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>
+                            {post && (
+                                <p className="text-gray-600 mt-2">
+                                    {post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}
+                                </p>
+                            )}
                             </div>
                     ) : (
                         <p>Loading post...</p>

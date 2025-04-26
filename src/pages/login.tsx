@@ -11,7 +11,8 @@ import { Checkbox } from "~/components/ui/checkbox"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { set, z } from "zod"
+import { browserLocalPersistence, browserSessionPersistence, setPersistence } from "firebase/auth"; 
 
 import {
     Card,
@@ -53,7 +54,7 @@ export default function AuthPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [error, setError] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const router = useRouter();
     const { user, loading } = useAuth();
@@ -97,7 +98,7 @@ export default function AuthPage() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        if (isSubmitting || isLoading) return; // Check if already submitting or loading
+        if (isSubmitting || isLoading) return;
         setIsLoading(true);
         setIsSubmitting(true);
     
@@ -108,8 +109,10 @@ export default function AuthPage() {
         }
     
         try {
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+    
             const userCredential = await signInWithEmailAndPassword(values.email, values.password);
-            console.log("User Credential:", userCredential); // Debugging
+            console.log("User Credential:", userCredential);
     
             const user = userCredential?.user;
     
@@ -132,7 +135,7 @@ export default function AuthPage() {
             void router.push("/" + userData?.role + "/home");
         } catch (e) {
             if (e instanceof FirebaseError) {
-                console.log("Error Code:", e.code); // Log the error code for debugging
+                console.log("Error Code:", e.code);
                 switch (e.code) {
                     case "auth/user-not-found":
                         alert("Email belum terdaftar. Silakan daftar terlebih dahulu.");
@@ -153,7 +156,7 @@ export default function AuthPage() {
                         alert(`Terjadi kesalahan. Kode error: ${e.code}. Silakan coba lagi.`);
                 }
             } else {
-                console.error("sdaosdasd" + e); // Log the error for debugging
+                console.error("Unknown error:" + e);
                 alert("Terjadi kesalahan yang tidak diketahui.");
             }
         } finally {
@@ -218,6 +221,16 @@ export default function AuthPage() {
                                     Show Password
                                 </label>
                             </div>
+                            <div className="flex items-center">
+                                <Checkbox id="rememberMe" 
+                                    checked={rememberMe}
+                                    onCheckedChange={(checked) => setRememberMe(!!checked)}/>
+                                <label
+                                    htmlFor="rememberMe"
+                                    className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ml-2">
+                                    Remember Me
+                                </label>
+                            </div>
                             <div className="pt-4">
                                 <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">
                                 {isLoading ? (
@@ -227,6 +240,7 @@ export default function AuthPage() {
                                     )}
                                 </Button>
                             </div>
+                            <p className="justify-center items-center flex">Forgot Password?<Link href="/forgot-password" className="font-bold text-blue-700 ml-1">Reset</Link></p>
                         </form>
                         </Form>
                 </div>

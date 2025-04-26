@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
     const auth = getAuth();
     try {
       await sendPasswordResetEmail(auth, data.email, {
-        url: "http://localhost:3000/reset-password",
+        url: "http://prayerlink.vercel.app/reset-password",
         handleCodeInApp: true,
       });
       setMessage("Password reset email sent! Check your inbox.");

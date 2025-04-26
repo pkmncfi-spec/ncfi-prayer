@@ -125,10 +125,8 @@ export default function AuthPage() {
     
             if (!user.emailVerified) {
                 alert("Please verify your email before logging in.");
-                void auth.signOut();
-                await sendEmailVerification(user);
+                void router.push("/verify/" + user.uid);
                 setIsSubmitting(false);
-                void router.push("/login");
                 return;
             }
     

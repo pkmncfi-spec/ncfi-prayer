@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getAuth, applyActionCode } from "firebase/auth";
-import Spinner from "react-loading"; // optional for nice UX
+import Spinner from "react-loading";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const { oobCode } = router.query;
+  const { oobCode, continueUrl, lang } = router.query;
+  
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -17,17 +18,26 @@ export default function VerifyEmailPage() {
       try {
         await applyActionCode(auth, oobCode);
         setStatus("success");
-        // Optionally, force reload user info
+
+        // Optionally reload user info to update emailVerified
         await auth.currentUser?.reload();
       } catch (error: any) {
         console.error(error);
-        setErrorMessage(error.message || "An error occurred.");
+        setErrorMessage(error.message || "The verification link is invalid or expired.");
         setStatus("error");
       }
     };
 
     verifyEmail();
   }, [oobCode]);
+
+  const handleContinue = () => {
+    if (continueUrl && typeof continueUrl === "string") {
+      window.location.href = continueUrl;
+    } else {
+      router.push("/login");
+    }
+  };
 
   if (status === "loading") {
     return (
@@ -43,6 +53,12 @@ export default function VerifyEmailPage() {
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
         <h1 className="text-2xl font-bold text-red-600">Email Verification Failed</h1>
         <p className="mt-2">{errorMessage}</p>
+        <button
+          onClick={() => router.push("/")}
+          className="mt-6 px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-800"
+        >
+          Back to Home
+        </button>
       </div>
     );
   }
@@ -50,12 +66,12 @@ export default function VerifyEmailPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center">
       <h1 className="text-3xl font-bold text-green-600">Email Verified Successfully!</h1>
-      <p className="mt-4">You can now continue to log in.</p>
+      <p className="mt-4">Thank you! Your email has been verified.</p>
       <button
-        onClick={() => router.push("/login")}
+        onClick={handleContinue}
         className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
       >
-        Go to Login
+        {continueUrl ? "Continue" : "Go to Login"}
       </button>
     </div>
   );

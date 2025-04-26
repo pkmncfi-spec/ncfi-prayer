@@ -352,7 +352,7 @@ export default function SearchPage() {
       };
       sessionStorage.setItem(userSpecificKey, JSON.stringify(searchData));
     }
-    await router.push("/international/post/" + postId);
+    await router.push("/regional/post/" + postId);
   }
 
   return (

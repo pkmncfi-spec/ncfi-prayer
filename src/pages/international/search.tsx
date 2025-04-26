@@ -24,6 +24,11 @@ interface Post {
   name: string;
 }
 
+type User = {
+  uid: string; // Use uid as the unique identifier
+  username: string;
+};
+
 export default function SearchPage() {
   const router = useRouter();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -44,32 +49,44 @@ export default function SearchPage() {
 
   const db = getFirestore(app);
 
-  // Store search state in session storage
+  // Store search state in session storage with user-specific key
   useEffect(() => {
-    const savedSearchQuery = sessionStorage.getItem('searchQuery');
-    const savedSearchResults = sessionStorage.getItem('searchResults');
+    if (!user?.uid) return;
+    const userSpecificKey = `searchData_${user.uid}`;
+    const savedSearchData = sessionStorage.getItem(userSpecificKey);
     
-    if (savedSearchQuery) {
-      setSearchQuery(savedSearchQuery);
-      setHasSearched(true);
-    }
-    
-    if (savedSearchResults) {
+    if (savedSearchData) {
       try {
-        setSearchResults(JSON.parse(savedSearchResults));
+        const { searchQuery: savedQuery, searchResults: savedResults } = JSON.parse(savedSearchData);
+        if (savedQuery) {
+          setSearchQuery(savedQuery);
+          setHasSearched(true);
+        }
+        if (savedResults) {
+          setSearchResults(savedResults);
+        }
       } catch (error) {
-        console.error('Error parsing search results:', error);
+        console.error('Error parsing search data:', error);
       }
     }
-  }, []);
+  }, [user?.uid]);
 
-  // Save search state to session storage
+  // Save search state to session storage with user-specific key
   useEffect(() => {
-    if (hasSearched) {
-      sessionStorage.setItem('searchQuery', searchQuery);
-      sessionStorage.setItem('searchResults', JSON.stringify(searchResults));
+    if (!user?.uid || !hasSearched) return;
+
+    const userSpecificKey = `searchData_${user.uid}`;
+    const searchData = {
+      searchQuery,
+      searchResults
+    };
+    
+    try {
+      sessionStorage.setItem(userSpecificKey, JSON.stringify(searchData));
+    } catch (error) {
+      console.error('Error saving search data:', error);
     }
-  }, [searchQuery, searchResults, hasSearched]);
+  }, [searchQuery, searchResults, hasSearched, user?.uid]);
 
   const formatDate = useCallback((dateInput: string | Date): string => {
     try {
@@ -84,8 +101,13 @@ export default function SearchPage() {
     }
   }, []);
 
+  // Save recent searches to localStorage with user-specific key
   useEffect(() => {
-    const savedSearches = localStorage.getItem('recentSearches');
+    if (!user?.uid) return;
+
+    const userSpecificKey = `recentSearches_${user.uid}`;
+    const savedSearches = localStorage.getItem(userSpecificKey);
+    
     if (savedSearches) {
       try {
         setRecentSearches(JSON.parse(savedSearches));
@@ -94,15 +116,19 @@ export default function SearchPage() {
         setRecentSearches([]);
       }
     }
-  }, []);
+  }, [user?.uid]);
 
+  // Load recent searches from localStorage with user-specific key
   useEffect(() => {
+    if (!user?.uid) return;
+
+    const userSpecificKey = `recentSearches_${user.uid}`;
     try {
-      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+      localStorage.setItem(userSpecificKey, JSON.stringify(recentSearches));
     } catch (error) {
       console.error('Error saving recent searches:', error);
     }
-  }, [recentSearches]);
+  }, [recentSearches, user?.uid]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -216,8 +242,10 @@ export default function SearchPage() {
   const handleSearch = useCallback(async (searchTerm: string) => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
-      sessionStorage.removeItem('searchQuery');
-      sessionStorage.removeItem('searchResults');
+      if (user?.uid) {
+        const userSpecificKey = `searchData_${user.uid}`;
+        sessionStorage.removeItem(userSpecificKey);
+      }
       return;
     }
     
@@ -247,14 +275,16 @@ export default function SearchPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [posts, recentSearches]);
+  }, [posts, recentSearches, user?.uid]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
       setHasSearched(false);
-      sessionStorage.removeItem('searchQuery');
-      sessionStorage.removeItem('searchResults');
+      if (user?.uid) {
+        const userSpecificKey = `searchData_${user.uid}`;
+        sessionStorage.removeItem(userSpecificKey);
+      }
       return;
     }
 
@@ -271,15 +301,17 @@ export default function SearchPage() {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchQuery, handleSearch]);
+  }, [searchQuery, handleSearch, user?.uid]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery("");
     setSearchResults([]);
     setHasSearched(false);
-    sessionStorage.removeItem('searchQuery');
-    sessionStorage.removeItem('searchResults');
-  }, []);
+    if (user?.uid) {
+      const userSpecificKey = `searchData_${user.uid}`;
+      sessionStorage.removeItem(userSpecificKey);
+    }
+  }, [user?.uid]);
 
   const highlightText = useCallback((text: string | undefined, query: string) => {
     if (!text || !query) return text || '';
@@ -298,22 +330,28 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
-              // Detect if the screen width is mobile
-        const handleResize = () => {
-            setIsMobile(window.matchMedia("(max-width: 768px)").matches);
-        };
-  
-        handleResize(); // Check on initial render
-        window.addEventListener("resize", handleResize); // Listen for window resize
-  
-        return () => {
-            window.removeEventListener("resize", handleResize); // Cleanup listener
-        };
-    }, []);
+    // Detect if the screen width is mobile
+    const handleResize = () => {
+      setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+    };
+
+    handleResize(); // Check on initial render
+    window.addEventListener("resize", handleResize); // Listen for window resize
+
+    return () => {
+      window.removeEventListener("resize", handleResize); // Cleanup listener
+    };
+  }, []);
 
   const handleSeeMore = async (postId: string) => {
-    sessionStorage.setItem('searchQuery', searchQuery);
-    sessionStorage.setItem('searchResults', JSON.stringify(searchResults));
+    if (user?.uid) {
+      const userSpecificKey = `searchData_${user.uid}`;
+      const searchData = {
+        searchQuery,
+        searchResults
+      };
+      sessionStorage.setItem(userSpecificKey, JSON.stringify(searchData));
+    }
     await router.push("/international/post/" + postId);
   }
 
@@ -322,7 +360,7 @@ export default function SearchPage() {
       <div className={`flex flex-col w-full max-w-[600px] border min-h-screen ${GeistSans.className}`}>
         <div className="fixed w-full bg-white max-w-[598px]">
           {/* Header */}
-         <div className="flex flex-cols mt-3 border-b pb-2">
+          <div className="flex flex-cols mt-3 border-b pb-2">
             {isMobile ? (<div className="ml-2 mt-1.5">
               <SidebarTrigger />
             </div>): (<div className="ml-10 mt-1.5"></div>)}
@@ -357,13 +395,10 @@ export default function SearchPage() {
           <Separator className="mb-4" />
           
           {/* Search Results */}
-          <h1 className={`text-2xl font-bold text-left  px-4 ${GeistSans.className}`}>
-            Post
-          </h1>
           <div 
             ref={resultsContainerRef}
             className={`px-4 py-2 overflow-y-auto ${GeistSans.className}`}
-            style={{ maxHeight: 'calc(100vh - 140px)' }}
+            style={{ maxHeight: 'calc(100vh - 165px)' }}
           >
             {isLoading ? (
               <div className="space-y-2">
@@ -380,6 +415,9 @@ export default function SearchPage() {
               searchResults.length > 0 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500 mb-2">
+                  <h1 className={`text-2xl font-bold text-left   ${GeistSans.className}`}>
+                    Post
+                  </h1>
                     Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for "{searchQuery}"
                   </p>
                   {searchResults.map((post) => (

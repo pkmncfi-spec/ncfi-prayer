@@ -55,7 +55,7 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     await signOut(auth);
-    await router.push("/");
+    await router.replace(router.asPath);
   };
 
   return (

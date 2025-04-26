@@ -1,0 +1,62 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { getAuth, applyActionCode } from "firebase/auth";
+import Spinner from "react-loading"; // optional for nice UX
+
+export default function VerifyEmailPage() {
+  const router = useRouter();
+  const { oobCode } = router.query;
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  useEffect(() => {
+    const verifyEmail = async () => {
+      if (!oobCode || typeof oobCode !== "string") return;
+
+      const auth = getAuth();
+      try {
+        await applyActionCode(auth, oobCode);
+        setStatus("success");
+        // Optionally, force reload user info
+        await auth.currentUser?.reload();
+      } catch (error: any) {
+        console.error(error);
+        setErrorMessage(error.message || "An error occurred.");
+        setStatus("error");
+      }
+    };
+
+    verifyEmail();
+  }, [oobCode]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner color="blue" height={50} width={50} />
+        <p className="ml-4">Verifying your email...</p>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center">
+        <h1 className="text-2xl font-bold text-red-600">Email Verification Failed</h1>
+        <p className="mt-2">{errorMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen text-center">
+      <h1 className="text-3xl font-bold text-green-600">Email Verified Successfully!</h1>
+      <p className="mt-4">You can now continue to log in.</p>
+      <button
+        onClick={() => router.push("/login")}
+        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-800"
+      >
+        Go to Login
+      </button>
+    </div>
+  );
+}

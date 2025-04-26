@@ -14,13 +14,9 @@ export default function FirebaseActionPage() {
         router.replace(`/reset-password?apiKey=${apiKey}&mode=${mode}&oobCode=${oobCode}&continueUrl=${continueUrl}&lang=en`);
         break;
       case "verifyEmail":
-        router.replace(`/reset-password?apiKey=${apiKey}&mode=${mode}&oobCode=${oobCode}&continueUrl=${continueUrl}&lang=en`);
-        break;
-      case "recoverEmail":
-        router.replace(`/reset-password?apiKey=${apiKey}&mode=${mode}&oobCode=${oobCode}&continueUrl=${continueUrl}&lang=en`);
+        router.replace(`/verify-email?mode=${mode}&oobCode=${oobCode}apiKey=${apiKey}&lang=en`);
         break;
       default:
-        // Unknown mode - maybe redirect to home
         router.replace("/");
         break;
     }

@@ -1,16 +1,18 @@
 import { GeistSans } from "geist/font/sans";
-import Link from "next/link";
 import {
-  Home,
-  Search,
-  Bookmark,
   Bell,
+  Bookmark,
+  Home,
   Info,
-  User,
+  LogOut,
+  Search,
   Send,
-  LogOut
+  User
 } from "lucide-react";
+import Link from "next/link";
 
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/router";
 import {
   Sidebar,
   SidebarContent,
@@ -21,24 +23,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { getAuth, signOut } from "firebase/auth";
-import { useRouter } from "next/router";
 
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "~/components/ui/dialog";
 
 import {
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "~/components/ui/sheet";
 
 // Menu items.

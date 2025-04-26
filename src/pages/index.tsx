@@ -13,6 +13,7 @@ export default function Home() {
 
   useEffect(() => {
     async function userRole() {
+      if (!user || !user.uid) return;
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -25,7 +26,8 @@ export default function Home() {
         }
       }
     }
-    void userRole();
+    
+    userRole();
   }, [user, router]);
 
   if (loading) return <p>Loading...</p>;

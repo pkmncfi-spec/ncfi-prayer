@@ -23,15 +23,6 @@ import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "~/components/ui/dialog";
-
-import {
   Sheet,
   SheetTrigger,
   SheetContent,

@@ -1,5 +1,5 @@
 import { GeistSans } from "geist/font/sans";
-import Layout from "~/components/layout/sidebar-international";
+import Layout from "~/components/layout/sidebar-member";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from "react";

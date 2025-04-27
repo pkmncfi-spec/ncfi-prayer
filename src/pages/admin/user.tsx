@@ -262,18 +262,17 @@ export default function SearchPage() {
         <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
           <div className="fixed w-full bg-white max-w-[598px] top-0">
             <div className="flex flex-col w-full items-center justify-center">
-              <div className="sticky top-0 bg-white w-full z-10 py-3">
-                <div className="flex items-center justify-between px-4">
+              <div className="sticky top-0 bg-white w-full z-10  border-b pb-2">
+                <div className="flex items-center justify-between ml-2 mt-2 ">
                   <SidebarTrigger />
                   <div className="flex flex-col items-center justify-center pr-7 w-full">
-                    <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto"/>
+                    <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto mt-1"/>
                     <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                   </div>
                   <button onClick={() => setSettingsSheetOpen(true)}>
                     <SlidersHorizontal className="mr-2 h-5 w-5 text-gray-600 rounded-md hover:bg-gray-100 transition" />
                   </button>
                 </div>
-                <div className="w-full h-4 border-b border-gray-300"></div>
               </div>
             </div>
 
@@ -368,7 +367,7 @@ export default function SearchPage() {
           </div>
 
           {/* Scrollable Content */}
-          <div className="pt-[250px] pb-20 px-4">
+          <div className="pt-[230px] pb-20 px-4">
             {validCurrentRole === "all" ? (
               validRoles.map((role) => {
                 const users = filteredUsers[role] || [];

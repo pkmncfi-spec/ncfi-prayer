@@ -313,16 +313,16 @@ export default function HomePage() {
   }, [selectedRegion, applyFilters]);
 
   const handleSeeMore = useCallback((postId: string) => {
-    router.push("/regional/post/" + postId);
+    router.push("/admin/post/" + postId);
   }, [router]);
 
   return (
     <Layout>
       <div className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen`}>
-        <div className="fixed w-full bg-white max-w-[598px] z-20">
-          <div className="flex flex-cols-2 mt-4">
-            <SidebarTrigger />
-            <div className="w-full items-center justify-center pr-7">
+        <div className="fixed w-full bg-white max-w-[598px] z-20 top-0">
+          <div className="flex flex-cols-2 mt-3">
+            <SidebarTrigger className="ml-2 mt-1"/>
+            <div className="w-full items-center justify-center pr-2 pb-2">
               <Image 
                 src="/favicon.ico" 
                 alt="NFCI Prayer" 
@@ -331,19 +331,19 @@ export default function HomePage() {
                 className="mx-auto"
                 priority
               />
-              <p className="text-sm text-center text-muted-foreground">NCFI Prayer</p>
+              <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
             </div>
             <button 
               onClick={() => setSettingsSheetOpen(true)}
               aria-label="Filter posts"
             >
-              <SlidersHorizontal className="mr-2 h-5 w-5 text-gray-600 rounded-md hover:bg-gray-100 transition" />
+              <SlidersHorizontal className="mr-2 mb-4 h-5 w-5 text-gray-600 rounded-md hover:bg-gray-100 transition" />
             </button>
           </div>
           <Separator className="mb-4 w-full" />
           
           <div className="flex h-1 mb-[1px] items-center justify-center text-sm w-full mx-auto">
-            <button className="py-2 px-4 border-b-4 border-blue-400 font-semibold">
+            <button className="py-2 px-4 border-b-4 border-blue-500 font-semibold">
               Posts
             </button>
           </div>
@@ -534,8 +534,8 @@ export default function HomePage() {
         {/* Post List */}
         <div className="justify-center pt-24 w-full flex flex-col">
           {/* Region Filter Buttons */}
-          <div className="w-full overflow-x-auto px-2 sticky top-[104px] bg-white z-10 py-2 border-b">
-            <div className="flex space-x-2 pb-2">
+          <div className="w-full overflow-x-auto px-2 sticky top-[97px] bg-white z-10 py-2 border-b">
+            <div className="flex space-x-2 pt-1">
               {regions.map((region) => (
                 <button
                   key={region.id}

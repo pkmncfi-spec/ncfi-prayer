@@ -138,16 +138,17 @@ export default function HomePage() {
       if (!user?.uid) return;
       const currentUser = await getDoc(doc(db, "users", user.uid));
 
-      await addDoc(collection(db, "posts"), {
+      await addDoc(collection(db, "devotions"), {
         title: title.trim(),
         text: text.trim(),
-        uid: user.uid,
-        createdAt: new Date(),
-        status: "posted",
-        regional: (currentUser.data() as { regional?: string })?.regional,
-        postFor: "international",
-        country: (currentUser.data() as { country?: string })?.country,
+        postedAt: new Date(),
         imageURL: imageURL
+      });
+
+      await addDoc(collection(db, "notifications"), {
+        title: title.trim(),
+        message: "Today's devotion has been posted.",
+        createdAt: new Date()
       });
 
       setTitle("");

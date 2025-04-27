@@ -232,7 +232,7 @@ export default function AuthPage() {
                             <div className="pt-4">
                                 <Button className="w-full bg-blue-600 hover:bg-blue-800 active:bg-primary/30" type="submit">
                                 {isLoading ? (
-                                        <Spinner color="white" height={20} width={20}/>
+                                        <Spinner data-testid="loading-spinner" color="white" height={20} width={20}/>
                                     ) : (
                                         <>Submit</>
                                     )}

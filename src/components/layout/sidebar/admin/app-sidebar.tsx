@@ -88,23 +88,6 @@ export function AppSidebar() {
 
           {/* Tombol tambahan dengan popup dialog */}
          <div className="mt-6 flex flex-col space-y-3">
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="px-4 py-3 border-2 border-gray-400 rounded-2xl text-center font-bold text-xl w-full transition-all duration-300 hover:bg-gray-300 active:scale-95">
-                  Today&#39;s Devotion
-                </button>
-              </DialogTrigger>
-                <DialogContent className="flex flex-col w-full max-w-[500px] max-h-[450px] mx-autoborder">
-                  <div className={`p-6 rounded-lg shadow-lg w-full max-w-md ${GeistSans.className}`}>
-                    <DialogHeader>
-                      <DialogTitle>Today&#39;s Devotion</DialogTitle>
-                      <DialogDescription className={` ${GeistSans.className}`}>
-                        <p>&#39;&#39;Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.&#39;&#39; (Proverbs 3:5-6)</p>
-                      </DialogDescription>
-                    </DialogHeader>
-                  </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Button Region menggunakan Sheet */}
             <Sheet>

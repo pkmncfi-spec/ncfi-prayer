@@ -56,6 +56,21 @@ export default function SearchPage() {
     user: User;
     newRole: string;
   } | null>(null);
+  const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+            // Detect if the screen width is mobile
+            const handleResize = () => {
+                setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+            };
+    
+            handleResize(); // Check on initial render
+            window.addEventListener("resize", handleResize); // Listen for window resize
+    
+            return () => {
+                window.removeEventListener("resize", handleResize); // Cleanup listener
+            };
+    }, []);
 
   useEffect(() => {
     const fetchAllUsers = async () => {
@@ -264,8 +279,10 @@ export default function SearchPage() {
             <div className="flex flex-col w-full items-center justify-center">
               <div className="sticky top-0 bg-white w-full z-10  border-b pb-2">
                 <div className="flex items-center justify-between ml-2 mt-2 ">
-                  <SidebarTrigger />
-                  <div className="flex flex-col items-center justify-center pr-7 w-full">
+                {isMobile ? (<div>
+                    <SidebarTrigger />
+                  </div>): (<div className="ml-7 mt-1.5"></div>)}
+                  <div className="flex flex-col items-center justify-center pr-2 w-full">
                     <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto mt-1"/>
                     <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
                   </div>
@@ -292,7 +309,7 @@ export default function SearchPage() {
             <Separator className="my-2" />
 
             {/* Horizontal Role Filter Buttons */}
-            <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar">
+            <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar border-b">
               <button
                 onClick={() => handleRoleFilter("all")}
                 className={`whitespace-nowrap px-4 py-2 rounded-full border text-sm transition ${
@@ -365,9 +382,10 @@ export default function SearchPage() {
               </button>
             </div>
           </div>
+          
 
           {/* Scrollable Content */}
-          <div className="pt-[230px] pb-20 px-4">
+          <div className="mt-52 pt-2 pb-20 px-4">
             {validCurrentRole === "all" ? (
               validRoles.map((role) => {
                 const users = filteredUsers[role] || [];

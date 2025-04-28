@@ -1,36 +1,25 @@
 import { Dialog } from "@radix-ui/react-dialog";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
-import { GeistSans } from "geist/font/sans";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { FaEdit } from "react-icons/fa";
-import { FaShareFromSquare } from "react-icons/fa6";
-import { HiDotsVertical } from "react-icons/hi";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { MdDelete } from "react-icons/md";
 import Layout from "~/components/layout/sidebar-member";
-import { Button } from "~/components/ui/button";
-import { DialogClose, DialogContent, DialogDescription, DialogTrigger } from "~/components/ui/dialog";
 import { useAuth } from "~/context/authContext";
 import { app } from "~/lib/firebase";
+
 
 const db = getFirestore(app);
 
 export default function PostPage() {
     const router = useRouter();
-    const  postId  = "koet5C8rEWAJwBk7ibIj"; // Get postId from the URL
+    const [postId, setPostId]  = useState<string | null>(null); // Get postId from the URL
     const [post, setPost] = useState<{
         title: string;
         text: string;
         imageURL?: string;
         createdAt?: string;
-        status?: string;
-        uid?: string;
-        postFor?: string;
-        forInternational?: boolean
     } | null>(null);
     const [isMobile, setIsMobile] = useState(false);
     const { user } = useAuth(); // Assuming you have a user context or auth provider
@@ -52,80 +41,6 @@ export default function PostPage() {
         };
     }, []);
 
-    useEffect(() => {
-        if (!router.isReady || !postId) return; // Wait until the router is ready
-        const fetchPost = async () => {
-            try {
-                const postDoc = await getDoc(doc(db, "devotions", postId as string));
-                if (postDoc.exists()) {
-                    const data = postDoc.data();
-                    setPost({
-                        title: data.title,
-                        text: data.text,
-                        imageURL: data.imageURL,
-                        createdAt: data.createdAt?.toDate().toISOString(),
-                        status: data.status,
-                        uid: data.uid,
-                        postFor: data.postFor,
-                        forInternational: data.forInternational
-                    });
-                } else {
-                    console.error("Post not found");
-                }
-            } catch (error) {
-                console.error("Error fetching post:", error);
-            }
-
-            fetchPostUserName();
-        };
-
-
-        const fetchBookmarkedPosts = async () => {
-            try {
-                if (!user?.uid || !postId) {
-                    console.warn("User UID or Post ID is undefined. Skipping fetchBookmarkedPosts.");
-                    return;
-                }
-        
-                const q = query(
-                    collection(db, "bookmarks"),
-                    where("uid", "==", user.uid),
-                    where("postId", "==", postId)
-                );
-        
-                const querySnapshot = await getDocs(q);
-        
-                if (!querySnapshot.empty) {
-                    setIsBookmarked(true);
-                } else {
-                    setIsBookmarked(false);
-                }
-            } catch (error) {
-                console.error("Error fetching bookmarked posts:", error);
-            }
-        };
-
-        const fetchPostUserName = async () => {
-            if (!post?.uid) {
-                return;
-            }
-            try {
-                const postDoc = await getDoc(doc(db, "users", post.uid as string));
-                if (postDoc.exists()) {
-                    setUserName(postDoc.data().name);
-                } else {
-                    console.error("Post not found");
-                }
-            } catch (error) {
-                console.error("Error fetching post name:", error);
-            }
-        }
-        
-        fetchBookmarkedPosts();
-        setPrayerFor(post?.forInternational || false);
-        fetchPost();
-    }, [router.isReady, postId, user?.uid, post?.postFor, post?.forInternational, post?.uid]);
-
     function formatDate(date: Date): string {
         return new Intl.DateTimeFormat("en-US", {
             month: "long",
@@ -134,68 +49,38 @@ export default function PostPage() {
         }).format(date);
     }
 
-    const shareForInternational = async (postId: string) => {
-        try {
-          // Update the prayer request status to "posted"
-          await updateDoc(doc(db, "posts", postId), { forInternational: true });
-          alert("Prayer request shared for international!");
-          console.log("Prayer request accepted!");
-        } catch (error) {
-          console.error("Error accepting prayer request:", error);
-        }
-    };
-
-    const editPost = async (postId: string) => {
-        await router.push("/regional/edit/" + postId);
-    }
-
-    const deletePost = async (postId: string) => {
-        try {
-            await updateDoc(doc(db, "posts", postId), { status: "deleted" });
-            router.back();
-            console.log("Post deleted successfully!");
-        } catch (error) {
-            console.error("Error deleting post:", error);
-        }
-    };
-
-    const toggleBookmark = async () => {
-        if (!user?.uid || !postId) {
-            console.warn("User UID or Post ID is undefined. Skipping toggleBookmark.");
-            return;
-        }
-    
-        try {
-            const bookmarksQuery = query(
-                collection(db, "bookmarks"),
-                where("uid", "==", user.uid),
-                where("postId", "==", postId)
-            );
-    
-            const querySnapshot = await getDocs(bookmarksQuery);
-    
-            if (!querySnapshot.empty) {
-                // If the post is already bookmarked, remove it
-                const bookmarkDocId = querySnapshot.docs[0]?.id; // Get the document ID of the bookmark
-                if (bookmarkDocId) {
-                    await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
-                    setIsBookmarked(false); // Update the state
-                    console.log("Bookmark removed successfully.");
-                }
-            } else {
-                // If the post is not bookmarked, add it
-                await addDoc(collection(db, "bookmarks"), {
-                    uid: user.uid,
-                    postId: postId,
-                    createdAt: new Date(),
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+          
+              const tomorrow = new Date(today);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+          
+              const postsQuery = query(
+                collection(db, "devotions"),
+                where("postedAt", ">=", Timestamp.fromDate(today))
+              );
+          
+              const querySnapshot = await getDocs(postsQuery);
+          
+              querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                setPost({
+                  title: data.title,
+                  text: data.text,
+                  imageURL: data.imageURL,
+                  createdAt: data.postedAt?.toDate().toISOString(), // optional
                 });
-                setIsBookmarked(true); // Update the state
-                console.log("Bookmark added successfully.");
+              });
+            } catch (error) {
+              console.error("Error fetching today's posts:", error);
             }
-        } catch (error) {
-            console.error("Error toggling bookmark:", error);
-        }
-    };
+          };
+        
+        fetchPost();
+    }, [router.isReady, postId, user?.uid]);
 
     return (
         <Layout>
@@ -235,10 +120,10 @@ export default function PostPage() {
                                     className="mt-4 rounded-lg object-cover max-w-full"
                                 />
                             )}
-                            <p className="text-gray-600 mt-2">April 25, 2025</p>                        
+                            <p className="text-gray-600 mt-2">{post.createdAt ? formatDate(new Date(post.createdAt)) : "Unknown date"}</p>                        
                         </div>
                     ) : (
-                        <p>Loading post...</p>
+                        <p>Today's devotion not been posted yet</p>
                     )}
                 </div>
             </main>

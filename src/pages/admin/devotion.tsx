@@ -34,6 +34,21 @@ export default function HomePage() {
   const [loadings, setLoadings] = useState(false);
   const paragraphRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
   const router = useRouter();
+    const [isMobile, setIsMobile] = useState(false)
+  
+      useEffect(() => {
+              // Detect if the screen width is mobile
+              const handleResize = () => {
+                  setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+              };
+      
+              handleResize(); // Check on initial render
+              window.addEventListener("resize", handleResize); // Listen for window resize
+      
+              return () => {
+                  window.removeEventListener("resize", handleResize); // Cleanup listener
+              };
+      }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -169,13 +184,16 @@ export default function HomePage() {
 
   return (
     <Layout>
+      <div className="flex justify-center w-full">
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
         <div className="fixed w-full bg-white max-w-[598px] top-0">
           <div className="flex flex-cols mt-3 mb-2">
             <div>
-              <SidebarTrigger className="!h-8 !w-8"/>
+            {isMobile ? (<div className="ml-2 mt-1.5">
+              <SidebarTrigger />
+            </div>): (<div className="ml-9 mt-1.5"></div>)}
             </div>
-            <div className="w-full items-center justify-center pr-7">
+            <div className="w-full items-center justify-center pr-12">
               <Image src="/favicon.ico" alt="NFCI Prayer" width={25} height={25} className="mx-auto" />
               <p className="text-sm text-center text-muted-foreground">PrayerLink</p>
             </div>
@@ -193,7 +211,7 @@ export default function HomePage() {
                 <SheetTitle>Post Devotion</SheetTitle>
               </SheetHeader>
               <SheetDescription>
-                <div className="tems-start">
+                <div className="items-start">
                   <div>
                     <Textarea
                       value={title}
@@ -249,6 +267,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </Layout>
   );

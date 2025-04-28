@@ -26,7 +26,7 @@ const LoadingBar = () => {
       className="fixed top-0 left-0 w-full h-1 bg-blue-500 z-50"
       initial={{ scaleX: 0 }}
       animate={{ scaleX: loading ? 1 : 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: loading ? 0.8 : 0.0, ease: "easeOut" }}
       style={{ transformOrigin: "left" }}
     />
   );

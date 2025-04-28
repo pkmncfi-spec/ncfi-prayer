@@ -144,44 +144,6 @@ export default function PostPage() {
         }
     };
 
-    const toggleBookmark = async () => {
-        if (!user?.uid || !postId) {
-            console.warn("User UID or Post ID is undefined. Skipping toggleBookmark.");
-            return;
-        }
-    
-        try {
-            const bookmarksQuery = query(
-                collection(db, "bookmarks"),
-                where("uid", "==", user.uid),
-                where("postId", "==", postId)
-            );
-    
-            const querySnapshot = await getDocs(bookmarksQuery);
-    
-            if (!querySnapshot.empty) {
-                // If the post is already bookmarked, remove it
-                const bookmarkDocId = querySnapshot.docs[0]?.id; // Get the document ID of the bookmark
-                if (bookmarkDocId) {
-                    await deleteDoc(doc(db, "bookmarks", bookmarkDocId));
-                    setIsBookmarked(false); // Update the state
-                    console.log("Bookmark removed successfully.");
-                }
-            } else {
-                // If the post is not bookmarked, add it
-                await addDoc(collection(db, "bookmarks"), {
-                    uid: user.uid,
-                    postId: postId,
-                    createdAt: new Date(),
-                });
-                setIsBookmarked(true); // Update the state
-                console.log("Bookmark added successfully.");
-            }
-        } catch (error) {
-            console.error("Error toggling bookmark:", error);
-        }
-    };
-
     return (
         <Layout>
             <Head>
@@ -222,13 +184,6 @@ export default function PostPage() {
                         </div>
                         <div className="flex w-full">
                             <p className="ml-2 text-lg mr-1 font-bold">{userName}</p>
-                            <button onClick={toggleBookmark} className="ml-auto">
-                            {isBookmarked ? (
-                                <BookmarkCheck className="w-6 h-6 text-blue-500 fill-current text-right" />
-                            ) : (
-                                <Bookmark className="w-6 h-6 text-gray-600" />
-                            )}
-                        </button>
                         </div>
                     </div>
                     {post ? (

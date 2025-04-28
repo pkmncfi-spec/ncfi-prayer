@@ -19,8 +19,8 @@ db.sqlite
 next-env.d.ts
 
 #mocks
-/src/__mocks__
-/src/pages/__test__
+/src/__mocks__/
+/src/pages/__test__/
 
 jest.config.cjs
 jest.setup.js

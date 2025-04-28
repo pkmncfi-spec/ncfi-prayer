@@ -88,6 +88,7 @@ export default function HomePage() {
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false)
 
   const toggleRegionDropdown = useCallback(() => {
     setOpenDropdown(prev => prev === 'region' ? null : 'region');
@@ -295,6 +296,19 @@ export default function HomePage() {
     setOpenDropdown(null);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+        setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+    };
+
+    handleResize(); // Check on initial render
+    window.addEventListener("resize", handleResize); // Listen for window resize
+
+    return () => {
+        window.removeEventListener("resize", handleResize); // Cleanup listener
+    };
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     setSelectedRegion("All");
     setSelectedCountry("All");
@@ -318,10 +332,13 @@ export default function HomePage() {
 
   return (
     <Layout>
+      <div className="flex w-full">
       <div className={`${GeistSans.className} flex flex-col w-full max-w-[600px] border min-h-screen`}>
         <div className="fixed w-full bg-white max-w-[598px] z-20 top-0">
           <div className="flex flex-cols-2 mt-3">
-            <SidebarTrigger className="ml-2 mt-1"/>
+            {isMobile ? (<div className="ml-2 mt-1.5">
+              <SidebarTrigger />
+            </div>): (<div className="ml-9 mt-1.5"></div>)}
             <div className="w-full items-center justify-center pr-2 pb-2">
               <Image 
                 src="/favicon.ico" 
@@ -534,7 +551,7 @@ export default function HomePage() {
         {/* Post List */}
         <div className="justify-center pt-24 w-full flex flex-col">
           {/* Region Filter Buttons */}
-          <div className="w-full overflow-x-auto px-2 sticky top-[97px] bg-white z-10 py-2 border-b">
+          <div className="w-full overflow-x-auto px-2 sticky top-[97px] bg-white py-2 border-l border-b">
             <div className="flex space-x-2 pt-1">
               {regions.map((region) => (
                 <button
@@ -625,7 +642,8 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+        </div>
     </Layout>
   );
 }

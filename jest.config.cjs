@@ -44,5 +44,6 @@ module.exports = {
     '^~/context/authContext$': '<rootDir>/src/__mocks__/authContext.tsx',
     '^~/components/(.*)$': '<rootDir>/src/components/$1',
     '^~/lib/(.*)$': '<rootDir>/src/lib/$1',
+    '^geist/font/sans$': '<rootDir>/src/__mocks__/geist/font/sans',
   },
 };

@@ -10,17 +10,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "~/components/ui/sidebar";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "~/components/ui/dialog";
 import {
   Sheet,
   SheetTrigger,
@@ -30,6 +23,7 @@ import {
 } from "~/components/ui/sheet";
 import { IoBookOutline } from "react-icons/io5";
 import ClockFading from '~/components/icon/ClockFading'; // Custom import path
+import { useEffect, useState } from "react";
 
 // Menu items.
 const items = [
@@ -59,6 +53,21 @@ export function AppSidebar() {
       router.replace("/");
     }, 300);
   };
+
+  const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+                // Detect if the screen width is mobile
+                const handleResize = () => {
+                    setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+                };
+        
+                handleResize(); // Check on initial render
+                window.addEventListener("resize", handleResize); // Listen for window resize
+        
+                return () => {
+                    window.removeEventListener("resize", handleResize); // Cleanup listener
+                };
+    }, []);
 
   return (
     <Sidebar>

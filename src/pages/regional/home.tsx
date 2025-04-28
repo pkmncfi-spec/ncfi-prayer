@@ -194,7 +194,7 @@ export default function HomePage() {
 
       const currentUser = await getDoc(doc(db, "users", user.uid));
 
-      await addDoc(collection(db, "posts"), {
+      const postId = await addDoc(collection(db, "posts"), {
         title: title.trim(),
         text: text.trim(),
         uid: user?.uid,
@@ -207,11 +207,14 @@ export default function HomePage() {
         forInternational: false
       });
 
-      await addDoc(collection(db, "notifications"), { 
-          uid: user?.uid,
-          regional: (currentUser.data() as { regional?: string })?.regional,
-          message: username + " has posted a prayer request", 
-          createdAt: new Date()
+      await addDoc(collection(db, "notifications"), {
+        title: username,
+        message: " posted a new prayer",
+        createdAt: new Date(),
+        type: "post",
+        forAll: true,
+        uid: "",
+        postId: postId.id
       });
 
       alert("Prayer posted successfully!");

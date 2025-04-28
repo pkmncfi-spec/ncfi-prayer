@@ -131,6 +131,15 @@ export default function PostPage() {
             uid: post?.uid,
             postId: postId
         });
+              await addDoc(collection(db, "notifications"), {
+                title: username,
+                message: " posted a new prayer",
+                createdAt: new Date(),
+                type: "post",
+                forAll: true,
+                uid: "",
+                postId: postId
+              });
           alert("Prayer request accepted!");
           router.back();
           console.log("Prayer request accepted!");

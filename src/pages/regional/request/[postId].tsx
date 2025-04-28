@@ -132,7 +132,7 @@ export default function PostPage() {
             postId: postId
         });
               await addDoc(collection(db, "notifications"), {
-                title: username,
+                title: userName,
                 message: " posted a new prayer",
                 createdAt: new Date(),
                 type: "post",

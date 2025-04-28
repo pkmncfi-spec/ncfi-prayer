@@ -1,5 +1,5 @@
 import { Dialog } from "@radix-ui/react-dialog";
-import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { GeistSans } from "geist/font/sans";
 import Head from "next/head";
 import Image from "next/image";
@@ -122,11 +122,15 @@ export default function PostPage() {
         try {
           // Update the prayer request status to "posted"
           await updateDoc(doc(db, "posts", postId), { status: "posted", postFor: "regional", uid: user?.uid, createdAt: new Date(), forInternational: false});
-        //   await addDoc(collection(db, "notifications"), { 
-        //     uid: post?.uid, 
-        //     message: "Your prayer request has been accepted by "+ users + "'s admin", 
-        //     createdAt: new Date() 
-        //   });
+          await addDoc(collection(db, "notifications"), {
+            title: "Your prayer request",
+            message: " has been accepted",
+            createdAt: new Date(),
+            type: "post",
+            forAll: false,
+            uid: post?.uid,
+            postId: postId
+        });
           alert("Prayer request accepted!");
           router.back();
           console.log("Prayer request accepted!");
@@ -142,11 +146,15 @@ export default function PostPage() {
     const deletePost = async (postId: string) => {
         try {
             await updateDoc(doc(db, "posts", postId), { status: "rejected" });
-            // await addDoc(collection(db, "notifications"), { 
-            //     uid: post?.uid, 
-            //     message: "Your prayer request has been accepted by "+ users + "'s admin", 
-            //     createdAt: new Date()
-            // });
+            await addDoc(collection(db, "notifications"), {
+                title: "Your prayer request",
+                message: " has been rejected",
+                createdAt: new Date(),
+                type: "post",
+                forAll: false,
+                uid: post?.uid,
+                postId: postId
+            });
             router.back();
             console.log("Post deleted successfully!");
         } catch (error) {

@@ -49,21 +49,23 @@ export default function NotificationPage() {
         console.error("User UID is undefined. Cannot fetch notifications.");
         return;
       }
-  
+    
       const notificationsRef = collection(db, "notifications");
-  
+    
       const q1 = query(
         notificationsRef,
         where("forAll", "==", true),
-        where("uid", "==", "") // uid is blank
+        where("uid", "==", "") // for all
       );
-  
+    
       const q2 = query(
         notificationsRef,
         where("forAll", "==", false),
-        where("uid", "==", user.uid) // uid matches user
+        where("uid", "==", user.uid) // personal
       );
-  
+    
+      let allNotifications: Notification[] = [];
+    
       const unsubscribe1 = onSnapshot(q1, (snapshot1) => {
         const notifications1: Notification[] = snapshot1.docs.map((doc) => {
           const data = doc.data() as Partial<Notification>;
@@ -78,10 +80,12 @@ export default function NotificationPage() {
             postId: data.postId ?? ""
           };
         });
-  
-        setNotifications((prev) => [...prev.filter(n => n.forAll !== true), ...notifications1]);
+    
+        allNotifications = [...allNotifications.filter(n => n.forAll !== true), ...notifications1];
+        allNotifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort descending
+        setNotifications(allNotifications);
       });
-  
+    
       const unsubscribe2 = onSnapshot(q2, (snapshot2) => {
         const notifications2: Notification[] = snapshot2.docs.map((doc) => {
           const data = doc.data() as Partial<Notification>;
@@ -96,15 +100,18 @@ export default function NotificationPage() {
             postId: data.postId ?? ""
           };
         });
-  
-        setNotifications((prev) => [...prev.filter(n => n.forAll !== false), ...notifications2]);
+    
+        allNotifications = [...allNotifications.filter(n => n.forAll !== false), ...notifications2];
+        allNotifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort descending
+        setNotifications(allNotifications);
       });
-  
+    
       return () => {
         unsubscribe1();
         unsubscribe2();
       };
     };
+    
   
     fetchNotifications();
   }, [user, loading]);
@@ -145,7 +152,7 @@ export default function NotificationPage() {
           ) : (
             notifications.map((notification) => (
               <div
-                onClick={() => {notification.type === "devotion" ? router.push(`/member/devotion`) : router.push(`/post/${notification.postId}`)}}
+                onClick={() => {notification.type === "devotion" ? router.push(`/member/devotion`) : router.push(`/member/post/${notification.postId}`)}}
                 key={notification.id}
                 className="bg-white p-2 rounded-2xl w-full text-left transition-all duration-300 hover:bg-gray-100 active:scale-95 flex items-center space-x-3 hover:cursor-pointer"
               >                

@@ -6,15 +6,21 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Separator } from "~/components/ui/separator";
 import { useAuth } from "~/context/authContext";
 import Image from "next/image";
+import Head from "next/head";
+import { Router } from "lucide-react";
+import router from "next/router";
 
 const db = getFirestore(app);
 
 interface Notification {
-  id: string;
-  message: string;
-  uid: string;
-  name: string;
-  createdAt?: Date;
+  id: string,
+  message: string,
+  uid: string,
+  forAll: boolean,
+  createdAt: Date,
+  title: string,
+  type: string,
+  postId: string
 }
 
 export default function NotificationPage() {
@@ -41,29 +47,63 @@ export default function NotificationPage() {
       if (loading) return;
       if (!user?.uid) {
         console.error("User UID is undefined. Cannot fetch notifications.");
-        return; // Exit the function if user.uid is undefined
+        return;
       }
   
-      const q = query(
-        collection(db, "notifications"),
-        orderBy("createdAt", "desc") // Order notifications by creation date
+      const notificationsRef = collection(db, "notifications");
+  
+      const q1 = query(
+        notificationsRef,
+        where("forAll", "==", true),
+        where("uid", "==", "") // uid is blank
       );
   
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const notificationsData: Notification[] = snapshot.docs.map((doc) => {
+      const q2 = query(
+        notificationsRef,
+        where("forAll", "==", false),
+        where("uid", "==", user.uid) // uid matches user
+      );
+  
+      const unsubscribe1 = onSnapshot(q1, (snapshot1) => {
+        const notifications1: Notification[] = snapshot1.docs.map((doc) => {
           const data = doc.data() as Partial<Notification>;
           return {
             id: doc.id,
             message: data.message ?? "No content",
             uid: data.uid ?? "",
-            name: data.name ?? "Unknown",
-            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(), // Safely convert Firestore Timestamp to Date
+            forAll: data.forAll ?? false,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
+            title: data.title ?? "",
+            type: data.type ?? "",
+            postId: data.postId ?? ""
           };
         });
-        setNotifications(notificationsData);
+  
+        setNotifications((prev) => [...prev.filter(n => n.forAll !== true), ...notifications1]);
       });
   
-      return () => unsubscribe(); // Cleanup the listener on unmount
+      const unsubscribe2 = onSnapshot(q2, (snapshot2) => {
+        const notifications2: Notification[] = snapshot2.docs.map((doc) => {
+          const data = doc.data() as Partial<Notification>;
+          return {
+            id: doc.id,
+            message: data.message ?? "No content",
+            uid: data.uid ?? "",
+            forAll: data.forAll ?? false,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
+            title: data.title ?? "",
+            type: data.type ?? "",
+            postId: data.postId ?? ""
+          };
+        });
+  
+        setNotifications((prev) => [...prev.filter(n => n.forAll !== false), ...notifications2]);
+      });
+  
+      return () => {
+        unsubscribe1();
+        unsubscribe2();
+      };
     };
   
     fetchNotifications();
@@ -79,6 +119,9 @@ export default function NotificationPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>Notifications</title>
+      </Head>
       <div className="flex flex-col w-full max-w-[600px] border min-h-screen">
         {/* Fixed Header */}
         <div className="fixed w-full bg-white max-w-[598px] flex flex-cols top-0 pt-3 pb-2 border-b">
@@ -102,16 +145,21 @@ export default function NotificationPage() {
           ) : (
             notifications.map((notification) => (
               <div
+                onClick={() => {notification.type === "devotion" ? router.push(`/member/devotion`) : router.push(`/post/${notification.postId}`)}}
                 key={notification.id}
                 className="bg-white p-2 rounded-2xl w-full text-left transition-all duration-300 hover:bg-gray-100 active:scale-95 flex items-center space-x-3 hover:cursor-pointer"
-              >
+              >                
                 <div className="w-8 h-8 bg-gray-400 rounded-full"></div>
                 <div className="text-xs break-words w-full">
-                  <p className="font-semibold text-base">{notification.message}</p>
+                  <div className="flex">
+                    <p className="font-semibold text-base">{notification.title}</p>
+                    <p className="text-base ml-1">{notification.message}</p>
+                  </div>
                   <p className="text-muted-foreground text-xs">
                     {notification.createdAt ? formatDate(notification.createdAt) : "Unknown Date"}
                   </p>
                 </div>
+                
               </div>
             ))
           )}

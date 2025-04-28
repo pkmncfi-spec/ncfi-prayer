@@ -153,7 +153,7 @@ export default function HomePage() {
       if (!user?.uid) return;
       const currentUser = await getDoc(doc(db, "users", user.uid));
 
-      await addDoc(collection(db, "devotions"), {
+      const devotionRef = await addDoc(collection(db, "devotions"), {
         title: title.trim(),
         text: text.trim(),
         postedAt: new Date(),
@@ -161,9 +161,12 @@ export default function HomePage() {
       });
 
       await addDoc(collection(db, "notifications"), {
-        title: title.trim(),
-        message: "Today's devotion has been posted.",
-        createdAt: new Date()
+        title: "Today's devotion",
+        message: " has been posted",
+        createdAt: new Date(),
+        type: "devotion",
+        forAll: true,
+        uid: ""
       });
 
       setTitle("");

@@ -137,6 +137,27 @@ export default function PostPage() {
     const deletePost = async (postId: string) => {
         try {
             await updateDoc(doc(db, "posts", postId), { status: "deleted" });
+
+            await addDoc(collection(db, "logs"), {
+                title: "Admin",
+                message: " has deleted a post",
+                createdAt: new Date(),
+                type: "post",
+                forAll: true,
+                uid: "",
+                postId: postId
+            });
+
+            await addDoc(collection(db, "notifications"), {
+                title: "Admin",
+                message: " has deleted your post",
+                createdAt: new Date(),
+                type: "post",
+                forAll: false,
+                uid: post?.uid,
+                postId: postId
+            });
+
             router.back();
             console.log("Post deleted successfully!");
         } catch (error) {

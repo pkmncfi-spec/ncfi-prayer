@@ -217,6 +217,16 @@ export default function HomePage() {
         postId: postId.id
       });
 
+      await addDoc(collection(db, "logs"), {
+          title: username,
+          message: " accepted a prayer request",
+          createdAt: new Date(),
+          type: "post",
+          forAll: true,
+          uid: "",
+          postId: postId.id
+      });
+
       alert("Prayer posted successfully!");
       setTitle("");
       setText("");

@@ -138,6 +138,15 @@ export default function PostPage() {
         try {
           // Update the prayer request status to "posted"
           await updateDoc(doc(db, "posts", postId), { forInternational: true });
+          await addDoc(collection(db, "logs"), {
+                title: userName,
+                message: " requested a prayer to International",
+                createdAt: new Date(),
+                type: "post",
+                forAll: true,
+                uid: "",
+                postId: postId
+            });
           alert("Prayer request shared for international!");
           console.log("Prayer request accepted!");
         } catch (error) {
@@ -152,6 +161,15 @@ export default function PostPage() {
     const deletePost = async (postId: string) => {
         try {
             await updateDoc(doc(db, "posts", postId), { status: "deleted" });
+            await addDoc(collection(db, "logs"), {
+                title: userName,
+                message: " deleted a prayer",
+                createdAt: new Date(),
+                type: "post",
+                forAll: true,
+                uid: "",
+                postId: postId
+            });
             router.back();
             console.log("Post deleted successfully!");
         } catch (error) {

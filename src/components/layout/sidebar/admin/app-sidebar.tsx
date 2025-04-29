@@ -30,7 +30,7 @@ const items = [
   { title: "Home", url: "/admin/home", icon: Home },
   { title: "Users", url: "/admin/user", icon: Users },
   { title: "Devotion", url: "/admin/devotion", icon: IoBookOutline},
-  { title: "Activity", url: "/admin/activity", icon: ClockFading },
+  { title: "Activity", url: "/admin/log", icon: ClockFading },
   { title: "Log Out", url: "/login", icon: LogOut },
 ];
 

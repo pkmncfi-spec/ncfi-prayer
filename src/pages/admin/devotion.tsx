@@ -169,6 +169,16 @@ export default function HomePage() {
         uid: ""
       });
 
+      await addDoc(collection(db, "logs"), {
+        title: "Admin",
+        message: " posted today's devotion",
+        createdAt: new Date(),
+        type: "devotion",
+        forAll: true,
+        uid: "",
+        postId: devotionRef.id
+      });
+
       setTitle("");
       setText("");
       setImage(null);

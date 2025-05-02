@@ -125,7 +125,6 @@ export default function PostPage() {
         setPrayerFor(post?.forInternational || false);
         fetchPost();
     }, [router.isReady, postId, user?.uid, post?.postFor, post?.forInternational, post?.uid]);
-
     function formatDate(date: Date): string {
         if (!(date instanceof Date) || isNaN(date.getTime())) {
           return 'Invalid date';

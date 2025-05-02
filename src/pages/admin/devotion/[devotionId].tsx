@@ -73,14 +73,16 @@ export default function PostPage() {
         fetchPost();
         fetchUserId();
     }, [router.isReady, devotionId, user?.uid]);
-
     function formatDate(date: Date): string {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+          return 'Invalid date';
+        }
         return new Intl.DateTimeFormat("en-US", {
-            month: "long",
-            day: "2-digit",
-            year: "numeric",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
         }).format(date);
-    }
+      }
 
     const editPost = useCallback((devotionId: string) => {
         console.log("Editing post with ID:", devotionId);

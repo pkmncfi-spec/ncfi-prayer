@@ -1,37 +1,73 @@
-# NCFI Website Project 🌍
+# NCFI Prayer
 
-Welcome to the official repository for the **Nurses Christian Fellowship International (NCFI) website**. This platform aims to promote transparency, foster community engagement, and provide easy access to information about NCFI’s activities, mission, and impact.
+**NCFI Prayer** adalah aplikasi web dan mobile yang dikembangkan untuk memperkuat keterhubungan spiritual komunitas perawat Kristen di seluruh dunia. Aplikasi ini memfasilitasi permohonan doa, pembinaan rohani, dan koneksi lintas wilayah dalam lingkungan yang aman, gratis, dan mudah digunakan.
 
-## 🌟 Features
+## Teknologi
 
-- **Homepage**: Highlights NCFI's mission, vision, and key activities.
-- **About Us**: Detailed information about NCFI, its history, and team members.
-- **Projects and Impact**: Showcases the organization's ongoing and completed projects with measurable results.
-- **Donation Page**: Secure and user-friendly platform for online donations.
-- **Volunteer Portal**: Allows users to sign up as volunteers and stay updated on opportunities.
-- **Contact Us**: Form and contact details for inquiries and feedback.
+Proyek ini dikembangkan menggunakan [T3 App Stack](https://create.t3.gg/), yang mencakup:
 
-## 🔧 Tech Stack
+- **Next.js** – Framework full-stack React
+- **TypeScript** – Bahasa pemrograman statis modern
+- **Tailwind CSS** – Utility-first CSS
+- **tRPC** – API tanpa skema yang efisien
+- **Prisma ORM** – Manajemen basis data yang kuat
+- **NextAuth.js** – Otentikasi modern
 
-This project is built using the **T3 App**, which integrates modern web development technologies to ensure scalability and performance.
+## Instalasi
 
-- **Frontend**: TypeScript, Next.js, Tailwind CSS
-- **Backend**: tRPC, Prisma
-- **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **Deployment**: Railway (backend), Vercel (frontend)
+### Prasyarat
 
-## 🚀 Deployment
+- Node.js >= 18
+- PostgreSQL (atau database yang kompatibel)
+- pnpm / npm / yarn
 
-The site is live at: -
+### Langkah-langkah
 
-## 🤝 Contributing
+```bash
+git clone https://github.com/yourusername/ncfi-prayer.git
+cd ncfi-prayer
+pnpm install
+cp .env.example .env
+npx prisma migrate dev --name init
+pnpm dev
+```
 
-We welcome contributions from the community! To contribute:
+Aplikasi akan berjalan di `http://localhost:3000`.
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make changes and commit (`git commit -m "Add feature description"`).
-4. Push to the branch (`git push origin feature-name`).
-5. Open a pull request.
+## Struktur Folder
 
+```
+/
+├── src/
+│   ├── pages/
+│   ├── server/
+│   ├── prisma/
+│   ├── styles/
+│   └── components/
+├── public/
+├── prisma/
+├── .env.example
+└── README.md
+```
+
+## Dokumentasi Proyek
+
+Berikut adalah dokumen proyek yang relevan:
+
+- [Proposal](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EWOo5jUx-qBApTIdTQJSKZcBHrCh--LEHF-1XMtrcDQnKA?e=esSC6T)
+- [Team Contract](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EUqJOei2UydKgWeleA_2UOEBP1fr4P_yrGb3FSMy-zPXsw?e=XUb3Eb)
+- [Template Project Planning](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EdINl8T_SLBBp7vDR7SUXgkB67Yv4ShK3CqA15liu1aO2Q?e=WfkUtv)
+- [SRS](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/ETymW9AB4DxPq-_LpU2o664BkOeC5zLawUs6VuicBjPJZQ?e=t2ladX)
+- [Weekly Status Report](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EdJt6jfUuihKsH1iKmy2DSgBOJ5jNurydr_-Tlu0lJtjdw?e=p7INTk)
+- [Coding Standard & Convention](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/Ea_c0MgKPMdGkHDPm169HWIBgXZAbjid4Wt8w_H1nAupUA?e=LFNfNc)
+- [Gantt Chart](https://uph365-my.sharepoint.com/:x:/g/personal/01082230023_student_uph_edu/EUNY-uM1-RJFi0KjPFRVLUQBs7x8zQOFsD5pCwQwVzPbdw?rtime=dkRv5_163Ug)
+- [Burn Down Chart](https://uph365-my.sharepoint.com/:x:/g/personal/01082230009_student_uph_edu/Ees3AgGfjipBhVGtaIusJHAB_N4_x2IamZzlHTV9ViJSvw?e=i002Lu)
+- [User Story](https://uph365-my.sharepoint.com/:x:/g/personal/01082230009_student_uph_edu/EXExsqV_EgxOrpCdgdse7UMBMSpMf14d4ltYB6DFn_5yRg?e=HrStEL)
+- [Testing Plan](https://uph365-my.sharepoint.com/:x:/g/personal/01082230009_student_uph_edu/EYTKKl-lVzhHr4drMzL8DcMBFyTH7e_Lg_JUieEyYiTDqQ?e=GlzoSw)
+- [Laporan Testing](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/Ee58A79cLCpPoc5CwkLPO5wBCk3rJmD96zbX8clJnriynw?e=iAcGm7)
+
+## Kontak
+
+Jika Anda memiliki pertanyaan atau ingin berkontribusi, silakan hubungi:
+
+**Email:** 01082230015@student.uph.edu

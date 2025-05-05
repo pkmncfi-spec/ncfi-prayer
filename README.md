@@ -54,7 +54,7 @@ Aplikasi akan berjalan di `http://localhost:3000`.
 
 Berikut adalah dokumen proyek yang relevan:
 
-- [Proposal](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EWOo5jUx-qBApTIdTQJSKZcBHrCh--LEHF-1XMtrcDQnKA?e=esSC6T)
+- [Proposal](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/ESs3NG3vzo1Kq32gGJEQmsoB-oofhDEH-OzJvCP4F8Un9w?e=bw2tJn)
 - [Team Contract](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EUqJOei2UydKgWeleA_2UOEBP1fr4P_yrGb3FSMy-zPXsw?e=XUb3Eb)
 - [Template Project Planning](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/EdINl8T_SLBBp7vDR7SUXgkB67Yv4ShK3CqA15liu1aO2Q?e=WfkUtv)
 - [SRS](https://uph365-my.sharepoint.com/:w:/g/personal/01082230009_student_uph_edu/ETymW9AB4DxPq-_LpU2o664BkOeC5zLawUs6VuicBjPJZQ?e=t2ladX)

@@ -37,6 +37,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-, "src/components/icon/ClockFading.tsx", "src/pages/verify/[verifyId].tsx"  ],
+, "src/components/icon/ClockFading.tsx", "src/pages/verify/[verifyId].tsx", "jest.config.js", "jest.setup.js"  ],
   "exclude": ["node_modules"]
 }

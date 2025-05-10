@@ -60,7 +60,7 @@ export default function PostPage() {
                         title: data.title || "Untitled", // Fallback to "Untitled" if title is undefined
                         text: data.text || "No content available.", // Fallback to default text
                         imageURL: data.imageURL || null,
-                        postedAt: data.postedAt?.toDate().toLocaleString() || "Unknown date",
+                        postedAt: formatDate(data.postedAt?.toDate()),
                     });
                 } else {
                     console.error("Post document not found.");

@@ -59,7 +59,7 @@ export default function PostPage() {
                         title: data.title,
                         text: data.text,
                         imageURL: data.imageURL,
-                        createdAt: data.createdAt?.toDate().toLocaleString(),
+                        createdAt: formatDate(data.createdAt?.toDate()),
                         status: data.status,
                         uid: data.uid,
                         postFor: data.postFor

@@ -16,8 +16,6 @@ import {
 } from "~/components/ui/card"
 
 import Spinner from "react-loading";
-
-
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -81,7 +79,12 @@ const formSchema = z.object({
 export default function RegisterPage() {
     const router = useRouter();
     const [showPass, setShowPass] = useState<boolean>(false);
-    const [createUserWithEmailAndPassword] = useCreateUserWithEmailAndPassword(auth);
+    const [
+        createUserWithEmailAndPassword,
+        userCredential,
+        loadingCreate,
+        errorCreate
+      ] = useCreateUserWithEmailAndPassword(auth);      
     const { user, loading } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     
@@ -103,68 +106,79 @@ export default function RegisterPage() {
             role: "guest"
         },
     })
-    async function onSubmit(values: z.infer<typeof formSchema>){
+    
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
-        try{
-            const userCredential = await createUserWithEmailAndPassword(values.email, values.password);
-            if(userCredential){
-                const users = userCredential.user;
-                try{
-                    await sendEmailVerification(users);
-                }
-                catch(e){
-                    alert("Error sending email verification: " + String(e));
-                    return null;
-                }
-
-                let regionals = "";
-
-                if (["Ghana", "Nigeria", "Sierra Leone", "Zambia"].includes(values.country)) {
-                    regionals = "africa";
-                } else if (["Canada", "Haiti", "USA"].includes(values.country)) {
-                    regionals = "cana";
-                } else if (["Denmark", "United Kingdom & Ireland", "Finland", "Norway", "Spain"].includes(values.country)) {
-                    regionals = "europe";
-                } else if (["Argentina", "Colombia", "Chile", "Cuba", "Ecuador"].includes(values.country)) {
-                    regionals = "latin america";
-                } else if ([
-                    "Australia", "Fiji", "Hong Kong", "Indonesia", "Japan", "New Zealand", 
-                    "Mongolia", "Papua New Guinea", "Philippines", "Singapore", "Malaysia", 
-                    "South Korea", "Taiwan"
-                ].includes(values.country)) {
-                    regionals = "pacea";
-                } else if (["Bangladesh", "India", "Nepal", "Pakistan"].includes(values.country)) {
-                    regionals = "same";
-                }
-
-                await setDoc(doc(db, "users", users.uid), {
-                    name: values.name,
-                    uid: users.uid,
-                    email: users.email,
-                    country: values.country,
-                    dateOfBirth: values.dateOfBirth,
-                    isVerified: false,
-                    gender: values.gender,
-                    role: "guest",
-                    regional: regionals,
-                });
-
-                // await signOut(auth);
-                
-                alert("Register successful!");
-                form.reset();
-
-                router.push("/verify/" + users.uid);
-            } else {
-                alert("Please use a different email address.");
-                console.error('Failed to create user credential');
-            }
-        } catch(e){
-            console.error(e);
-        } finally {
-            setIsLoading(false);
+      
+        await createUserWithEmailAndPassword(values.email, values.password);
+      
+        if (errorCreate) {
+          if (errorCreate.code === "auth/email-already-in-use") {
+            alert("This email is already registered. Please use a different email.");
+          } else {
+            alert("Registration failed: " + errorCreate.message);
+          }
+          setIsLoading(false);
+          return;
         }
-    }
+      
+        if (!userCredential || !userCredential.user) {
+          alert("Failed to create user.");
+          setIsLoading(false);
+          return;
+        }
+      
+        const users = userCredential.user;
+      
+        try {
+          await sendEmailVerification(users);
+      
+          // Determine region
+          let regionals = "";
+      
+          if (["Ghana", "Nigeria", "Sierra Leone", "Zambia"].includes(values.country)) {
+            regionals = "africa";
+          } else if (["Canada", "Haiti", "USA"].includes(values.country)) {
+            regionals = "cana";
+          } else if (["Denmark", "United Kingdom & Ireland", "Finland", "Norway", "Spain"].includes(values.country)) {
+            regionals = "europe";
+          } else if (["Argentina", "Colombia", "Chile", "Cuba", "Ecuador"].includes(values.country)) {
+            regionals = "latin america";
+          } else if (
+            [
+              "Australia", "Fiji", "Hong Kong", "Indonesia", "Japan", "New Zealand",
+              "Mongolia", "Papua New Guinea", "Philippines", "Singapore", "Malaysia",
+              "South Korea", "Taiwan"
+            ].includes(values.country)
+          ) {
+            regionals = "pacea";
+          } else if (["Bangladesh", "India", "Nepal", "Pakistan"].includes(values.country)) {
+            regionals = "same";
+          }
+      
+          await setDoc(doc(db, "users", users.uid), {
+            name: values.name,
+            uid: users.uid,
+            email: users.email,
+            country: values.country,
+            dateOfBirth: values.dateOfBirth,
+            isVerified: false,
+            gender: values.gender,
+            role: "guest",
+            regional: regionals,
+          });
+      
+          alert("Register successful!");
+          form.reset();
+          router.push("/verify/" + users.uid);
+        } catch (e) {
+          console.error(e);
+          alert("An error occurred while saving your data.");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      
 
     const handleGoogleRegist = async () => {
         const provider = new GoogleAuthProvider();

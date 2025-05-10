@@ -21,6 +21,7 @@ next-env.d.ts
 #mocks
 /src/__mocks__/
 /src/pages/__test__/
+/src/pages/__test2__/
 
 jest.config.cjs
 jest.setup.js

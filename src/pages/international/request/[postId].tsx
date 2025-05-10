@@ -65,7 +65,7 @@ export default function PostPage() {
                         title: data.title,
                         text: data.text,
                         imageURL: data.imageURL,
-                        createdAt: data.createdAt?.toDate().toLocaleString(),
+                        createdAt: formatDate(data.createdAt?.toDate()),
                         status: data.status,
                         uid: data.uid,
                         postFor: data.postFor
@@ -115,7 +115,7 @@ export default function PostPage() {
         fetchPost();
         
     }, [router.isReady, postId, user?.uid, post?.postFor, post?.uid]);
-    
+
     function formatDate(date: Date): string {
         if (!(date instanceof Date) || isNaN(date.getTime())) {
           return 'Invalid date';
